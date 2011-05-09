@@ -32,9 +32,9 @@ public:
   void print() const;
 
 private:
-  char const *get_object_type_name();
-  char const *get_machine_name();
-  char const *get_version_name();
+  static char const *get_object_type_name(uint16_t type);
+  static char const *get_machine_name(uint16_t machine);
+  static char const *get_version_name(uint32_t version);
 
 };
 
