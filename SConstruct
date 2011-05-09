@@ -4,6 +4,7 @@ env = Environment(CFLAGS=['-Wall', '-Werror', '-O2'],
 
 env.Program('elfreader',
             source=['elf_ident.cpp',
+                    'elf_header.cpp',
                     'elf_object.cpp',
                     'main.cpp',
                     'utils/helper.cpp',
