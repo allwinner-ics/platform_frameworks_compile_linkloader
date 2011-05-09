@@ -1,5 +1,5 @@
 env = Environment(CFLAGS=['-Wall', '-Werror', '-O2'],
-                  CXXFLAGS=['-Wall', '-Werror', '-O2'],
+                  CXXFLAGS=['-Wall', '-Werror', '-fno-exceptions', '-O2'],
                   CPPPATH=['utils'])
 
 env.Program('elfreader',

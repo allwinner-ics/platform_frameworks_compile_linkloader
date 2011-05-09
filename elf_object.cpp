@@ -21,13 +21,13 @@ using namespace std;
 shared_ptr<elf_object> elf_object::read(string const &filename) {
   int file_fd = open(filename.c_str(), O_RDONLY);
   if (file_fd < 0) {
-    throw runtime_error("Unable to open the file");
+    return shared_ptr<elf_object>();
   }
 
   struct stat sb;
   if (fstat(file_fd, &sb) != 0) {
     close(file_fd);
-    throw runtime_error("Unable to stat the file");
+    return shared_ptr<elf_object>();
   }
 
   size_t file_size = (size_t)sb.st_size;
@@ -37,7 +37,7 @@ shared_ptr<elf_object> elf_object::read(string const &filename) {
 
   if (file == NULL || file == MAP_FAILED) {
     close(file_fd);
-    throw runtime_error("Unable to mmap the file");
+    return shared_ptr<elf_object>();
   }
 
   archive_reader_le ar(file, file_size);
