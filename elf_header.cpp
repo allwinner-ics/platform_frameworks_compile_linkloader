@@ -1,10 +1,22 @@
 #include "elf_header.h"
 
+#include "utils/serialize.h"
+#include "utils/term.h"
+
+#include <boost/shared_ptr.hpp>
+
+#include <iomanip>
+#include <iostream>
+
 #include <elf.h>
+
+using namespace boost;
+using namespace serialization;
+using namespace std;
+
 
 class elf_header_32 : public elf_header {
 private:
-  unsigned char e_ident[EI_NIDENT];
   Elf32_Half e_type;
   Elf32_Half e_machine;
   Elf32_Word e_version;
@@ -38,9 +50,86 @@ public:
   virtual uint16_t get_str_section_index() const;
 };
 
+template <typename Archiver>
+void elf_header_32::serialize(Archiver &AR) {
+  AR <<= *this;
+
+  AR & e_ident;
+  AR & e_type;
+  AR & e_machine;
+  AR & e_version;
+  AR & e_entry;
+  AR & e_phoff;
+  AR & e_shoff;
+  AR & e_flags;
+  AR & e_ehsize;
+  AR & e_phentsize;
+  AR & e_phnum;
+  AR & e_shentsize;
+  AR & e_shnum;
+  AR & e_shstrndx;
+
+  AR >>= *this;
+}
+
+uint16_t elf_header_32::get_object_type() const {
+  return e_type;
+}
+
+uint16_t elf_header_32::get_machine() const {
+  return e_machine;
+}
+
+uint32_t elf_header_32::get_version() const {
+  return e_version;
+}
+
+uint64_t elf_header_32::get_entry_vaddr() const {
+  return e_entry;
+}
+
+uint64_t elf_header_32::get_program_header_table_offset() const {
+  return e_phoff;
+}
+
+uint64_t elf_header_32::get_section_header_table_offset() const {
+  return e_shoff;
+}
+
+uint32_t elf_header_32::get_flags() const {
+  return e_flags;
+}
+
+uint16_t elf_header_32::get_elf_header_size() const {
+  return e_ehsize;
+}
+
+uint16_t elf_header_32::get_program_header_entry_size() const {
+  return e_phentsize;
+}
+
+uint16_t elf_header_32::get_program_header_num() const {
+  return e_phnum;
+}
+
+uint16_t elf_header_32::get_section_header_entry_size() const {
+  return e_shentsize;
+}
+
+uint16_t elf_header_32::get_section_header_num() const {
+  return e_shnum;
+}
+
+uint16_t elf_header_32::get_str_section_index() const {
+  return e_shstrndx;
+}
+
+
+//=============================================================================
+
+
 class elf_header_64 : public elf_header {
 private:
-  unsigned char e_ident[EI_NIDENT];
   Elf64_Half e_type;
   Elf64_Half e_machine;
   Elf64_Word e_version;
@@ -73,3 +162,272 @@ public:
   virtual uint16_t get_section_header_num() const;
   virtual uint16_t get_str_section_index() const;
 };
+
+template <typename Archiver>
+void elf_header_64::serialize(Archiver &AR) {
+  AR <<= *this;
+
+  AR & e_ident;
+  AR & e_type;
+  AR & e_machine;
+  AR & e_version;
+  AR & e_entry;
+  AR & e_phoff;
+  AR & e_shoff;
+  AR & e_flags;
+  AR & e_ehsize;
+  AR & e_phentsize;
+  AR & e_phnum;
+  AR & e_shentsize;
+  AR & e_shnum;
+  AR & e_shstrndx;
+
+  AR >>= *this;
+}
+
+uint16_t elf_header_64::get_object_type() const {
+  return e_type;
+}
+
+uint16_t elf_header_64::get_machine() const {
+  return e_machine;
+}
+
+uint32_t elf_header_64::get_version() const {
+  return e_version;
+}
+
+uint64_t elf_header_64::get_entry_vaddr() const {
+  return e_entry;
+}
+
+uint64_t elf_header_64::get_program_header_table_offset() const {
+  return e_phoff;
+}
+
+uint64_t elf_header_64::get_section_header_table_offset() const {
+  return e_shoff;
+}
+
+uint32_t elf_header_64::get_flags() const {
+  return e_flags;
+}
+
+uint16_t elf_header_64::get_elf_header_size() const {
+  return e_ehsize;
+}
+
+uint16_t elf_header_64::get_program_header_entry_size() const {
+  return e_phentsize;
+}
+
+uint16_t elf_header_64::get_program_header_num() const {
+  return e_phnum;
+}
+
+uint16_t elf_header_64::get_section_header_entry_size() const {
+  return e_shentsize;
+}
+
+uint16_t elf_header_64::get_section_header_num() const {
+  return e_shnum;
+}
+
+uint16_t elf_header_64::get_str_section_index() const {
+  return e_shstrndx;
+}
+
+
+//=============================================================================
+
+
+int elf_header::get_class() const {
+  return e_ident[EI_CLASS];
+}
+
+int elf_header::get_endianness() const {
+  return e_ident[EI_DATA];
+}
+
+int elf_header::get_header_version() const {
+  return e_ident[EI_VERSION];
+}
+
+int elf_header::get_os_abi() const {
+  return e_ident[EI_OSABI];
+}
+
+int elf_header::get_abi_version() const {
+  return e_ident[EI_ABIVERSION];
+}
+
+bool elf_header::is_32bit() const {
+  return e_ident[EI_CLASS] == ELFCLASS32;
+}
+
+bool elf_header::is_64bit() const {
+  return e_ident[EI_CLASS] == ELFCLASS64;
+}
+
+bool elf_header::is_big_endian() const {
+  return e_ident[EI_CLASS] == ELFDATA2MSB;
+}
+
+bool elf_header::is_little_endian() const {
+  return e_ident[EI_CLASS] == ELFDATA2LSB;
+}
+
+inline bool elf_header::is_valid_magic_word() const {
+  return (memcmp(e_ident, "\x7f" "ELF", 4) == 0);
+}
+
+inline bool elf_header::is_valid_class() const {
+  return (is_32bit() || is_64bit());
+}
+
+inline bool elf_header::is_valid_endianness() const {
+  return (is_big_endian() || is_little_endian());
+}
+
+inline bool elf_header::is_valid_header_version() const {
+  return (get_header_version() == EV_CURRENT);
+}
+
+inline bool elf_header::is_unused_zeroed_padding() const {
+  for (size_t i = EI_PAD; i < EI_NIDENT; ++i) {
+    if (e_ident[i] != 0) {
+      return false;
+    }
+  }
+  return true;
+}
+
+bool elf_header::is_valid_elf_header() const {
+  return (is_valid_magic_word() &&
+          is_valid_class() &&
+          is_valid_endianness() &&
+          is_valid_header_version() &&
+          is_unused_zeroed_padding());
+}
+
+
+//=============================================================================
+
+
+template <typename Archiver>
+shared_ptr<elf_header> elf_header::read_32(Archiver &AR) {
+  shared_ptr<elf_header_32> result(new elf_header_32());
+
+  // Read the ELF header from the archive
+  result->serialize(AR);
+  if (!AR) {
+    return shared_ptr<elf_header_32>();
+  }
+
+#if 0
+  if (!result->is_valid_elf_header()) {
+    return shared_ptr<elf_header_32>();
+  }
+#endif
+
+  return result;
+}
+
+template <typename Archiver>
+shared_ptr<elf_header> elf_header::read_64(Archiver &AR) {
+  shared_ptr<elf_header_64> result(new elf_header_64());
+
+  // Read the ELF header from the archive
+  result->serialize(AR);
+  if (!AR) {
+    return shared_ptr<elf_header_64>();
+  }
+
+#if 0
+  if (!result->is_valid_elf_header()) {
+    return shared_ptr<elf_header_64>();
+  }
+#endif
+
+  return result;
+}
+
+template <typename Archiver>
+shared_ptr<elf_header> elf_header::read(Archiver &AR, bool is_64bit) {
+  return is_64bit ? read_64(AR) : read_32(AR);
+}
+
+template shared_ptr<elf_header> elf_header::read(archive_reader_le &, bool);
+template shared_ptr<elf_header> elf_header::read(archive_reader_be &, bool);
+
+
+//=============================================================================
+
+
+void elf_header::print() const {
+  using namespace term::color;
+
+  cout << endl << setw(79) << setfill('=') << '=' << endl;
+
+  cout << light::white() << "ELF Identification" << normal() << endl;
+
+  cout << setw(79) << setfill('-') << '-' << endl << setfill(' ');
+
+  cout << setw(20) << "Class" << " : " << get_class_name(get_class()) << endl;
+
+  cout << setw(20) << "Endianness" << " : "
+       << get_endianness_name(get_endianness()) << endl;
+
+  cout << setw(20) << "Header Version" << " : " << get_header_version() << endl;
+
+  cout << setw(20) << "OS ABI" << " : "
+       << get_os_abi_name(get_os_abi()) << endl;
+
+  cout << setw(20) << "ABI Version" << " : " << get_abi_version() << endl;
+
+  cout << setw(79) << setfill('=') << '=' << endl << endl;
+}
+
+char const *elf_header::get_class_name(int clazz) {
+  switch (clazz) {
+  default:
+#define CASE_PAIR(A, B) case A: return B;
+  CASE_PAIR(ELFCLASSNONE, "Invalid class")
+  CASE_PAIR(ELFCLASS32, "32bit")
+  CASE_PAIR(ELFCLASS64, "64bit")
+#undef CASE_PAIR
+  }
+}
+
+char const *elf_header::get_endianness_name(int endianness) {
+  switch (endianness) {
+  default:
+#define CASE_PAIR(A, B) case A: return B;
+  CASE_PAIR(ELFDATANONE, "Invalid endianness")
+  CASE_PAIR(ELFDATA2LSB, "Little endian")
+  CASE_PAIR(ELFDATA2MSB, "Big endian")
+#undef CASE_PAIR
+  }
+}
+
+char const *elf_header::get_os_abi_name(int abi) {
+  if (abi >= 64 && abi <= 255) {
+    return "Architecture specific";
+  }
+
+  switch (abi) {
+  default: return "Unknown OS ABI";
+#define CASE_PAIR(A, B) case A: return B;
+  CASE_PAIR(ELFOSABI_NONE, "No extensions or not specified")
+  CASE_PAIR(ELFOSABI_HPUX, "HP-UX")
+  CASE_PAIR(ELFOSABI_NETBSD, "NetBSD")
+  CASE_PAIR(ELFOSABI_LINUX, "Linux")
+  CASE_PAIR(ELFOSABI_SOLARIS, "Solaris")
+  CASE_PAIR(ELFOSABI_AIX, "AIX")
+  CASE_PAIR(ELFOSABI_FREEBSD, "FreeBSD")
+  CASE_PAIR(ELFOSABI_TRU64, "Tru64")
+  CASE_PAIR(ELFOSABI_MODESTO, "Modesto")
+  CASE_PAIR(ELFOSABI_OPENBSD, "OpenBSD")
+#undef CASE_PAIR
+  }
+}

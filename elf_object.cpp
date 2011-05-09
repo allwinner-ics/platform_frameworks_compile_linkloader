@@ -1,7 +1,7 @@
 #include "elf_object.h"
 
 #include "utils/serialize.h"
-#include "elf_ident.h"
+#include "elf_header.h"
 
 #include <iostream>
 #include <stdexcept>
@@ -41,7 +41,7 @@ shared_ptr<elf_object> elf_object::read(string const &filename) {
   }
 
   archive_reader_le ar(file, file_size);
-  shared_ptr<elf_ident> idt = elf_ident::read(ar);
+  shared_ptr<elf_header> idt = elf_header::read(ar, 32);
   idt->print();
 
   if (file != NULL && file != MAP_FAILED) {
