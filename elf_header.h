@@ -16,6 +16,9 @@ public:
   template <typename Archiver>
   static boost::shared_ptr<elf_header> read(Archiver &AR, bool is_64bit);
 
+  void print() const;
+
+  // ELF identification related functions
   bool is_32bit() const;
   bool is_64bit() const;
 
@@ -29,6 +32,7 @@ public:
   int get_os_abi() const;
   int get_abi_version() const;
 
+  // ELF header related functions
   virtual uint16_t get_object_type() const = 0;
   virtual uint16_t get_machine() const = 0;
   virtual uint32_t get_version() const = 0;
@@ -43,15 +47,15 @@ public:
   virtual uint16_t get_section_header_num() const = 0;
   virtual uint16_t get_str_section_index() const = 0;
 
-  void print() const;
-
 private:
+  // Read ELF header
   template <typename Archiver>
   static boost::shared_ptr<elf_header> read_32(Archiver &AR);
 
   template <typename Archiver>
   static boost::shared_ptr<elf_header> read_64(Archiver &AR);
 
+  // ELF identification related private functions
   inline bool is_valid_elf_ident() const;
 
   inline bool is_valid_magic_word() const;
@@ -64,12 +68,12 @@ private:
   static char const *get_endianness_name(int endianness);
   static char const *get_os_abi_name(int abi);
 
+  // ELF header related privat functions
   static char const *get_object_type_name(uint16_t type);
   static char const *get_machine_name(uint16_t machine);
   static char const *get_version_name(uint32_t version);
 
 };
-
 
 extern template boost::shared_ptr<elf_header>
 elf_header::read(serialization::archive_reader_le &, bool);
