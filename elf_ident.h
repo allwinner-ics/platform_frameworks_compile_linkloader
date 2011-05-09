@@ -57,11 +57,9 @@ inline void elf_ident::serialize(Archiver &AR) {
 }
 
 extern template boost::shared_ptr<elf_ident>
-elf_ident::read<serialization::archive_reader_le>(
-  serialization::archive_reader_le &);
+elf_ident::read(serialization::archive_reader_le &);
 
 extern template boost::shared_ptr<elf_ident>
-elf_ident::read<serialization::archive_reader_be>(
-  serialization::archive_reader_be &);
+elf_ident::read(serialization::archive_reader_be &);
 
 #endif // ELF_IDENT_H

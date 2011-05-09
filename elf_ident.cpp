@@ -38,11 +38,8 @@ shared_ptr<elf_ident> elf_ident::read(Archiver &AR) {
   return result;
 }
 
-template shared_ptr<elf_ident>
-elf_ident::read<archive_reader_le>(archive_reader_le &);
-
-template shared_ptr<elf_ident>
-elf_ident::read<archive_reader_be>(archive_reader_be &);
+template shared_ptr<elf_ident> elf_ident::read(archive_reader_le &);
+template shared_ptr<elf_ident> elf_ident::read(archive_reader_be &);
 
 int elf_ident::get_class() const {
   return ident[EI_CLASS];
