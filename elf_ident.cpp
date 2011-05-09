@@ -1,6 +1,7 @@
 #include "elf_ident.h"
 
-#include "term.h"
+#include "utils/term.h"
+#include "utils/serialize.h"
 
 #include <iostream>
 #include <iomanip>
@@ -11,46 +12,37 @@
 #include <elf.h>
 #include <string.h>
 
-#if !defined(ELFOSABI_OPENVMS)
-#define ELFOSABI_OPENVMS 13
-#endif
-
-#if !defined(ELFOSABI_NSK)
-#define ELFOSABI_NSK 14
-#endif
-
-#if !defined(ELFOSABI_AROS)
-#define ELFOSABI_AROS 15
-#endif
-
-#if !defined(ELFOSABI_FENIXOS)
-#define ELFOSABI_FENIXOS 16
-#endif
-
 using namespace boost;
+using namespace serialization;
 using namespace std;
 
-shared_ptr<elf_ident> elf_ident::create(unsigned char const *file,
-                                        size_t size,
-                                        size_t offset) {
-  if (size <= offset + EI_NIDENT) {
-    throw runtime_error("ELF identification truncated");
+elf_ident::elf_ident() {
+  memset(ident, '\0', sizeof(ident));
+}
+
+template <typename Archiver>
+shared_ptr<elf_ident> elf_ident::read(Archiver &AR) {
+  shared_ptr<elf_ident> result(new elf_ident());
+
+  // Read the ELF identifier from the archive
+  result->serialize(AR);
+  if (!AR) {
+    return shared_ptr<elf_ident>();
   }
 
-  return shared_ptr<elf_ident>(new elf_ident(file + offset));
+  // Check the correctness of the ELF identifier
+  if (!result->is_valid_elf_ident()) {
+    return shared_ptr<elf_ident>();
+  }
+
+  return result;
 }
 
-elf_ident::elf_ident(unsigned char const *buf) {
-  // Make a copy of ELF identification
-  memcpy(ident, buf, EI_NIDENT);
+template shared_ptr<elf_ident>
+elf_ident::read<archive_reader_le>(archive_reader_le &);
 
-  // Some assertions
-  assert_valid_magic_word();
-  assert_valid_class();
-  assert_valid_endianness();
-  assert_valid_header_version();
-  assert_zeroed_padding();
-}
+template shared_ptr<elf_ident>
+elf_ident::read<archive_reader_be>(archive_reader_be &);
 
 int elf_ident::get_class() const {
   return ident[EI_CLASS];
@@ -112,36 +104,37 @@ void elf_ident::print() const {
   cout << setw(79) << setfill('=') << '=' << endl << endl;
 }
 
-void elf_ident::assert_valid_magic_word() const {
-  if (memcmp(ident, "\x7f" "ELF", 4) != 0) {
-    throw runtime_error("Bad ELF magic word");
-  }
+inline bool elf_ident::is_valid_magic_word() const {
+  return (memcmp(ident, "\x7f" "ELF", 4) == 0);
 }
 
-void elf_ident::assert_valid_class() const {
-  if (!is_32bit() && !is_64bit()) {
-    throw runtime_error("Unknown or invalid class");
-  }
+inline bool elf_ident::is_valid_class() const {
+  return (is_32bit() || is_64bit());
 }
 
-void elf_ident::assert_valid_endianness() const {
-  if (!is_big_endian() && !is_little_endian()) {
-    throw runtime_error("Unknown or invalid endianness");
-  }
+inline bool elf_ident::is_valid_endianness() const {
+  return (is_big_endian() || is_little_endian());
 }
 
-void elf_ident::assert_valid_header_version() const {
-  if (get_header_version() != EV_CURRENT) {
-    throw runtime_error("Unknown or invalid ELF header version");
-  }
+inline bool elf_ident::is_valid_header_version() const {
+  return (get_header_version() == EV_CURRENT);
 }
 
-void elf_ident::assert_zeroed_padding() const {
+inline bool elf_ident::is_unused_zeroed_padding() const {
   for (size_t i = EI_PAD; i < EI_NIDENT; ++i) {
     if (ident[i] != 0) {
-      throw runtime_error("Padding should be zeroed out");
+      return false;
     }
   }
+  return true;
+}
+
+bool elf_ident::is_valid_elf_ident() const {
+  return (is_valid_magic_word() &&
+          is_valid_class() &&
+          is_valid_endianness() &&
+          is_valid_header_version() &&
+          is_unused_zeroed_padding());
 }
 
 char const *elf_ident::get_class_name(int clazz) {
@@ -184,10 +177,6 @@ char const *elf_ident::get_os_abi_name(int abi) {
   CASE_PAIR(ELFOSABI_TRU64, "Tru64")
   CASE_PAIR(ELFOSABI_MODESTO, "Modesto")
   CASE_PAIR(ELFOSABI_OPENBSD, "OpenBSD")
-  CASE_PAIR(ELFOSABI_OPENVMS, "OpenVMS")
-  CASE_PAIR(ELFOSABI_NSK, "NSK")
-  CASE_PAIR(ELFOSABI_AROS, "AmigaOS")
-  CASE_PAIR(ELFOSABI_FENIXOS, "FenixOS")
 #undef CASE_PAIR
   }
 }

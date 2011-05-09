@@ -1,6 +1,8 @@
 #ifndef ELF_IDENT_H
 #define ELF_IDENT_H
 
+#include "utils/serialize.h"
+
 #include <boost/shared_ptr.hpp>
 
 #include <elf.h>
@@ -11,9 +13,9 @@ private:
   unsigned char ident[EI_NIDENT];
 
 public:
-  static boost::shared_ptr<elf_ident> create(unsigned char const *file,
-                                             size_t size,
-                                             size_t offset = 0);
+  elf_ident();
+
+  bool is_valid_elf_ident() const;
 
   int get_class() const;
   int get_endianness() const;
@@ -29,18 +31,37 @@ public:
 
   void print() const;
 
-private:
-  elf_ident(unsigned char const *buf);
+  template <typename Archiver>
+  void serialize(Archiver &AR);
 
-  void assert_valid_magic_word() const;
-  void assert_valid_class() const;
-  void assert_valid_endianness() const;
-  void assert_valid_header_version() const;
-  void assert_zeroed_padding() const;
+  template <typename Archiver>
+  static boost::shared_ptr<elf_ident> read(Archiver &AR);
+
+private:
+  inline bool is_valid_magic_word() const;
+  inline bool is_valid_class() const;
+  inline bool is_valid_endianness() const;
+  inline bool is_valid_header_version() const;
+  inline bool is_unused_zeroed_padding() const;
 
   static char const *get_class_name(int clazz);
   static char const *get_endianness_name(int endianness);
   static char const *get_os_abi_name(int abi);
 };
+
+template <typename Archiver>
+inline void elf_ident::serialize(Archiver &AR) {
+  AR <<= *this;
+  AR & ident;
+  AR >>= *this;
+}
+
+extern template boost::shared_ptr<elf_ident>
+elf_ident::read<serialization::archive_reader_le>(
+  serialization::archive_reader_le &);
+
+extern template boost::shared_ptr<elf_ident>
+elf_ident::read<serialization::archive_reader_be>(
+  serialization::archive_reader_be &);
 
 #endif // ELF_IDENT_H

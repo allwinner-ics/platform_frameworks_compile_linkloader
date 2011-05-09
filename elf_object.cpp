@@ -1,5 +1,6 @@
 #include "elf_object.h"
 
+#include "utils/serialize.h"
 #include "elf_ident.h"
 
 #include <iostream>
@@ -14,6 +15,7 @@
 #include <sys/types.h>
 
 using namespace boost;
+using namespace serialization;
 using namespace std;
 
 shared_ptr<elf_object> elf_object::read(string const &filename) {
@@ -38,7 +40,8 @@ shared_ptr<elf_object> elf_object::read(string const &filename) {
     throw runtime_error("Unable to mmap the file");
   }
 
-  shared_ptr<elf_ident> idt = elf_ident::create(file, file_size, 0);
+  archive_reader_le ar(file, file_size);
+  shared_ptr<elf_ident> idt = elf_ident::read(ar);
   idt->print();
 
   if (file != NULL && file != MAP_FAILED) {
