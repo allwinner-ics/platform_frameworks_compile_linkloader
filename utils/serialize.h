@@ -164,8 +164,8 @@ private:
 
 };
 
-typedef archive_reader<true>  archive_reader_from_little_endian;
-typedef archive_reader<false> archive_reader_from_big_endian;
+typedef archive_reader<true>  archive_reader_le;
+typedef archive_reader<false> archive_reader_be;
 
 
 template <bool is_archive_little_endian>
@@ -298,8 +298,8 @@ private:
 
 };
 
-typedef archive_writer<true>  archive_writer_to_little_endian;
-typedef archive_writer<false> archive_writer_to_big_endian;
+typedef archive_writer<true>  archive_writer_le;
+typedef archive_writer<false> archive_writer_be;
 
 }
 
