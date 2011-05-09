@@ -1,5 +1,4 @@
 #include <iostream>
-#include <stdexcept>
 
 #include <stdlib.h>
 
@@ -11,17 +10,10 @@ using namespace std;
 using namespace boost;
 
 int main(int argc, char **argv) {
-  if (argc < 2) {
-    cerr << "USAGE: " << argv[0] << " [ELFObjectFile]" << endl;
-    exit(EXIT_FAILURE);
-  }
+  shared_ptr<elf_object> ptr(elf_object::read(argv[0]));
 
-  try {
-    shared_ptr<elf_object> ptr(elf_object::read(argv[1]));
-
-  } catch (runtime_error &e) {
-    cerr << "ERROR: " << e.what() << endl;
-    exit(EXIT_FAILURE);
+  if (!ptr) {
+    cerr << "ERROR: Unable to read ELF executable." << endl;
   }
 
   return EXIT_SUCCESS;
