@@ -72,15 +72,15 @@ public:
     packed = pac;
   }
 
-  template <typename T> void operator<<=(T &b) {
+  void prologue(size_t size) {
     assert(cursor_base == NULL);
     cursor_base = cursor;
   }
 
-  template <typename T> void operator>>=(T &b) {
+  void epilogue(size_t size) {
     assert(cursor_base != NULL);
-    assert(cursor_base + sizeof(T) >= cursor);
-    cursor = cursor_base + sizeof(T);
+    assert(cursor_base + size >= cursor);
+    cursor = cursor_base + size;
     cursor_base = NULL;
   }
 
@@ -196,15 +196,15 @@ public:
     return buf.size();
   }
 
-  template <typename T> void operator<<=(T const &src) {
+  void prologue(size_t size) {
     assert(cursor_base == ((size_t)-1));
     cursor_base = cursor;
   }
 
-  template <typename T> void operator>>=(T const &src) {
+  void epilogue(size_t size) {
     assert(cursor_base != ((size_t)-1));
-    assert(cursor_base + sizeof(T) >= cursor);
-    cursor = cursor_base + sizeof(T);
+    assert(cursor_base + size >= cursor);
+    cursor = cursor_base + size;
     cursor_base = (size_t)-1;
   }
 
