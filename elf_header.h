@@ -13,6 +13,22 @@ protected:
   unsigned char e_ident[EI_NIDENT];
 
 public:
+  template <typename Archiver>
+  static boost::shared_ptr<elf_header> read(Archiver &AR, bool is_64bit);
+
+  bool is_32bit() const;
+  bool is_64bit() const;
+
+  bool is_big_endian() const;
+  bool is_little_endian() const;
+  bool is_valid_elf_header() const;
+
+  int get_class() const;
+  int get_endianness() const;
+  int get_header_version() const;
+  int get_os_abi() const;
+  int get_abi_version() const;
+
   virtual uint16_t get_object_type() const = 0;
   virtual uint16_t get_machine() const = 0;
   virtual uint32_t get_version() const = 0;
@@ -26,22 +42,6 @@ public:
   virtual uint16_t get_section_header_entry_size() const = 0;
   virtual uint16_t get_section_header_num() const = 0;
   virtual uint16_t get_str_section_index() const = 0;
-
-  template <typename Archiver>
-  static boost::shared_ptr<elf_header> read(Archiver &AR, bool is_64bit);
-
-  int get_class() const;
-  int get_endianness() const;
-  int get_header_version() const;
-  int get_os_abi() const;
-  int get_abi_version() const;
-
-  bool is_32bit() const;
-  bool is_64bit() const;
-
-  bool is_big_endian() const;
-  bool is_little_endian() const;
-  bool is_valid_elf_header() const;
 
   void print() const;
 
