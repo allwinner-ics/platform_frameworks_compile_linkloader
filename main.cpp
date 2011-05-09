@@ -3,9 +3,12 @@
 
 #include <stdlib.h>
 
-#include "elf_reader.h"
+#include <boost/shared_ptr.hpp>
+
+#include "elf_object.h"
 
 using namespace std;
+using namespace boost;
 
 int main(int argc, char **argv) {
   if (argc < 2) {
@@ -14,9 +17,9 @@ int main(int argc, char **argv) {
   }
 
   try {
-    elf_reader r(argv[1]);
+    shared_ptr<elf_object> ptr(elf_object::read(argv[1]));
 
-  } catch (exception &e) {
+  } catch (runtime_error &e) {
     cerr << "ERROR: " << e.what() << endl;
     exit(EXIT_FAILURE);
   }
