@@ -6,6 +6,5 @@ env.Program('elfreader',
             source=['elf_ident.cpp',
                     'elf_reader.cpp',
                     'main.cpp',
-                    'utils/endianness.cpp',
                     'utils/helper.cpp',
                     'utils/term.cpp'])

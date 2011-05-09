@@ -1,139 +1,111 @@
 #if !defined(SERIALIZE_H)
 #define SERIALIZE_H
 
+#include <algorithm>
+#include <vector>
+
+#include <assert.h>
 #include <string.h>
 #include <stdint.h>
 
 namespace serialization {
 
 namespace detail {
-  inline void swap(unsigned char &a, unsigned char &b) {
-    unsigned char tmp = a;
-    a = b;
-    b = tmp;
-  }
-
   inline bool is_host_little_endian() {
     unsigned long one = 0x1UL;
     return *reinterpret_cast<unsigned char *>(&one);
   }
 
-  inline void mirror(unsigned char (&array)[1]) {
+  inline void swap_byte_order(unsigned char (&array)[1]) {
     // Nothing to do
   }
 
-  inline void mirror(unsigned char (&array)[2]) {
-    swap(array[0], array[1]);
+  inline void swap_byte_order(unsigned char (&array)[2]) {
+    std::swap(array[0], array[1]);
   }
 
-  inline void mirror(unsigned char (&array)[4]) {
-    swap(array[0], array[3]);
-    swap(array[1], array[2]);
+  inline void swap_byte_order(unsigned char (&array)[4]) {
+    std::swap(array[0], array[3]);
+    std::swap(array[1], array[2]);
   }
 
-  inline void mirror(unsigned char (&array)[8]) {
-    swap(array[0], array[7]);
-    swap(array[1], array[6]);
-    swap(array[2], array[5]);
-    swap(array[3], array[4]);
+  inline void swap_byte_order(unsigned char (&array)[8]) {
+    std::swap(array[0], array[7]);
+    std::swap(array[1], array[6]);
+    std::swap(array[2], array[5]);
+    std::swap(array[3], array[4]);
   }
-
-  struct set_seek_request {
-    off_t off;
-    bool from_begin;
-
-    set_seek_request(off_t off_in, bool from_begin_in)
-    : off(off_in), from_begin(from_begin_in) {
-    }
-  };
-
-  struct read_chunk_request {
-    unsigned char *ptr;
-    size_t size;
-
-    read_chunk_request(unsigned char *ptr_in, size_t size_in)
-    : ptr(ptr_in), size(size_in) {
-    }
-  };
 }
 
-template <class reader, bool is_archive_little_endian>
-class unserializer {
-public:
-#define SERIALIZATION_ARCHIVE_READER_OPERATOR_SERIAL(TYPE)                  \
-  void operator|=(TYPE &val) {                                              \
-    unsigned char (&ref)[sizeof(TYPE)] =                                    \
-      reinterpret_cast<unsigned char (&)[sizeof(TYPE)]>(val);               \
-                                                                            \
-    static_cast<reader *>(this)->read(ref);                                 \
-                                                                            \
-    if (is_archive_little_endian != detail::is_host_little_endian()) {      \
-      detail::mirror(ref);                                                  \
-    }                                                                       \
-  }
-
-  SERIALIZATION_ARCHIVE_READER_OPERATOR_SERIAL(int8_t);
-  SERIALIZATION_ARCHIVE_READER_OPERATOR_SERIAL(int16_t);
-  SERIALIZATION_ARCHIVE_READER_OPERATOR_SERIAL(int32_t);
-  SERIALIZATION_ARCHIVE_READER_OPERATOR_SERIAL(int64_t);
-
-  SERIALIZATION_ARCHIVE_READER_OPERATOR_SERIAL(uint8_t);
-  SERIALIZATION_ARCHIVE_READER_OPERATOR_SERIAL(uint16_t);
-  SERIALIZATION_ARCHIVE_READER_OPERATOR_SERIAL(uint32_t);
-  SERIALIZATION_ARCHIVE_READER_OPERATOR_SERIAL(uint64_t);
-
-#undef SERIALIZATION_ARCHIVE_READER_OPERATOR_SERIAL
-};
 
 template <bool is_archive_little_endian>
-class archive_reader
-: public unserializer<archive_reader<is_archive_little_endian>,
-                      is_archive_little_endian> {
+class archive_reader {
 private:
+  unsigned char const *buf_begin;
+  unsigned char const *buf_end;
+  unsigned char const *cursor;
+
   bool good;
 
-  unsigned char *cursor;
-  unsigned char *buf;
-  unsigned char *buf_end;
-
-public:
-  archive_reader(unsigned char *buf_in = 0, size_t size_in = 0)
-  : cursor(buf_in), buf(buf_in), buf_end(buf_in + size_in)
-  {
-    good = buf_in ? true : false;
-  }
-
-  void read(unsigned char *ptr, size_t size) {
-    if (good && cursor + size <= buf_end) {
-      memcpy(ptr, cursor, size);
-      cursor += size;
-    } else {
-      good = false;
+private:
+  void prologue_bytes(unsigned char *dest, size_t size) {
+    if (good) {
+      if (cursor + size > buf_end) {
+        good = false;
+      } else {
+        memcpy(dest, cursor, size);
+        cursor += size;
+      }
     }
   }
 
-  template <size_t size>
-  void read(unsigned char (&ref)[size]) {
-    read(ref, size);
+  void epilogue_bytes(unsigned char *dest, size_t size) {
+    // Nothing to in epilogue in archive reader
+  }
+
+public:
+  archive_reader(unsigned char const *buf = NULL, size_t size = 0)
+  : buf_begin(buf), buf_end(buf + size), cursor(buf), good(buf != NULL) {
+  }
+
+  template <typename T> void prologue(T &dest) {
+    prologue_bytes(reinterpret_cast<unsigned char *>(&dest), sizeof(T));
+  }
+
+  template <typename T> void epilogue(T &dest) {
+    epilogue_bytes(reinterpret_cast<unsigned char *>(&dest), sizeof(T));
   }
 
   void seek(off_t off, bool from_begin = false) {
     if (from_begin) {
-      cursor = buf + off;
+      cursor = buf_begin + off;
     } else {
       cursor += off;
     }
   }
 
-  using unserializer<archive_reader, is_archive_little_endian>::operator|=;
-
-  void operator|=(detail::set_seek_request const &request) {
-    seek(request.off, request.from_begin);
+#define SERIALIZATION_ARCHIVE_READER_SWAP_BYTE_ORDER_OPERATOR(T)              \
+  void operator|=(T &val) {                                                   \
+    if (is_archive_little_endian != detail::is_host_little_endian()) {        \
+      detail::swap_byte_order(                                                \
+        reinterpret_cast<unsigned char (&)[sizeof(T)]>(val));                 \
+    }                                                                         \
   }
 
-  void operator|=(detail::read_chunk_request const &request) {
-    read(request.ptr, request.size);
-  }
+  SERIALIZATION_ARCHIVE_READER_SWAP_BYTE_ORDER_OPERATOR(int8_t)
+  SERIALIZATION_ARCHIVE_READER_SWAP_BYTE_ORDER_OPERATOR(int16_t)
+  SERIALIZATION_ARCHIVE_READER_SWAP_BYTE_ORDER_OPERATOR(int32_t)
+  SERIALIZATION_ARCHIVE_READER_SWAP_BYTE_ORDER_OPERATOR(int64_t)
+
+  SERIALIZATION_ARCHIVE_READER_SWAP_BYTE_ORDER_OPERATOR(uint8_t)
+  SERIALIZATION_ARCHIVE_READER_SWAP_BYTE_ORDER_OPERATOR(uint16_t)
+  SERIALIZATION_ARCHIVE_READER_SWAP_BYTE_ORDER_OPERATOR(uint32_t)
+  SERIALIZATION_ARCHIVE_READER_SWAP_BYTE_ORDER_OPERATOR(uint64_t)
+
+  SERIALIZATION_ARCHIVE_READER_SWAP_BYTE_ORDER_OPERATOR(float)
+  SERIALIZATION_ARCHIVE_READER_SWAP_BYTE_ORDER_OPERATOR(double)
+
+#undef SERIALIZATION_ARCHIVE_READER_SWAP_BYTE_ORDER_OPERATOR
 
   operator void *() const {
     return good ? this : 0;
@@ -144,16 +116,107 @@ public:
   }
 };
 
-inline detail::set_seek_request set_seek(off_t off, bool from_begin = false) {
-  return detail::set_seek_request(off, from_begin);
-}
+typedef archive_reader<true>  archive_reader_from_little_endian;
+typedef archive_reader<false> archive_reader_from_big_endian;
 
-inline detail::read_chunk_request read(unsigned char *ptr, size_t size) {
-  return detail::read_chunk_request(ptr, size);
-}
 
-typedef archive_reader<true>  archive_reader_from_le;
-typedef archive_reader<false> archive_reader_from_be;
+template <bool is_archive_little_endian>
+class archive_writer {
+private:
+  std::vector<unsigned char> buf;
+  unsigned char const *prev_src;
+  size_t cursor;
+
+private:
+  void prologue_bytes(unsigned char const *src, size_t size) {
+    assert(prev_src == NULL); // Note: prologue/epilogue is not reentrant.
+    prev_src = src;
+
+    if (cursor + size > buf.size()) {
+      buf.resize(cursor + size);
+    }
+
+    memcpy(&*buf.begin() + cursor, src, size);
+  }
+
+  void epilogue_bytes(unsigned char const *src, size_t size) {
+    prev_src = NULL;
+    cursor += size;
+  }
+
+public:
+  archive_writer() : cursor(0), prev_src(NULL) {
+  }
+
+  unsigned char const *begin() const {
+    return &*buf.begin();
+  }
+
+  unsigned char const *end() const {
+    return &*buf.end();
+  }
+
+  size_t size() const {
+    return buf.size();
+  }
+
+  template <typename T> void prologue(T const &src) {
+    prologue_bytes(reinterpret_cast<unsigned char const *>(&src), sizeof(T));
+  }
+
+  template <typename T> void epilogue(T const &src) {
+    epilogue_bytes(reinterpret_cast<unsigned char const *>(&src), sizeof(T));
+  }
+
+  void seek(off_t off, bool from_begin = false) {
+    if (from_begin) {
+      cursor = off;
+    } else {
+      cursor += off;
+    }
+  }
+
+#define SERIALIZATION_ARCHIVE_WRITER_SWAP_BYTE_ORDER_OPERATOR(T)              \
+  void operator|=(T const &val) {                                             \
+    if (is_archive_little_endian != detail::is_host_little_endian()) {        \
+      ptrdiff_t off =                                                         \
+        reinterpret_cast<unsigned char const *>(&val) - prev_src;             \
+                                                                              \
+      detail::swap_byte_order(reinterpret_cast<unsigned char (&)[sizeof(T)]>( \
+          *(&*buf.begin() + cursor + off)));                                  \
+    }                                                                         \
+  }
+
+  SERIALIZATION_ARCHIVE_WRITER_SWAP_BYTE_ORDER_OPERATOR(int8_t)
+  SERIALIZATION_ARCHIVE_WRITER_SWAP_BYTE_ORDER_OPERATOR(int16_t)
+  SERIALIZATION_ARCHIVE_WRITER_SWAP_BYTE_ORDER_OPERATOR(int32_t)
+  SERIALIZATION_ARCHIVE_WRITER_SWAP_BYTE_ORDER_OPERATOR(int64_t)
+
+  SERIALIZATION_ARCHIVE_WRITER_SWAP_BYTE_ORDER_OPERATOR(uint8_t)
+  SERIALIZATION_ARCHIVE_WRITER_SWAP_BYTE_ORDER_OPERATOR(uint16_t)
+  SERIALIZATION_ARCHIVE_WRITER_SWAP_BYTE_ORDER_OPERATOR(uint32_t)
+  SERIALIZATION_ARCHIVE_WRITER_SWAP_BYTE_ORDER_OPERATOR(uint64_t)
+
+  SERIALIZATION_ARCHIVE_WRITER_SWAP_BYTE_ORDER_OPERATOR(float)
+  SERIALIZATION_ARCHIVE_WRITER_SWAP_BYTE_ORDER_OPERATOR(double)
+
+#undef SERIALIZATION_ARCHIVE_WRITER_SWAP_BYTE_ORDER_OPERATOR
+
+
+  // Note: Archive writer is always considered in "good" state, unless the
+  // buffer is not big enough, and an exception will be thrown.
+
+  operator void *() const {
+    return this;
+  }
+
+  bool operator!() const {
+    return false;
+  }
+};
+
+typedef archive_writer<true>  archive_writer_to_little_endian;
+typedef archive_writer<false> archive_writer_to_big_endian;
 
 }
 
