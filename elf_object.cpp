@@ -41,7 +41,7 @@ shared_ptr<elf_object> elf_object::read(string const &filename) {
   }
 
   archive_reader_le ar(file, file_size);
-  shared_ptr<elf_header> idt = elf_header::read(ar, 32);
+  shared_ptr<elf_header> idt = elf_header::read(ar, false);
   idt->print();
 
   if (file != NULL && file != MAP_FAILED) {

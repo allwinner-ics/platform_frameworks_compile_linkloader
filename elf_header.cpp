@@ -52,7 +52,7 @@ public:
 
 template <typename Archiver>
 void elf_header_32::serialize(Archiver &AR) {
-  AR <<= *this;
+  AR.prologue(sizeof(Elf32_Ehdr));
 
   AR & e_ident;
   AR & e_type;
@@ -69,7 +69,7 @@ void elf_header_32::serialize(Archiver &AR) {
   AR & e_shnum;
   AR & e_shstrndx;
 
-  AR >>= *this;
+  AR.epilogue(sizeof(Elf32_Ehdr));
 }
 
 uint16_t elf_header_32::get_object_type() const {
@@ -165,7 +165,7 @@ public:
 
 template <typename Archiver>
 void elf_header_64::serialize(Archiver &AR) {
-  AR <<= *this;
+  AR.prologue(sizeof(Elf64_Ehdr));
 
   AR & e_ident;
   AR & e_type;
@@ -182,7 +182,7 @@ void elf_header_64::serialize(Archiver &AR) {
   AR & e_shnum;
   AR & e_shstrndx;
 
-  AR >>= *this;
+  AR.epilogue(sizeof(Elf64_Ehdr));
 }
 
 uint16_t elf_header_64::get_object_type() const {
@@ -369,21 +369,62 @@ void elf_header::print() const {
 
   cout << endl << setw(79) << setfill('=') << '=' << endl;
 
-  cout << light::white() << "ELF Identification" << normal() << endl;
+  cout << light::white() << "ELF Header" << normal() << endl;
 
   cout << setw(79) << setfill('-') << '-' << endl << setfill(' ');
 
-  cout << setw(20) << "Class" << " : " << get_class_name(get_class()) << endl;
+  cout << setw(25) << "Class" << " : " << get_class_name(get_class()) << endl;
 
-  cout << setw(20) << "Endianness" << " : "
+  cout << setw(25) << "Endianness" << " : "
        << get_endianness_name(get_endianness()) << endl;
 
-  cout << setw(20) << "Header Version" << " : " << get_header_version() << endl;
+  cout << setw(25) << "Header Version" << " : "
+       << get_header_version() << endl;
 
-  cout << setw(20) << "OS ABI" << " : "
+  cout << setw(25) << "OS ABI" << " : "
        << get_os_abi_name(get_os_abi()) << endl;
 
-  cout << setw(20) << "ABI Version" << " : " << get_abi_version() << endl;
+  cout << setw(25) << "ABI Version" << " : " << get_abi_version() << endl;
+
+
+  cout << setw(25) << "Object Type" << " : "
+       << get_object_type_name(get_object_type()) << endl;
+
+  cout << setw(25) << "Machine" << " : "
+       << get_machine_name(get_machine()) << endl;
+
+  cout << setw(25) << "Version" << " : "
+       << get_version_name(get_version()) << endl;
+
+  cout << setw(25) << "Entry Address" << " : "
+       << setw(16) << setfill('0') << hex << get_entry_vaddr()
+       << setfill(' ') << dec << endl;
+
+  cout << setw(25) << "Program Header Offset" << " : "
+       << get_program_header_table_offset() << endl;
+
+  cout << setw(25) << "Section Header Offset" << " : "
+       << get_section_header_table_offset() << endl;
+
+  cout << setw(25) << "Flags" << " : " << get_flags() << endl;
+
+  cout << setw(25) << "ELF Header Size" << " : "
+       << get_elf_header_size() << endl;
+
+  cout << setw(25) << "Program Header Size" << " : "
+       << get_program_header_entry_size() << endl;
+
+  cout << setw(25) << "Program Header Num" << " : "
+       << get_program_header_num() << endl;
+
+  cout << setw(25) << "Section Header Size" << " : "
+       << get_section_header_entry_size() << endl;
+
+  cout << setw(25) << "Section Header Num" << " : "
+       << get_section_header_num() << endl;
+
+  cout << setw(25) << "String Section Index" << " : "
+       << get_str_section_index() << endl;
 
   cout << setw(79) << setfill('=') << '=' << endl << endl;
 }
@@ -429,5 +470,37 @@ char const *elf_header::get_os_abi_name(int abi) {
   CASE_PAIR(ELFOSABI_MODESTO, "Modesto")
   CASE_PAIR(ELFOSABI_OPENBSD, "OpenBSD")
 #undef CASE_PAIR
+  }
+}
+
+char const *elf_header::get_object_type_name(uint16_t type) {
+  switch (type) {
+  default: return "No file type";
+
+  case ET_REL:  return "Relocatable file";
+  case ET_EXEC: return "Executable file";
+  case ET_DYN:  return "Shared object file";
+  case ET_CORE: return "Core file";
+
+  case ET_LOOS: case ET_HIOS:
+    return "Operating system-specific";
+
+  case ET_LOPROC: case ET_HIPROC:
+    return "Processor-specific";
+  }
+}
+
+char const *elf_header::get_machine_name(uint16_t machine) {
+  switch (machine) {
+    default: return "No machine or unknown";
+    case EM_386: return "Intel 80386 (X86)";
+    case EM_ARM: return "Advanced RISC Machine (ARM)";
+  }
+}
+
+char const *elf_header::get_version_name(uint32_t version) {
+  switch (version) {
+    default: return "Invalid version";
+    case EV_CURRENT: return "Current version";
   }
 }
