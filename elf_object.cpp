@@ -41,7 +41,10 @@ shared_ptr<elf_object> elf_object::read(string const &filename) {
   }
 
   archive_reader_le ar(file, file_size);
-  shared_ptr<elf_header> idt = elf_header::read(ar, false);
+  //FIXME:recognize 32bit or 64bit
+  //TODO:I think it should only use ELF Identification to recognize 32bit or 64bit.
+  //And alignment may not use trait, because we might read any type elf on any type machine?
+  shared_ptr<elf_header> idt = elf_header::read(ar, sizeof(void*)==8);
   idt->print();
 
   if (file != NULL && file != MAP_FAILED) {
