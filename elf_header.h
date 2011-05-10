@@ -12,7 +12,7 @@ protected:
 
 public:
   template <typename Archiver>
-  static boost::shared_ptr<elf_header> read(Archiver &AR, bool is_64bit);
+  static boost::shared_ptr<elf_header> read(Archiver &AR);
 
   void print() const;
 
@@ -77,10 +77,10 @@ private:
 };
 
 extern template boost::shared_ptr<elf_header>
-elf_header::read(serialization::archive_reader_le &, bool);
+elf_header::read(serialization::archive_reader_le &);
 
 extern template boost::shared_ptr<elf_header>
-elf_header::read(serialization::archive_reader_be &, bool);
+elf_header::read(serialization::archive_reader_be &);
 
 
 #endif // ELF_HEADER_H

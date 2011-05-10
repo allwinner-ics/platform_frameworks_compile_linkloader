@@ -373,12 +373,19 @@ shared_ptr<elf_header> elf_header::read_64(Archiver &AR) {
 }
 
 template <typename Archiver>
-shared_ptr<elf_header> elf_header::read(Archiver &AR, bool is_64bit) {
-  return is_64bit ? read_64(AR) : read_32(AR);
+shared_ptr<elf_header> elf_header::read(Archiver &AR) {
+  unsigned char ident[EI_NIDENT];
+
+  AR.prologue(sizeof(ident));
+  AR & ident;
+  AR.epilogue(sizeof(ident));
+  AR.seek(0, true);
+
+  return (ident[EI_CLASS] == ELFCLASS64) ? read_64(AR) : read_32(AR);
 }
 
-template shared_ptr<elf_header> elf_header::read(archive_reader_le &, bool);
-template shared_ptr<elf_header> elf_header::read(archive_reader_be &, bool);
+template shared_ptr<elf_header> elf_header::read(archive_reader_le &);
+template shared_ptr<elf_header> elf_header::read(archive_reader_be &);
 
 
 //=============================================================================
