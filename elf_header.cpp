@@ -317,11 +317,13 @@ inline bool elf_header::is_valid_elf_ident() const {
 inline bool elf_header::is_compatible_header_size() const {
   if (is_32bit()) {
     return (get_elf_header_size() >= sizeof(Elf32_Ehdr) &&
-            get_program_header_entry_size() >= sizeof(Elf32_Phdr) &&
+              (!(get_object_type() == ET_EXEC || get_object_type() == ET_DYN)
+               || get_program_header_entry_size() >= sizeof(Elf32_Phdr)) &&
             get_section_header_entry_size() >= sizeof(Elf32_Shdr));
   } else {
     return (get_elf_header_size() >= sizeof(Elf64_Ehdr) &&
-            get_program_header_entry_size() >= sizeof(Elf64_Phdr) &&
+              (!(get_object_type() == ET_EXEC || get_object_type() == ET_DYN)
+               || get_program_header_entry_size() >= sizeof(Elf64_Phdr)) &&
             get_section_header_entry_size() >= sizeof(Elf64_Shdr));
   }
 }
