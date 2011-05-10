@@ -10,7 +10,15 @@ using namespace std;
 using namespace boost;
 
 int main(int argc, char **argv) {
-  shared_ptr<elf_object> ptr(elf_object::read(argv[0]));
+  string filename;
+
+  if (argc >= 2) {
+    filename = argv[1];
+  } else {
+    filename = argv[0];
+  }
+
+  shared_ptr<elf_object> ptr(elf_object::read(filename));
 
   if (!ptr) {
     cerr << "ERROR: Unable to read ELF executable." << endl;
