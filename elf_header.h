@@ -6,8 +6,6 @@
 
 #include <elf.h>
 
-class elf_ident;
-
 class elf_header {
 protected:
   unsigned char e_ident[EI_NIDENT];
