@@ -277,6 +277,10 @@ bool elf_header::is_little_endian() const {
   return e_ident[EI_CLASS] == ELFDATA2LSB;
 }
 
+
+//=============================================================================
+
+
 inline bool elf_header::is_valid_magic_word() const {
   return (memcmp(e_ident, "\x7f" "ELF", 4) == 0);
 }
@@ -302,12 +306,28 @@ inline bool elf_header::is_unused_zeroed_padding() const {
   return true;
 }
 
-bool elf_header::is_valid_elf_header() const {
+inline bool elf_header::is_valid_elf_ident() const {
   return (is_valid_magic_word() &&
           is_valid_class() &&
           is_valid_endianness() &&
           is_valid_header_version() &&
           is_unused_zeroed_padding());
+}
+
+inline bool elf_header::is_compatible_header_size() const {
+  if (is_32bit()) {
+    return (get_elf_header_size() >= sizeof(Elf32_Ehdr) &&
+            get_program_header_entry_size() >= sizeof(Elf32_Phdr) &&
+            get_section_header_entry_size() >= sizeof(Elf32_Shdr));
+  } else {
+    return (get_elf_header_size() >= sizeof(Elf64_Ehdr) &&
+            get_program_header_entry_size() >= sizeof(Elf64_Phdr) &&
+            get_section_header_entry_size() >= sizeof(Elf64_Shdr));
+  }
+}
+
+bool elf_header::is_valid_elf_header() const {
+  return (is_valid_elf_ident() && is_compatible_header_size());
 }
 
 
@@ -324,11 +344,10 @@ shared_ptr<elf_header> elf_header::read_32(Archiver &AR) {
     return shared_ptr<elf_header_32>();
   }
 
-#if 0
+  // Ensure that the ELF header is valid
   if (!result->is_valid_elf_header()) {
     return shared_ptr<elf_header_32>();
   }
-#endif
 
   return result;
 }
@@ -343,11 +362,10 @@ shared_ptr<elf_header> elf_header::read_64(Archiver &AR) {
     return shared_ptr<elf_header_64>();
   }
 
-#if 0
+  // Ensure that the ELF header is valid
   if (!result->is_valid_elf_header()) {
     return shared_ptr<elf_header_64>();
   }
-#endif
 
   return result;
 }

@@ -22,7 +22,6 @@ public:
 
   bool is_big_endian() const;
   bool is_little_endian() const;
-  bool is_valid_elf_header() const;
 
   int get_class() const;
   int get_endianness() const;
@@ -31,6 +30,8 @@ public:
   int get_abi_version() const;
 
   // ELF header related functions
+  bool is_valid_elf_header() const;
+
   virtual uint16_t get_object_type() const = 0;
   virtual uint16_t get_machine() const = 0;
   virtual uint32_t get_version() const = 0;
@@ -67,6 +68,8 @@ private:
   static char const *get_os_abi_name(int abi);
 
   // ELF header related privat functions
+  inline bool is_compatible_header_size() const;
+
   static char const *get_object_type_name(uint16_t type);
   static char const *get_machine_name(uint16_t machine);
   static char const *get_version_name(uint32_t version);
