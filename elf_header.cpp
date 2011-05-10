@@ -270,11 +270,11 @@ bool elf_header::is_64bit() const {
 }
 
 bool elf_header::is_big_endian() const {
-  return e_ident[EI_CLASS] == ELFDATA2MSB;
+  return e_ident[EI_DATA] == ELFDATA2MSB;
 }
 
 bool elf_header::is_little_endian() const {
-  return e_ident[EI_CLASS] == ELFDATA2LSB;
+  return e_ident[EI_DATA] == ELFDATA2LSB;
 }
 
 
