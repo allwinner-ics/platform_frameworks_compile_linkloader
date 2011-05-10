@@ -2,6 +2,7 @@
 
 #include "utils/serialize.h"
 #include "elf_header.h"
+#include "elf_section_header.h"
 
 #include <iostream>
 #include <stdexcept>
@@ -46,6 +47,16 @@ shared_ptr<elf_object> elf_object::read(string const &filename) {
   //And alignment may not use trait, because we might read any type elf on any type machine?
   shared_ptr<elf_header> idt = elf_header::read(ar, sizeof(void*)==8);
   idt->print();
+
+  vector< shared_ptr<elf_section_header> > sht;
+  ar.seek(idt->get_section_header_table_offset(), true);
+  for(int i=0; i<idt->get_section_header_num(); ++i)
+    sht.push_back(elf_section_header::read(ar, idt->is_64bit()));
+
+  elf_section_header::print_header();
+  for(int i=0; i<idt->get_section_header_num(); ++i)
+    sht[i]->print();
+  elf_section_header::print_footer();
 
   if (file != NULL && file != MAP_FAILED) {
     munmap(static_cast<void *>(const_cast<unsigned char *>(file)), file_size);

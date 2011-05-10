@@ -25,6 +25,7 @@ env = Environment(CFLAGS=CFLAGS,
 
 env.Program('elfreader',
             source=['elf_header.cpp',
+                    'elf_section_header.cpp',
                     'elf_object.cpp',
                     'main.cpp',
                     'utils/helper.cpp',
