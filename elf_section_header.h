@@ -22,6 +22,10 @@ public:
   virtual uint64_t get_address() const = 0;
   virtual uint64_t get_offset() const = 0;
   virtual uint64_t get_size() const = 0;
+  virtual uint32_t get_link() const = 0;
+  virtual uint32_t get_extra_info() const = 0;
+  virtual uint64_t get_address_align() const = 0;
+  virtual uint64_t get_entry_size() const = 0;
 
 private:
   // Read ELF header

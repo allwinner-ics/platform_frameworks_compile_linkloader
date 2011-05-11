@@ -38,6 +38,10 @@ public:
   virtual uint64_t get_address() const;
   virtual uint64_t get_offset() const;
   virtual uint64_t get_size() const;
+  virtual uint32_t get_link() const;
+  virtual uint32_t get_extra_info() const;
+  virtual uint64_t get_address_align() const;
+  virtual uint64_t get_entry_size() const;
 };
 
 template <typename Archiver>
@@ -82,6 +86,22 @@ uint64_t elf_section_header_32::get_size() const {
   return sh_size;
 }
 
+uint32_t elf_section_header_32::get_link() const {
+	return sh_link;
+}
+
+uint32_t elf_section_header_32::get_extra_info() const {
+	return sh_info;
+}
+
+uint64_t elf_section_header_32::get_address_align() const {
+	return sh_addralign;
+}
+
+uint64_t elf_section_header_32::get_entry_size() const {
+	return sh_entsize;
+}
+
 
 //=============================================================================
 
@@ -109,6 +129,10 @@ public:
   virtual uint64_t get_address() const;
   virtual uint64_t get_offset() const;
   virtual uint64_t get_size() const;
+  virtual uint32_t get_link() const;
+  virtual uint32_t get_extra_info() const;
+  virtual uint64_t get_address_align() const;
+  virtual uint64_t get_entry_size() const;
 };
 
 template <typename Archiver>
@@ -151,6 +175,22 @@ uint64_t elf_section_header_64::get_offset() const {
 
 uint64_t elf_section_header_64::get_size() const {
   return sh_size;
+}
+
+uint32_t elf_section_header_64::get_link() const {
+	return sh_link;
+}
+
+uint32_t elf_section_header_64::get_extra_info() const {
+	return sh_info;
+}
+
+uint64_t elf_section_header_64::get_address_align() const {
+	return sh_addralign;
+}
+
+uint64_t elf_section_header_64::get_entry_size() const {
+	return sh_entsize;
 }
 
 
@@ -201,12 +241,16 @@ void elf_section_header::print_header(){
   cout << light::white() << "Section Header" << normal() << endl;
 
   cout << setw(79) << setfill('-') << '-' << endl << setfill(' ');
-  cout << setw(20) << "Name" <<
-          setw(7) << "Type" <<
+  cout << setw(15) << "Name" <<
+          setw(6) << "Type" <<
           setw(7) << "Flags" <<
-          setw(10) << "Address" <<
-          setw(10) << "Offset" <<
+          setw(8) << "Address" <<
+          setw(8) << "Offset" <<
           setw(7) << "Size" <<
+          setw(7) << "Link" <<
+          setw(7) << "Info" <<
+          setw(7) << "Align" <<
+          setw(7) << "Esize" <<
           endl;
 }
 
@@ -219,12 +263,16 @@ void elf_section_header::print_footer(){
 void elf_section_header::print() const {
   using namespace term::color;
 
-  cout << setw(20) << get_name() <<
-          setw(7) << get_type() <<
+  cout << setw(15) << get_name() <<
+          setw(6) << get_type() <<
           setw(7) << get_flags() <<
-          setw(10) << (void*)get_address() <<
-          setw(10) << (void*)get_offset() <<
+          setw(8) << (void*)get_address() <<
+          setw(8) << (void*)get_offset() <<
           setw(7) << get_size() <<
+          setw(7) << get_link() <<
+          setw(7) << get_extra_info() <<
+          setw(7) << get_address_align() <<
+          setw(7) << get_entry_size() <<
           endl;
 }
 
