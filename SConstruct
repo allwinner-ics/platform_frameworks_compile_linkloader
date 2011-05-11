@@ -1,26 +1,31 @@
-#from http://www.scons.org/wiki/SconstructMultiple
-#usage: scons mode=debug
-#get the mode flag from the command line
-#default to 'release' if the user didn't specify
-mymode = ARGUMENTS.get('mode', 'release')   #holds current mode
+COMMON_CFLAGS = ['-Wall', '-Werror']
+COMMON_CXXFLAGS = ['-Wall', '-Werror']
 
-#check if the user has been naughty: only 'debug' or 'release' allowed
-if not (mymode in ['debug', 'release']):
-    print "Error: expected 'debug' or 'release', found: " + mymode
+build_configurations = {
+    'debug': {
+        'CFLAGS': COMMON_CFLAGS + ['-g'],
+        'CXXFLAGS': COMMON_CXXFLAGS + ['-g']
+    },
+
+    'release': {
+        'CFLAGS': COMMON_CFLAGS + ['-O2'],
+        'CXXFLAGS': COMMON_CXXFLAGS + ['-O2', '-fno-exceptions']
+        # FIXME: We should move -fno-exceptions to COMMON_CXXFLAGS.
+    },
+}
+
+mode = ARGUMENTS.get('mode', 'release')
+
+if not mode in build_configurations:
+    print 'ERROR: Unknown building mode:', mode
     Exit(1)
 
-#tell the user what we're doing
-print '**** Compiling in ' + mymode + ' mode...'
+build_config = build_configurations[mode]
 
-if mymode == 'debug':
-    CFLAGS=['-Wall', '-Werror', '-g']
-    CXXFLAGS=['-Wall', '-Werror', '-g']
-else:  #default mode(release)
-    CFLAGS=['-Wall', '-Werror', '-O2']
-    CXXFLAGS=['-Wall', '-Werror', '-fno-exceptions', '-O2']
+print '===> BUILDING IN ' + mode.upper() + ' MODE ...'
 
-env = Environment(CFLAGS=CFLAGS,
-                  CXXFLAGS=CXXFLAGS,
+env = Environment(CFLAGS=build_config['CFLAGS'],
+                  CXXFLAGS=build_config['CXXFLAGS'],
                   CPPPATH=['utils'])
 
 env.Program('elfreader',
