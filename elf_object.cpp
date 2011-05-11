@@ -19,6 +19,9 @@ using namespace boost;
 using namespace serialization;
 using namespace std;
 
+elf_object::elf_object(string const &filename) {
+	//TODO:constructor
+}
 shared_ptr<elf_object> elf_object::read(string const &filename) {
   int file_fd = open(filename.c_str(), O_RDONLY);
   if (file_fd < 0) {
@@ -41,19 +44,15 @@ shared_ptr<elf_object> elf_object::read(string const &filename) {
     return shared_ptr<elf_object>();
   }
 
+  shared_ptr<elf_object> elf_obj_ptr(new elf_object(filename));
+
   archive_reader_le ar(file, file_size);
-  shared_ptr<elf_header> idt = elf_header::read(ar);
-  idt->print();
+  elf_obj_ptr->header = elf_header::read(ar);
+  const elf_header &idt = elf_obj_ptr->get_header();
 
-  vector< shared_ptr<elf_section_header> > sht;
-  ar.seek(idt->get_section_header_table_offset(), true);
-  for(int i=0; i<idt->get_section_header_num(); ++i)
-    sht.push_back(elf_section_header::read(ar, idt->is_64bit()));
-
-  elf_section_header::print_header();
-  for(int i=0; i<idt->get_section_header_num(); ++i)
-    sht[i]->print();
-  elf_section_header::print_footer();
+  ar.seek(idt.get_section_header_table_offset(), true);
+  for(int i=0; i<idt.get_section_header_num(); ++i)
+    elf_obj_ptr->sh_table.push_back(elf_section_header::read(ar, idt.is_64bit()));
 
   if (file != NULL && file != MAP_FAILED) {
     munmap(static_cast<void *>(const_cast<unsigned char *>(file)), file_size);
@@ -63,5 +62,15 @@ shared_ptr<elf_object> elf_object::read(string const &filename) {
     close(file_fd);
   }
 
-  return shared_ptr<elf_object>();
+  return elf_obj_ptr;
+}
+
+void elf_object::print() const{
+  //print elf header
+  get_header().print();
+  //print elf section header
+  elf_section_header::print_header();
+  for(int i=0; i<get_header().get_section_header_num(); ++i)
+    get_section_header(i).print();
+  elf_section_header::print_footer();
 }

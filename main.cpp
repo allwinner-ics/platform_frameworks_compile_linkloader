@@ -22,6 +22,8 @@ int main(int argc, char **argv) {
 
   if (!ptr) {
     cerr << "ERROR: Unable to read ELF executable." << endl;
+  }else{
+	  ptr->print();
   }
 
   return EXIT_SUCCESS;

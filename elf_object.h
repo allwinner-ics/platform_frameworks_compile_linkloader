@@ -19,6 +19,8 @@ private:
   std::vector<boost::shared_ptr<elf_section_header> > sh_table;
   std::vector<boost::shared_ptr<elf_program_header> > ph_table;
 
+  elf_section_header const &get_section_header(size_t index) const { return *sh_table[index]; }
+
   elf_object() {
   }
 
@@ -26,6 +28,8 @@ public:
   static boost::shared_ptr<elf_object> read(std::string const &filename);
 
   elf_header const &get_header() const { return *header; }
+
+  void print() const;
 
 private:
   elf_object(std::string const &filename);
