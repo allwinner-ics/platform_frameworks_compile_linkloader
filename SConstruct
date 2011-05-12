@@ -32,6 +32,7 @@ env.Program('elfreader',
             source=['elf_header.cpp',
                     'elf_section_header.cpp',
                     'elf_object.cpp',
+                    'elf_section.cpp',
                     'main.cpp',
                     'utils/helper.cpp',
                     'utils/term.cpp'])
