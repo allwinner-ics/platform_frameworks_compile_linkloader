@@ -73,7 +73,7 @@ void elf_symtab::print() const {
 
   cout << endl << setw(79) << setfill('=') << '=' << endl;
 
-  cout << light::white() << "Section Header" << normal() << endl;
+  cout << light::white() << "Symbol Table" << normal() << endl;
 
   cout << setw(79) << setfill('-') << '-' << endl << setfill(' ');
   cout << setw(20) << "Name" <<
