@@ -33,6 +33,7 @@ env.Program('elfreader',
                     'elf_section_header.cpp',
                     'elf_object.cpp',
                     'elf_section.cpp',
+                    'elf_strtab.cpp',
                     'main.cpp',
                     'utils/helper.cpp',
                     'utils/term.cpp'])
