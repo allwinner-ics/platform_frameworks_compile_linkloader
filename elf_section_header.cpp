@@ -89,19 +89,19 @@ uint64_t elf_section_header_32::get_size() const {
 }
 
 uint32_t elf_section_header_32::get_link() const {
-	return sh_link;
+  return sh_link;
 }
 
 uint32_t elf_section_header_32::get_extra_info() const {
-	return sh_info;
+  return sh_info;
 }
 
 uint64_t elf_section_header_32::get_address_align() const {
-	return sh_addralign;
+  return sh_addralign;
 }
 
 uint64_t elf_section_header_32::get_entry_size() const {
-	return sh_entsize;
+  return sh_entsize;
 }
 
 
@@ -180,19 +180,19 @@ uint64_t elf_section_header_64::get_size() const {
 }
 
 uint32_t elf_section_header_64::get_link() const {
-	return sh_link;
+  return sh_link;
 }
 
 uint32_t elf_section_header_64::get_extra_info() const {
-	return sh_info;
+  return sh_info;
 }
 
 uint64_t elf_section_header_64::get_address_align() const {
-	return sh_addralign;
+  return sh_addralign;
 }
 
 uint64_t elf_section_header_64::get_entry_size() const {
-	return sh_entsize;
+  return sh_entsize;
 }
 
 
@@ -274,6 +274,10 @@ char const *elf_section_header::get_type_name(uint32_t type) {
     CASE(DYNSYM) CASE(INIT_ARRAY) CASE(FINI_ARRAY) CASE(PREINIT_ARRAY)
     CASE(GROUP) CASE(SYMTAB_SHNDX) CASE(LOOS) CASE(HIOS) CASE(LOPROC)
     CASE(HIPROC) CASE(LOUSER) CASE(HIUSER)
+    //ARM
+    CASE(ARM_EXIDX)
+    CASE(ARM_PREEMPTMAP)
+    CASE(ARM_ATTRIBUTES)
 
 #undef CASE
   }
