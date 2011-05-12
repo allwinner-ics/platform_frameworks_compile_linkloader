@@ -21,8 +21,14 @@ private:
   std::vector<boost::shared_ptr<elf_section> > s_table;
   std::vector<boost::shared_ptr<elf_program_header> > ph_table;
 
-  elf_section_header const &get_section_header(size_t index) const { return *sh_table[index]; }
-  elf_section const &get_section(size_t index) const { return *s_table[index]; }
+private:
+  elf_section_header const &get_section_header(size_t index) const {
+    return *sh_table[index];
+  }
+
+  elf_section const &get_section(size_t index) const {
+    return *s_table[index];
+  }
 
   elf_object() {
   }
