@@ -3,6 +3,7 @@
 #include "utils/serialize.h"
 #include "elf_header.h"
 #include "elf_strtab.h"
+#include "elf_symtab.h"
 #include "elf_section_header.h"
 
 #include <iostream>
@@ -19,6 +20,10 @@
 using namespace boost;
 using namespace serialization;
 using namespace std;
+
+
+const std::string elf_object::SYMBOL_TABLE_NAME = ".symtab";
+const std::string elf_object::SYMBOL_STR_TAB_NAME = ".strtab";
 
 template <typename Archiver>
 inline void elf_object::read_header(Archiver &AR) {
@@ -44,11 +49,28 @@ inline void elf_object::read_section_header_str_tab(Archiver &AR) {
                          get_header().get_str_section_index()));
 }
 
+template <typename Archiver>
+inline void elf_object::read_symbol_table(Archiver &AR) {
+  symbol_table =
+    elf_symtab::read(AR,
+                     get_section_header(elf_object::SYMBOL_TABLE_NAME),
+                     *this);
+}
+
+template <typename Archiver>
+inline void elf_object::read_symbol_str_tab(Archiver &AR) {
+  symbol_str_tab =
+    elf_strtab::read(AR, get_section_header(
+                         elf_object::SYMBOL_STR_TAB_NAME));
+}
+
 template <typename archiver>
 void elf_object::read_internal(archiver &AR) {
   read_header(AR);
   read_section_header_table(AR);
   read_section_header_str_tab(AR);
+  read_symbol_table(AR);
+  read_symbol_str_tab(AR);
 }
 
 shared_ptr<elf_object> elf_object::read(string const &filename) {
@@ -96,6 +118,17 @@ shared_ptr<elf_object> elf_object::read(string const &filename) {
   return result;
 }
 
+elf_section_header const &
+elf_object::get_section_header(const std::string &str) const {
+  for (size_t i = 0; i < sh_table.size(); ++i){ // TODO: Use hash map
+    if (str == string(sh_table[i]->get_name())){
+      return *sh_table[i];
+    }
+  }
+  // Return SHN_UNDEF section entry;
+  return *sh_table[0];
+}
+
 void elf_object::print() const{
   // Print elf header
   get_header().print();
@@ -106,6 +139,9 @@ void elf_object::print() const{
     get_section_header(i).print();
   }
   elf_section_header::print_footer();
+
+  // Print elf symbol table
+  symbol_table->print();
 }
 
 bool elf_object::open_map_file(std::string const &filename,

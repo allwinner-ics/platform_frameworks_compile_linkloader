@@ -34,6 +34,8 @@ env.Program('elfreader',
                     'elf_object.cpp',
                     'elf_section.cpp',
                     'elf_strtab.cpp',
+                    'elf_symtab.cpp',
+                    'elf_sym_entry.cpp',
                     'main.cpp',
                     'utils/helper.cpp',
                     'utils/term.cpp'])
