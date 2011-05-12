@@ -92,6 +92,14 @@ public:
     }
   }
 
+  void read_bytes(void *array, size_t size) {
+    if (!good || cursor + size > buf_end) {
+      good = false;
+    } else {
+      memcpy(array, cursor, size);
+    }
+  }
+
   template <size_t size>
   void operator&(char (&array)[size]) {
     read_bytes(array, size);
@@ -142,14 +150,6 @@ public:
   }
 
 private:
-  void read_bytes(void *array, size_t size) {
-    if (!good || cursor + size > buf_end) {
-      good = false;
-    } else {
-      memcpy(array, cursor, size);
-    }
-  }
-
   template <typename T>
   void seek_to_next_address() {
     if (!packed) {
