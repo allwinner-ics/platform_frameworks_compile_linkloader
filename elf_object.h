@@ -47,6 +47,28 @@ public:
 
   void print() const;
 
+private:
+  template <typename Archiver>
+  inline void read_header(Archiver &AR);
+
+  template <typename Archiver>
+  inline void read_section_header_table(Archiver &AR);
+
+  template <typename Archiver>
+  inline void read_section_header_str_tab(Archiver &AR);
+
+  template <typename archiver>
+  void read_internal(archiver &ar);
+
+  // FIXME: Remove this function in the future.
+  static bool open_map_file(std::string const &filename,
+                            int &fd,
+                            unsigned char const *&image,
+                            size_t &size);
+
+  // FIXME: Remove this function in the future.
+  static void close_map_file(int fd, unsigned char const *ptr, size_t size);
+
 };
 
 #endif // ELF_READER_H

@@ -20,52 +20,80 @@ using namespace boost;
 using namespace serialization;
 using namespace std;
 
+template <typename Archiver>
+inline void elf_object::read_header(Archiver &AR) {
+  header = elf_header::read(AR);
+}
+
+template <typename Archiver>
+inline void elf_object::read_section_header_table(Archiver &AR) {
+  elf_header const &header = get_header();
+
+  AR.seek(header.get_section_header_table_offset(), true);
+  for(size_t i = 0; i < header.get_section_header_num(); ++i) {
+    sh_table.push_back(elf_section_header::read(AR, *this));
+
+    // FIXME: AR should be seeked if sizeof(Elf_Shdr) != shentsize.
+  }
+}
+
+template <typename Archiver>
+inline void elf_object::read_section_header_str_tab(Archiver &AR) {
+  section_header_str_tab =
+    elf_strtab::read(AR, get_section_header(
+                         get_header().get_str_section_index()));
+}
+
+template <typename archiver>
+void elf_object::read_internal(archiver &AR) {
+  read_header(AR);
+  read_section_header_table(AR);
+  read_section_header_str_tab(AR);
+}
+
 shared_ptr<elf_object> elf_object::read(string const &filename) {
-  int file_fd = open(filename.c_str(), O_RDONLY);
-  if (file_fd < 0) {
+  int fd;
+  unsigned char const *image;
+  size_t size;
+
+  if (!open_map_file(filename, fd, image, size)) {
+    // Unable to open and map the file
     return shared_ptr<elf_object>();
   }
 
-  struct stat sb;
-  if (fstat(file_fd, &sb) != 0) {
-    close(file_fd);
+  if (size < EI_NIDENT) {
+    // File size is smallar than EI_NIDENT, impossible to be correct.
+    close_map_file(fd, image, size);
     return shared_ptr<elf_object>();
   }
 
-  size_t file_size = (size_t)sb.st_size;
+  // Read the ELF object
+  shared_ptr<elf_object> result(new elf_object());
 
-  unsigned char const *file = static_cast<unsigned char const *>(
-    mmap(0, file_size, PROT_READ, MAP_PRIVATE, file_fd, 0));
+  if (image[EI_DATA] == ELFDATA2LSB) {
+    archive_reader_le AR(image, size);
+    result->read_internal(AR);
 
-  if (file == NULL || file == MAP_FAILED) {
-    close(file_fd);
-    return shared_ptr<elf_object>();
+    if (!AR) {
+      // Something got wrong while reading.
+      close_map_file(fd, image, size);
+      return shared_ptr<elf_object>();
+    }
+  } else {
+    archive_reader_be AR(image, size);
+    result->read_internal(AR);
+
+    if (!AR) {
+      // Something got wrong while reading.
+      close_map_file(fd, image, size);
+      return shared_ptr<elf_object>();
+    }
   }
 
-  shared_ptr<elf_object> elf_obj_ptr(new elf_object());
+  // Close the file
+  close_map_file(fd, image, size);
 
-  archive_reader_le ar(file, file_size);
-  elf_obj_ptr->header = elf_header::read(ar);
-  const elf_header &idt = elf_obj_ptr->get_header();
-
-  ar.seek(idt.get_section_header_table_offset(), true);
-  for(int i=0; i<idt.get_section_header_num(); ++i) {
-    elf_obj_ptr->sh_table.push_back(
-      elf_section_header::read(ar, *elf_obj_ptr));
-  }
-
-  elf_obj_ptr->section_header_str_tab =
-    elf_strtab::read(ar, elf_obj_ptr->get_section_header(
-                         elf_obj_ptr->get_header().get_str_section_index()));
-  cout << elf_obj_ptr->get_header().get_str_section_index() << endl;
-
-  if (file != NULL && file != MAP_FAILED) {
-    munmap(static_cast<void *>(const_cast<unsigned char *>(file)), file_size);
-  }
-
-  close(file_fd);
-
-  return elf_obj_ptr;
+  return result;
 }
 
 void elf_object::print() const{
@@ -78,4 +106,42 @@ void elf_object::print() const{
     get_section_header(i).print();
   }
   elf_section_header::print_footer();
+}
+
+bool elf_object::open_map_file(std::string const &filename,
+                               int &fd,
+                               unsigned char const *&image,
+                               size_t &size) {
+  // Open the file in readonly mode
+  fd = open(filename.c_str(), O_RDONLY);
+  if (fd < 0) {
+    return false;
+  }
+
+  // Query the file size
+  struct stat sb;
+  if (fstat(fd, &sb) != 0) {
+    close(fd);
+    return false;
+  }
+
+  size = (size_t)sb.st_size;
+
+  // Map the file image
+  image = static_cast<unsigned char const *>(
+    mmap(0, size, PROT_READ, MAP_PRIVATE, fd, 0));
+
+  if (image == NULL || image == MAP_FAILED) {
+    close(fd);
+    return false;
+  }
+
+  return true;
+}
+
+void elf_object::close_map_file(int fd,
+                                unsigned char const *ptr,
+                                size_t size) {
+  if (ptr) { munmap((void *)ptr, size); }
+  if (fd >= 0) { close(fd); }
 }
