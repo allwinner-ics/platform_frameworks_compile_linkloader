@@ -16,7 +16,7 @@ public:
   static void print_footer();
   void print() const;
 
-  virtual char const* get_name() const = 0;
+  virtual uint32_t get_name() const = 0;
   virtual uint32_t get_type() const = 0;
   virtual uint64_t get_flags() const = 0;
   virtual uint64_t get_address() const = 0;

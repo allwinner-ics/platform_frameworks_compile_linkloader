@@ -7,6 +7,8 @@
 
 #include <iomanip>
 #include <iostream>
+#include <sstream>
+#include <string>
 
 #include <elf.h>
 
@@ -32,7 +34,7 @@ public:
   template <typename Archiver>
   void serialize(Archiver &AR);
 
-  virtual char const* get_name() const;
+  virtual uint32_t get_name() const;
   virtual uint32_t get_type() const;
   virtual uint64_t get_flags() const;
   virtual uint64_t get_address() const;
@@ -62,8 +64,8 @@ void elf_section_header_32::serialize(Archiver &AR) {
   AR.epilogue(sizeof(Elf32_Shdr));
 }
 
-char const* elf_section_header_32::get_name() const {
-  return "Oops! I don't know, not finished yet.";
+uint32_t elf_section_header_32::get_name() const {
+  return sh_name;
 }
 
 uint32_t elf_section_header_32::get_type() const {
@@ -123,7 +125,7 @@ public:
   template <typename Archiver>
   void serialize(Archiver &AR);
 
-  virtual char const* get_name() const;
+  virtual uint32_t get_name() const;
   virtual uint32_t get_type() const;
   virtual uint64_t get_flags() const;
   virtual uint64_t get_address() const;
@@ -153,8 +155,8 @@ void elf_section_header_64::serialize(Archiver &AR) {
   AR.epilogue(sizeof(Elf64_Shdr));
 }
 
-char const* elf_section_header_64::get_name() const {
-  return "I don't know.";
+uint32_t elf_section_header_64::get_name() const {
+  return sh_name;
 }
 
 uint32_t elf_section_header_64::get_type() const {
@@ -260,10 +262,16 @@ void elf_section_header::print_footer(){
   cout << setw(79) << setfill('=') << '=' << endl;
 }
 
+static string get_name_str(uint32_t idx) {
+  stringstream ss;
+  ss << "shstr[" << idx << "]";
+  return ss.str();
+}
+
 void elf_section_header::print() const {
   using namespace term::color;
 
-  cout << setw(15) << get_name() <<
+  cout << setw(15) << get_name_str(get_name()) <<
           setw(6) << get_type() <<
           setw(7) << get_flags() <<
           setw(8) << (void*)get_address() <<
