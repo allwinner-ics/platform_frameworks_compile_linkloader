@@ -51,8 +51,10 @@ shared_ptr<elf_object> elf_object::read(string const &filename) {
   const elf_header &idt = elf_obj_ptr->get_header();
 
   ar.seek(idt.get_section_header_table_offset(), true);
-  for(int i=0; i<idt.get_section_header_num(); ++i)
-    elf_obj_ptr->sh_table.push_back(elf_section_header::read(ar, idt.is_64bit()));
+  for(int i=0; i<idt.get_section_header_num(); ++i) {
+    elf_obj_ptr->sh_table.push_back(
+      elf_section_header::read(ar, idt.is_64bit()));
+  }
 
   if (file != NULL && file != MAP_FAILED) {
     munmap(static_cast<void *>(const_cast<unsigned char *>(file)), file_size);
@@ -66,11 +68,13 @@ shared_ptr<elf_object> elf_object::read(string const &filename) {
 }
 
 void elf_object::print() const{
-  //print elf header
+  // Print elf header
   get_header().print();
-  //print elf section header
+
+  // Print elf section header
   elf_section_header::print_header();
-  for(int i=0; i<get_header().get_section_header_num(); ++i)
+  for(int i=0; i<get_header().get_section_header_num(); ++i) {
     get_section_header(i).print();
+  }
   elf_section_header::print_footer();
 }
