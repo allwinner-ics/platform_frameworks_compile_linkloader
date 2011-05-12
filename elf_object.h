@@ -24,7 +24,7 @@ private:
   std::vector<boost::shared_ptr<elf_section> > s_table;
   std::vector<boost::shared_ptr<elf_program_header> > ph_table;
 
-private:
+protected:
   elf_object() {
   }
 
@@ -47,8 +47,6 @@ public:
 
   void print() const;
 
-private:
-  elf_object(std::string const &filename);
 };
 
 #endif // ELF_READER_H

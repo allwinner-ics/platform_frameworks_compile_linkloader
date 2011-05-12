@@ -20,9 +20,6 @@ using namespace boost;
 using namespace serialization;
 using namespace std;
 
-elf_object::elf_object(string const &filename) {
-  //TODO:constructor
-}
 shared_ptr<elf_object> elf_object::read(string const &filename) {
   int file_fd = open(filename.c_str(), O_RDONLY);
   if (file_fd < 0) {
@@ -45,7 +42,7 @@ shared_ptr<elf_object> elf_object::read(string const &filename) {
     return shared_ptr<elf_object>();
   }
 
-  shared_ptr<elf_object> elf_obj_ptr(new elf_object(filename));
+  shared_ptr<elf_object> elf_obj_ptr(new elf_object());
 
   archive_reader_le ar(file, file_size);
   elf_obj_ptr->header = elf_header::read(ar);
