@@ -212,7 +212,7 @@ shared_ptr<elf_section_header>
 elf_section_header::read_32(Archiver &AR, elf_object const &obj) {
   shared_ptr<elf_section_header_32> result(new elf_section_header_32(obj));
 
-  // Read the ELF header from the archive
+  // Read the ELF section header from the archive
   result->serialize(AR);
   if (!AR) {
     return shared_ptr<elf_section_header_32>();
@@ -226,7 +226,7 @@ shared_ptr<elf_section_header>
 elf_section_header::read_64(Archiver &AR, elf_object const &obj) {
   shared_ptr<elf_section_header_64> result(new elf_section_header_64(obj));
 
-  // Read the ELF header from the archive
+  // Read the ELF section header from the archive
   result->serialize(AR);
   if (!AR) {
     return shared_ptr<elf_section_header_64>();
