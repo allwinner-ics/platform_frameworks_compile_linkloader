@@ -244,9 +244,9 @@ void elf_section_header::print_header(){
 
   cout << setw(79) << setfill('-') << '-' << endl << setfill(' ');
   cout << setw(15) << "Name" <<
-          setw(6) << "Type" <<
+          setw(15) << "Type" <<
           setw(7) << "Flags" <<
-          setw(8) << "Address" <<
+          setw(14) << "Address" <<
           setw(8) << "Offset" <<
           setw(7) << "Size" <<
           setw(7) << "Link" <<
@@ -262,6 +262,23 @@ void elf_section_header::print_footer(){
   cout << setw(79) << setfill('=') << '=' << endl;
 }
 
+char const *elf_section_header::get_type_name(uint32_t type) {
+  switch (type) {
+    default: return "(UNKNOWN)";
+
+#define CASE(TYPE) \
+    case SHT_##TYPE: return #TYPE;
+
+    CASE(NULL) CASE(PROGBITS) CASE(SYMTAB) CASE(STRTAB) CASE(RELA) CASE(HASH)
+    CASE(DYNAMIC) CASE(NOTE) CASE(NOBITS) CASE(REL) CASE(SHLIB)
+    CASE(DYNSYM) CASE(INIT_ARRAY) CASE(FINI_ARRAY) CASE(PREINIT_ARRAY)
+    CASE(GROUP) CASE(SYMTAB_SHNDX) CASE(LOOS) CASE(HIOS) CASE(LOPROC)
+    CASE(HIPROC) CASE(LOUSER) CASE(HIUSER)
+
+#undef CASE
+  }
+}
+
 string elf_section_header::get_name_str(uint32_t idx) {
   stringstream ss;
   ss << "shstr[" << idx << "]";
@@ -272,9 +289,9 @@ void elf_section_header::print() const {
   using namespace term::color;
 
   cout << setw(15) << get_name_str(get_name()) <<
-          setw(6) << get_type() <<
+          setw(15) << get_type_name(get_type()) <<
           setw(7) << get_flags() <<
-          setw(8) << (void*)get_address() <<
+          setw(14) << (void*)get_address() <<
           setw(8) << (void*)get_offset() <<
           setw(7) << get_size() <<
           setw(7) << get_link() <<

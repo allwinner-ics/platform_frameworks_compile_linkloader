@@ -37,6 +37,7 @@ private:
   static boost::shared_ptr<elf_section_header> read_64(Archiver &AR);
 
   static std::string get_name_str(uint32_t index);
+  static char const *get_type_name(uint32_t type);
 
 };
 
