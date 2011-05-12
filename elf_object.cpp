@@ -2,6 +2,7 @@
 
 #include "utils/serialize.h"
 #include "elf_header.h"
+#include "elf_strtab.h"
 #include "elf_section_header.h"
 
 #include <iostream>
@@ -53,16 +54,19 @@ shared_ptr<elf_object> elf_object::read(string const &filename) {
   ar.seek(idt.get_section_header_table_offset(), true);
   for(int i=0; i<idt.get_section_header_num(); ++i) {
     elf_obj_ptr->sh_table.push_back(
-      elf_section_header::read(ar, idt.is_64bit()));
+      elf_section_header::read(ar, *elf_obj_ptr));
   }
+
+  elf_obj_ptr->section_header_str_tab =
+    elf_strtab::read(ar, elf_obj_ptr->get_section_header(
+                         elf_obj_ptr->get_header().get_str_section_index()));
+  cout << elf_obj_ptr->get_header().get_str_section_index() << endl;
 
   if (file != NULL && file != MAP_FAILED) {
     munmap(static_cast<void *>(const_cast<unsigned char *>(file)), file_size);
   }
 
-  if (file_fd >= 0) {
-    close(file_fd);
-  }
+  close(file_fd);
 
   return elf_obj_ptr;
 }

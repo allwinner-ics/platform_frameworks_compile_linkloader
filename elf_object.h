@@ -13,15 +13,26 @@ class elf_header;
 class elf_section_header;
 class elf_program_header;
 class elf_section;
+class elf_strtab;
 
 class elf_object {
 private:
   boost::shared_ptr<elf_header> header;
+  boost::shared_ptr<elf_strtab> section_header_str_tab;
+
   std::vector<boost::shared_ptr<elf_section_header> > sh_table;
   std::vector<boost::shared_ptr<elf_section> > s_table;
   std::vector<boost::shared_ptr<elf_program_header> > ph_table;
 
 private:
+  elf_object() {
+  }
+
+public:
+  static boost::shared_ptr<elf_object> read(std::string const &filename);
+
+  elf_header const &get_header() const { return *header; }
+
   elf_section_header const &get_section_header(size_t index) const {
     return *sh_table[index];
   }
@@ -30,13 +41,9 @@ private:
     return *s_table[index];
   }
 
-  elf_object() {
+  elf_strtab const &get_section_header_str_tab() const {
+    return *section_header_str_tab;
   }
-
-public:
-  static boost::shared_ptr<elf_object> read(std::string const &filename);
-
-  elf_header const &get_header() const { return *header; }
 
   void print() const;
 

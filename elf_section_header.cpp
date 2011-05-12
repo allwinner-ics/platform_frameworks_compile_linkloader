@@ -1,5 +1,8 @@
 #include "elf_section_header.h"
 
+#include "elf_object.h"
+#include "elf_header.h"
+#include "elf_strtab.h"
 #include "utils/serialize.h"
 #include "utils/term.h"
 
@@ -31,10 +34,13 @@ private:
   Elf32_Word sh_entsize;
 
 public:
+  elf_section_header_32(elf_object const &obj) : elf_section_header(obj) {
+  }
+
   template <typename Archiver>
   void serialize(Archiver &AR);
 
-  virtual uint32_t get_name() const;
+  virtual uint32_t get_name_index() const;
   virtual uint32_t get_type() const;
   virtual uint64_t get_flags() const;
   virtual uint64_t get_address() const;
@@ -64,7 +70,7 @@ void elf_section_header_32::serialize(Archiver &AR) {
   AR.epilogue(sizeof(Elf32_Shdr));
 }
 
-uint32_t elf_section_header_32::get_name() const {
+uint32_t elf_section_header_32::get_name_index() const {
   return sh_name;
 }
 
@@ -122,10 +128,13 @@ private:
   Elf64_Xword sh_entsize;
 
 public:
+  elf_section_header_64(elf_object const &obj) : elf_section_header(obj) {
+  }
+
   template <typename Archiver>
   void serialize(Archiver &AR);
 
-  virtual uint32_t get_name() const;
+  virtual uint32_t get_name_index() const;
   virtual uint32_t get_type() const;
   virtual uint64_t get_flags() const;
   virtual uint64_t get_address() const;
@@ -155,7 +164,7 @@ void elf_section_header_64::serialize(Archiver &AR) {
   AR.epilogue(sizeof(Elf64_Shdr));
 }
 
-uint32_t elf_section_header_64::get_name() const {
+uint32_t elf_section_header_64::get_name_index() const {
   return sh_name;
 }
 
@@ -199,8 +208,9 @@ uint64_t elf_section_header_64::get_entry_size() const {
 //=============================================================================
 
 template <typename Archiver>
-shared_ptr<elf_section_header> elf_section_header::read_32(Archiver &AR) {
-  shared_ptr<elf_section_header_32> result(new elf_section_header_32());
+shared_ptr<elf_section_header>
+elf_section_header::read_32(Archiver &AR, elf_object const &obj) {
+  shared_ptr<elf_section_header_32> result(new elf_section_header_32(obj));
 
   // Read the ELF header from the archive
   result->serialize(AR);
@@ -212,8 +222,9 @@ shared_ptr<elf_section_header> elf_section_header::read_32(Archiver &AR) {
 }
 
 template <typename Archiver>
-shared_ptr<elf_section_header> elf_section_header::read_64(Archiver &AR) {
-  shared_ptr<elf_section_header_64> result(new elf_section_header_64());
+shared_ptr<elf_section_header>
+elf_section_header::read_64(Archiver &AR, elf_object const &obj) {
+  shared_ptr<elf_section_header_64> result(new elf_section_header_64(obj));
 
   // Read the ELF header from the archive
   result->serialize(AR);
@@ -224,13 +235,28 @@ shared_ptr<elf_section_header> elf_section_header::read_64(Archiver &AR) {
   return result;
 }
 
-template <typename Archiver>
-shared_ptr<elf_section_header> elf_section_header::read(Archiver &AR, bool is_64bit) {
-  return is_64bit ? read_64(AR) : read_32(AR);
+char const *elf_section_header::get_name() const {
+  return owner.get_section_header_str_tab()[get_name_index()];
 }
 
-template shared_ptr<elf_section_header> elf_section_header::read(archive_reader_le &, bool);
-template shared_ptr<elf_section_header> elf_section_header::read(archive_reader_be &, bool);
+template <typename Archiver>
+shared_ptr<elf_section_header>
+elf_section_header::read(Archiver &AR, elf_object const &obj) {
+  shared_ptr<elf_section_header> result =
+    obj.get_header().is_64bit() ? read_64(AR, obj) : read_32(AR, obj);
+
+  if (!result) {
+    return shared_ptr<elf_section_header>();
+  }
+
+  return result;
+}
+
+template shared_ptr<elf_section_header>
+elf_section_header::read(archive_reader_le &, elf_object const &);
+
+template shared_ptr<elf_section_header>
+elf_section_header::read(archive_reader_be &, elf_object const &);
 
 
 //=============================================================================
@@ -283,16 +309,10 @@ char const *elf_section_header::get_type_name(uint32_t type) {
   }
 }
 
-string elf_section_header::get_name_str(uint32_t idx) {
-  stringstream ss;
-  ss << "shstr[" << idx << "]";
-  return ss.str();
-}
-
 void elf_section_header::print() const {
   using namespace term::color;
 
-  cout << setw(15) << get_name_str(get_name()) <<
+  cout << setw(15) << get_name() <<
           setw(15) << get_type_name(get_type()) <<
           setw(7) << get_flags() <<
           setw(14) << (void*)get_address() <<
