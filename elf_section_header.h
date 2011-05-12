@@ -3,6 +3,7 @@
 
 #include "utils/serialize.h"
 #include <boost/shared_ptr.hpp>
+#include <string>
 
 #include <elf.h>
 
@@ -34,6 +35,8 @@ private:
 
   template <typename Archiver>
   static boost::shared_ptr<elf_section_header> read_64(Archiver &AR);
+
+  static std::string get_name_str(uint32_t index);
 
 };
 

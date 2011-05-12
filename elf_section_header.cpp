@@ -262,7 +262,7 @@ void elf_section_header::print_footer(){
   cout << setw(79) << setfill('=') << '=' << endl;
 }
 
-static string get_name_str(uint32_t idx) {
+string elf_section_header::get_name_str(uint32_t idx) {
   stringstream ss;
   ss << "shstr[" << idx << "]";
   return ss.str();
