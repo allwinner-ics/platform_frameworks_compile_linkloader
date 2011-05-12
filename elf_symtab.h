@@ -32,6 +32,8 @@ public:
   elf_sym_entry const &operator[](size_t index) const {
     return *symbol_table[index];
   }
+
+  elf_sym_entry const &operator[](const std::string &str) const;
 };
 
 extern template boost::shared_ptr<elf_symtab>

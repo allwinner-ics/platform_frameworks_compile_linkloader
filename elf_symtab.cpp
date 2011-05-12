@@ -58,6 +58,16 @@ elf_symtab::read(serialization::archive_reader_be &,
 
 //=============================================================================
 
+elf_sym_entry const &
+elf_symtab::operator[](const std::string &str) const {
+  for (size_t i = 0; i < this->size(); ++i) { // TODO: Use hash map
+    if (str == string(symbol_table[i]->get_name())){
+      return *symbol_table[i];
+    }
+  }
+  return *symbol_table[0];
+}
+
 void elf_symtab::print() const {
   using namespace term::color;
 

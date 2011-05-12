@@ -39,6 +39,8 @@ public:
 
   elf_header const &get_header() const { return *header; }
 
+  elf_symtab const &get_symbol_table() const { return *symbol_table; }
+
   elf_section_header const &get_section_header(size_t index) const {
     return *sh_table[index];
   }
