@@ -521,6 +521,7 @@ char const *elf_header::get_machine_name(uint16_t machine) {
   switch (machine) {
     default: return "No machine or unknown";
     case EM_386: return "Intel 80386 (X86)";
+    case EM_X86_64: return "AMD x86-64 architecture";
     case EM_ARM: return "Advanced RISC Machine (ARM)";
   }
 }
