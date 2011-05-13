@@ -20,13 +20,10 @@ protected:
 
 public:
   template <typename Archiver>
-  static boost::shared_ptr<elf_sym_entry> read(Archiver &AR,
-                                                    elf_object const &);
+    static boost::shared_ptr<elf_sym_entry> read(Archiver &AR,
+                                                 elf_object const &);
 
   void print() const;
-
-  template <typename Archiver>
-  void serialize(Archiver &AR);
 
   char const *get_name() const;
   virtual uint32_t get_name_index() const = 0;
