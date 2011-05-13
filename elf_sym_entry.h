@@ -40,12 +40,12 @@ public:
 private:
   // Read ELF header
   template <typename Archiver>
-  static boost::shared_ptr<elf_sym_entry> read_32(Archiver &AR,
-                                                       elf_object const &);
+    static boost::shared_ptr<elf_sym_entry> read_32(Archiver &AR,
+                                                    elf_object const &);
 
   template <typename Archiver>
-  static boost::shared_ptr<elf_sym_entry> read_64(Archiver &AR,
-                                                       elf_object const &);
+    static boost::shared_ptr<elf_sym_entry> read_64(Archiver &AR,
+                                                    elf_object const &);
 
   static char const *get_type_name(uint8_t);
   static char const *get_binding_attribute_name(uint8_t);
@@ -55,11 +55,11 @@ private:
 
 extern template boost::shared_ptr<elf_sym_entry>
 elf_sym_entry::read(serialization::archive_reader_le &,
-                         elf_object const &);
+                    elf_object const &);
 
 extern template boost::shared_ptr<elf_sym_entry>
 elf_sym_entry::read(serialization::archive_reader_be &,
-                         elf_object const &);
+                    elf_object const &);
 
 
 #endif // ELF_SYM_ENTRY_H
