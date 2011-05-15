@@ -6,11 +6,13 @@
 #include <boost/shared_ptr.hpp>
 #include <vector>
 
+#include "elf_section.h"
 #include "elf_sym_entry.h"
+
 class elf_object;
 class elf_section_header;
 
-class elf_symtab {
+class elf_symtab : elf_section {
 private:
   std::vector<boost::shared_ptr<elf_sym_entry> > symbol_table;
 
