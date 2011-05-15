@@ -11,6 +11,8 @@ public:
   template <typename Archiver>
   static boost::shared_ptr<elf_section> read(Archiver &AR,
                                              elf_section_header const &);
+
+  virtual ~elf_section(){}
 };
 
 extern template boost::shared_ptr<elf_section>

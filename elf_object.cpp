@@ -5,6 +5,7 @@
 #include "elf_strtab.h"
 #include "elf_symtab.h"
 #include "elf_section_header.h"
+#include "elf_progbits.h"
 
 #include <iostream>
 #include <stdexcept>
@@ -71,6 +72,16 @@ void elf_object::read_internal(archiver &AR) {
   read_section_header_str_tab(AR);
   read_symbol_table(AR);
   read_symbol_str_tab(AR);
+
+  // TODO: Some section may have dependency.
+  s_table.resize(sh_table.size());
+  for (size_t i = 0; i < sh_table.size(); ++i){
+    switch (sh_table[i]->get_type()){
+      case SHT_PROGBITS:
+        s_table[i] = elf_progbits::read(AR, get_section_header(i));
+        break;
+    }
+  }
 }
 
 shared_ptr<elf_object> elf_object::read(string const &filename) {
@@ -142,6 +153,14 @@ void elf_object::print() const{
 
   // Print elf symbol table
   symbol_table->print();
+
+  for (size_t i = 0; i < sh_table.size(); ++i){
+    switch (sh_table[i]->get_type()){
+      case SHT_PROGBITS:
+        dynamic_cast<elf_progbits&>(*s_table[i]).dump();
+        break;
+    }
+  }
 }
 
 bool elf_object::open_map_file(std::string const &filename,
