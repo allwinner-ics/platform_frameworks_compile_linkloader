@@ -74,6 +74,8 @@ void elf_progbits::print() const {
 
   cout << setw(79) << setfill('-') << '-' << endl << setfill(' ');
 
+  cout << "Size: " << this->size() << endl;
+
   if (this->size() > 0) {
     char const *start = (*this)[0];
     char const *end = (*this)[this->size()-1];

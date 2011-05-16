@@ -6,6 +6,7 @@
 #include "elf_symtab.h"
 #include "elf_section_header.h"
 #include "elf_progbits.h"
+#include "elf_nobits.h"
 
 #include <iostream>
 #include <stdexcept>
@@ -79,6 +80,9 @@ void elf_object::read_internal(archiver &AR) {
     switch (sh_table[i]->get_type()){
       case SHT_PROGBITS:
         s_table[i] = elf_progbits::read(AR, get_section_header(i));
+        break;
+      case SHT_NOBITS:
+        s_table[i] = elf_nobits::read(AR, get_section_header(i));
         break;
     }
   }
