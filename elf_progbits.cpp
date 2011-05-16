@@ -25,6 +25,8 @@ shared_ptr<elf_progbits> elf_progbits::read(Archiver &AR,
 
   // Reserve enough buffer
   shared_ptr<elf_progbits> result(new elf_progbits());
+  // TODO: C's malloc() will align to 8(32bits) or 16(64bits).
+  //       Is we still need to use posix_memalign()?
   result->buf.resize(sh.get_size());
 
   // Save section_header
