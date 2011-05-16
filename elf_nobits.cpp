@@ -26,7 +26,17 @@ shared_ptr<elf_nobits> elf_nobits::read(Archiver &AR,
 
   // Reserve enough buffer
   shared_ptr<elf_nobits> result(new elf_nobits());
-  result->buf.resize(sh.get_size());
+  // TODO: Align.
+  result->buf_size = sh.get_size();
+  if (result->buf_size > 0) {
+    result->buf = (char *)mmap(0, result->buf_size, PROT_READ | PROT_WRITE,
+                               MAP_PRIVATE | MAP_ANONYMOUS, -1, 0);
+  }
+
+  // Check map success.
+  if (result->buf == MAP_FAILED) {
+    return shared_ptr<elf_nobits>();
+  }
 
   // Save section_header
   result->section_header = shared_ptr<elf_section_header const>(&sh);
@@ -42,14 +52,15 @@ char const *elf_nobits::memory_protect() const {
   if (this->section_header->get_flags() &SHF_EXECINSTR) {
     protect_type &= PROT_EXEC;
   }
-  int ret = mprotect((void *)&*buf.begin(), buf.size(), protect_type);
-  if (ret == 0) {
-    // FIXME: Throws excetion?
-    std::cerr<<"Error: Can't mprotect."<<std::endl;
-    return 0;
-  } else {
-    return &*buf.begin();
+  if (buf_size > 0) {
+    int ret = mprotect((void *)buf, buf_size, protect_type);
+    if (ret == -1) {
+      // FIXME: Throws excetion?
+      std::cerr<<"Error: Can't mprotect."<<std::endl;
+      return 0;
+    }
   }
+  return buf;
 }
 
 void elf_nobits::print() const {
@@ -65,11 +76,35 @@ void elf_nobits::print() const {
   cout << "Size: " << this->size() << endl;
 
   if (this->size() > 0) {
-    char const *start = (*this)[0];
-    char const *end = (*this)[this->size()-1];
+    char const *start = buf;
+    char const *end = buf + buf_size - 1;
     printf("%08LX ~ %08LX\n",
            (unsigned long long)start,
            (unsigned long long)end);
+  }
+  if (this->size() > 0) {
+    char const *start = buf;
+    char const *end = buf + buf_size - 1;
+    char const *line_start = (char const *)((uint64_t)start & (~0xFLL));
+    char const *line_end = (char const *)((uint64_t)end | (0xFLL));
+#define CHECK_IN_BOUND(x) (start <= (x) && (x) <= end)
+    for (char const *i = line_start; i <= line_end;) {
+      // FIXME: Use std::cout.
+      printf("%08LX: ", (unsigned long long)i);
+      for (int k = 0; k < 2;++k) {
+        printf(" ");
+        for (int j = 0; j < 8; ++j) {
+          if (CHECK_IN_BOUND(i)) {
+            printf(" %.2x", (uint8_t)*i);
+          } else {
+            printf("   ");
+          }
+          ++i;
+        }
+      }
+      printf("\n");
+    }
+#undef CHECK_IN_BOUND
   }
   cout << setw(79) << setfill('=') << '=' << endl;
 

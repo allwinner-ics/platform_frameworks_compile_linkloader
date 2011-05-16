@@ -25,9 +25,17 @@ shared_ptr<elf_progbits> elf_progbits::read(Archiver &AR,
 
   // Reserve enough buffer
   shared_ptr<elf_progbits> result(new elf_progbits());
-  // TODO: C's malloc() will align to 8(32bits) or 16(64bits).
-  //       Is we still need to use posix_memalign()?
-  result->buf.resize(sh.get_size());
+  // TODO: Align.
+  result->buf_size = sh.get_size();
+  if (result->buf_size > 0) {
+    result->buf = (char *)mmap(0, result->buf_size, PROT_READ | PROT_WRITE,
+                               MAP_PRIVATE | MAP_ANONYMOUS, -1, 0);
+  }
+
+  // Check map success.
+  if (result->buf == MAP_FAILED) {
+    return shared_ptr<elf_progbits>();
+  }
 
   // Save section_header
   result->section_header = shared_ptr<elf_section_header const>(&sh);
@@ -35,7 +43,7 @@ shared_ptr<elf_progbits> elf_progbits::read(Archiver &AR,
   // Read the buffer from string tab
   AR.seek(sh.get_offset(), true);
   AR.prologue(sh.get_size());
-  AR.read_bytes(&*result->buf.begin(), sh.get_size());
+  AR.read_bytes(result->buf, sh.get_size());
   AR.epilogue(sh.get_size());
 
   if (!AR) {
@@ -54,14 +62,15 @@ char const *elf_progbits::memory_protect() const {
   if (this->section_header->get_flags() &SHF_EXECINSTR) {
     protect_type &= PROT_EXEC;
   }
-  int ret = mprotect((void *)&*buf.begin(), buf.size(), protect_type);
-  if (ret == 0) {
-    // FIXME: Throws excetion?
-    std::cerr<<"Error: Can't mprotect."<<std::endl;
-    return 0;
-  } else {
-    return &*buf.begin();
+  if (buf_size > 0) {
+    int ret = mprotect((void *)buf, buf_size, protect_type);
+    if (ret == -1) {
+      // FIXME: Throws excetion?
+      std::cerr<<"Error: Can't mprotect."<<std::endl;
+      return 0;
+    }
   }
+  return buf;
 }
 
 void elf_progbits::print() const {
@@ -77,8 +86,8 @@ void elf_progbits::print() const {
   cout << "Size: " << this->size() << endl;
 
   if (this->size() > 0) {
-    char const *start = (*this)[0];
-    char const *end = (*this)[this->size()-1];
+    char const *start = buf;
+    char const *end = buf + buf_size - 1;
     char const *line_start = (char const *)((uint64_t)start & (~0xFLL));
     char const *line_end = (char const *)((uint64_t)end | (0xFLL));
 #define CHECK_IN_BOUND(x) (start <= (x) && (x) <= end)

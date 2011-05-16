@@ -76,8 +76,8 @@ void elf_object::read_internal(archiver &AR) {
 
   // TODO: Some section may have dependency.
   s_table.resize(sh_table.size());
-  for (size_t i = 0; i < sh_table.size(); ++i){
-    switch (sh_table[i]->get_type()){
+  for (size_t i = 0; i < sh_table.size(); ++i) {
+    switch (sh_table[i]->get_type()) {
       case SHT_PROGBITS:
         s_table[i] = elf_progbits::read(AR, get_section_header(i));
         break;
@@ -158,9 +158,34 @@ void elf_object::print() const{
   // Print elf symbol table
   symbol_table->print();
 
-  for (size_t i = 0; i < sh_table.size(); ++i){
+  for (size_t i = 0; i < sh_table.size(); ++i) {
     if (s_table[i]) {
       s_table[i]->print();
+#ifdef TEST_MPROTECT
+      switch (sh_table[i]->get_type()) {
+        case SHT_PROGBITS:
+          if ( sh_table[i]->get_size() > 0) {
+            dynamic_cast<elf_progbits&>(*s_table[i])[0] = 0;
+          }
+          break;
+        case SHT_NOBITS:
+          break;
+      }
+      std::cout << "Memory protect..." << std::endl;
+#endif
+      switch (sh_table[i]->get_type()) {
+        case SHT_PROGBITS:
+          dynamic_cast<elf_progbits&>(*s_table[i]).memory_protect();
+#ifdef TEST_MPROTECT
+          if ( sh_table[i]->get_size() > 0) {
+            dynamic_cast<elf_progbits&>(*s_table[i])[0] = 0;
+          }
+#endif
+          break;
+        case SHT_NOBITS:
+          dynamic_cast<elf_nobits&>(*s_table[i]).memory_protect();
+          break;
+      }
     }
   }
 }
