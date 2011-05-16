@@ -12,7 +12,7 @@ public:
   static boost::shared_ptr<elf_section> read(Archiver &AR,
                                              elf_section_header const &);
 
-  virtual ~elf_section(){}
+  virtual void print() const {}
 };
 
 extern template boost::shared_ptr<elf_section>

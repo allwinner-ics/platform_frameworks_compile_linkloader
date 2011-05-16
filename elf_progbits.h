@@ -9,7 +9,7 @@
 
 class elf_progbits : public elf_section {
 private:
-  boost::shared_ptr<elf_section_header> const section_header;
+  boost::shared_ptr<elf_section_header const> section_header;
   std::vector<char> buf;
 
 private:
@@ -24,13 +24,17 @@ public:
     return &*buf.begin() + index;
   }
 
+  char const *operator[](size_t index) const {
+    return &*buf.begin() + index;
+  }
+
   size_t size() const {
     return buf.size();
   }
 
   char const *memory_protect() const;
 
-  void dump() const;
+  void print() const;
 };
 
 extern template boost::shared_ptr<elf_progbits>

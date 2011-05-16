@@ -1,10 +1,12 @@
 #include "elf_progbits.h"
 #include "elf_section_header.h"
 #include "utils/serialize.h"
+#include "utils/term.h"
 
 #include "elf.h"
 #include <sys/mman.h>
 #include <iostream>
+#include <iomanip>
 #include <cstdio>
 
 using namespace boost;
@@ -24,6 +26,9 @@ shared_ptr<elf_progbits> elf_progbits::read(Archiver &AR,
   // Reserve enough buffer
   shared_ptr<elf_progbits> result(new elf_progbits());
   result->buf.resize(sh.get_size());
+
+  // Save section_header
+  result->section_header = shared_ptr<elf_section_header const>(&sh);
 
   // Read the buffer from string tab
   AR.seek(sh.get_offset(), true);
@@ -57,19 +62,42 @@ char const *elf_progbits::memory_protect() const {
   }
 }
 
-void elf_progbits::dump() const {
-  typedef vector<char>::const_iterator iter;
-  int t = 0;
-  for (iter i = buf.begin(); i != buf.end(); ++i) {
-    // FIXME: Use std::cout.
-    printf("%.2x ", (unsigned char)*i);
-    // XXX: Magic number = =.
-    if (++t == 10) {
-      t = 0;
+void elf_progbits::print() const {
+  using namespace term::color;
+
+  cout << endl << setw(79) << setfill('=') << '=' << endl;
+
+  cout << light::white() << "PROGBITS:" <<
+          section_header->get_name() << normal() << endl;
+
+  cout << setw(79) << setfill('-') << '-' << endl << setfill(' ');
+
+  if (this->size() > 0) {
+    char const *start = (*this)[0];
+    char const *end = (*this)[this->size()-1];
+    char const *line_start = (char const *)((uint64_t)start & (~0xFLL));
+    char const *line_end = (char const *)((uint64_t)end | (0xFLL));
+#define CHECK_IN_BOUND(x) (start <= (x) && (x) <= end)
+    for (char const *i = line_start; i <= line_end;) {
+      // FIXME: Use std::cout.
+      printf("%08LX: ", (unsigned long long)i);
+      for (int k = 0; k < 2;++k) {
+        printf(" ");
+        for (int j = 0; j < 8; ++j) {
+          if (CHECK_IN_BOUND(i)) {
+            printf(" %.2x", (uint8_t)*i);
+          } else {
+            printf("   ");
+          }
+          ++i;
+        }
+      }
       printf("\n");
     }
+#undef CHECK_IN_BOUND
   }
-  printf("\n");
+  cout << setw(79) << setfill('=') << '=' << endl;
+
 }
 
 template shared_ptr<elf_progbits>

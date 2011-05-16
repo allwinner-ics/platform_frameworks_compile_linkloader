@@ -155,10 +155,8 @@ void elf_object::print() const{
   symbol_table->print();
 
   for (size_t i = 0; i < sh_table.size(); ++i){
-    switch (sh_table[i]->get_type()){
-      case SHT_PROGBITS:
-        dynamic_cast<elf_progbits&>(*s_table[i]).dump();
-        break;
+    if (s_table[i]) {
+      s_table[i]->print();
     }
   }
 }
