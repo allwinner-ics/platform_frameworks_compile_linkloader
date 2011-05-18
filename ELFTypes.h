@@ -21,7 +21,6 @@ namespace detail {
     operator IMPL &() { return value; }                                     \
   };
 
-  ELF_TYPE_WRAPPER(ELFByte      , uint8_t)
   ELF_TYPE_WRAPPER(ELFHalf      , uint16_t)
   ELF_TYPE_WRAPPER(ELFWord      , uint32_t)
   ELF_TYPE_WRAPPER(ELFSword     , int32_t)
@@ -78,7 +77,6 @@ struct TypeTraits<detail::TYPE> { \
   enum { align = ALIGN }; \
 };
 
-ELF_TYPE_TRAITS_SPECIALIZE(ELFByte      , 1, 1)
 ELF_TYPE_TRAITS_SPECIALIZE(ELFHalf      , 2, 2)
 ELF_TYPE_TRAITS_SPECIALIZE(ELFWord      , 4, 4)
 ELF_TYPE_TRAITS_SPECIALIZE(ELFSword     , 4, 4)
@@ -100,7 +98,7 @@ struct ELFTypes<32> {
   typedef detail::ELF32Address  address;
   typedef detail::ELF32Offset   offset;
 
-  typedef detail::ELFByte       byte;
+  typedef unsigned char         byte;
   typedef detail::ELFHalf       half;
   typedef detail::ELFWord       word;
   typedef detail::ELFSword      sword;
@@ -117,23 +115,13 @@ struct ELFTypes<64> {
   typedef detail::ELF64Address  address;
   typedef detail::ELF64Offset   offset;
 
-  typedef detail::ELFByte       byte;
+  typedef unsigned char         byte;
   typedef detail::ELFHalf       half;
   typedef detail::ELFWord       word;
   typedef detail::ELFSword      sword;
   typedef detail::ELFXword      xword;
   typedef detail::ELFSxword     sxword;
 };
-
-#define ELF_TYPE_INTRO_TO_SCOPE(BITWIDTH) \
-  typedef ELFTypes<BITWIDTH>::address address_t; \
-  typedef ELFTypes<BITWIDTH>::offset  offset_t; \
-  typedef ELFTypes<BITWIDTH>::byte    byte_t; \
-  typedef ELFTypes<BITWIDTH>::half    half_t; \
-  typedef ELFTypes<BITWIDTH>::word    word_t; \
-  typedef ELFTypes<BITWIDTH>::sword   sword_t; \
-  typedef ELFTypes<BITWIDTH>::xword   xword_t; \
-  typedef ELFTypes<BITWIDTH>::sxword  sxword_t;
 
 #define ELF_TYPE_INTRO_TO_TEMPLATE_SCOPE(BITWIDTH) \
   typedef typename ELFTypes<BITWIDTH>::address address_t; \
@@ -144,6 +132,16 @@ struct ELFTypes<64> {
   typedef typename ELFTypes<BITWIDTH>::sword   sword_t; \
   typedef typename ELFTypes<BITWIDTH>::xword   xword_t; \
   typedef typename ELFTypes<BITWIDTH>::sxword  sxword_t;
+
+#define ELF_TYPE_INTRO_TO_SCOPE(BITWIDTH) \
+  typedef ELFTypes<BITWIDTH>::address address_t; \
+  typedef ELFTypes<BITWIDTH>::offset  offset_t; \
+  typedef ELFTypes<BITWIDTH>::byte    byte_t; \
+  typedef ELFTypes<BITWIDTH>::half    half_t; \
+  typedef ELFTypes<BITWIDTH>::word    word_t; \
+  typedef ELFTypes<BITWIDTH>::sword   sword_t; \
+  typedef ELFTypes<BITWIDTH>::xword   xword_t; \
+  typedef ELFTypes<BITWIDTH>::sxword  sxword_t;
 
 
 #endif // ELF_TYPES_H
