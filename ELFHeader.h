@@ -289,16 +289,14 @@ class ELFHeader;
 
 template <>
 class ELFHeader<32> : public ELFHeader_CRTP<32, ELFHeader<32> > {
-  friend class ELFHeader_CRTP<32, ELFHeader<32> >;
-  enum { ELF_HEADER_SIZE = 52 };
+  friend class ELFHeader_CRTP<32, ELFHeader>;
 
 private:
   ELFHeader() { }
 
-public:
   template <typename Archiver>
   bool serialize(Archiver &AR) {
-    AR.prologue(ELF_HEADER_SIZE);
+    AR.prologue(TypeTraits<ELFHeader>::size);
 
     AR & e_ident;
     AR & e_type;
@@ -315,22 +313,21 @@ public:
     AR & e_shnum;
     AR & e_shstrndx;
 
-    AR.epilogue(ELF_HEADER_SIZE);
+    AR.epilogue(TypeTraits<ELFHeader>::size);
     return AR;
   }
 };
 
 template <>
 class ELFHeader<64> : public ELFHeader_CRTP<64, ELFHeader<64> > {
-  friend class ELFHeader_CRTP<64, ELFHeader<64> >;
-  enum { ELF_HEADER_SIZE = 64 };
+  friend class ELFHeader_CRTP<64, ELFHeader>;
 
-public:
+private:
   ELFHeader() { }
 
   template <typename Archiver>
   bool serialize(Archiver &AR) {
-    AR.prologue(ELF_HEADER_SIZE);
+    AR.prologue(TypeTraits<ELFHeader>::size);
 
     AR & e_ident;
     AR & e_type;
@@ -347,7 +344,7 @@ public:
     AR & e_shnum;
     AR & e_shstrndx;
 
-    AR.epilogue(ELF_HEADER_SIZE);
+    AR.epilogue(TypeTraits<ELFHeader>::size);
     return AR;
   }
 };
