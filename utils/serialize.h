@@ -141,7 +141,7 @@ public:
 
 #undef SERIALIZE_ARCHIVE_READER_READ_AND_SWAP_BYTE_ORDER
 
-  operator void *() const {
+  operator void const *() const {
     return good ? this : 0;
   }
 
