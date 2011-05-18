@@ -1,5 +1,5 @@
-#ifndef ELF_TYPE_H
-#define ELF_TYPE_H
+#ifndef ELF_TYPES_H
+#define ELF_TYPES_H
 
 #include <iostream>
 
@@ -136,4 +136,4 @@ struct ELFTypes<64> {
   typedef typename ELFTypes<PTR_BITWIDTH>::sxword  sxword_t;
 
 
-#endif // ELF_TYPE_H
+#endif // ELF_TYPES_H
