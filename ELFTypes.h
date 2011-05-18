@@ -92,7 +92,7 @@ ELF_TYPE_TRAITS_SPECIALIZE(ELF64Offset  , 8, 8)
 #undef ELF_TYPE_TRAITS_SPECIALIZE
 
 
-template <size_t PtrBitwidth>
+template <size_t Bitwidth>
 struct ELFTypes;
 
 template <>
@@ -125,15 +125,15 @@ struct ELFTypes<64> {
   typedef detail::ELFSxword     sxword;
 };
 
-#define ELF_TYPE_INTRO_TO_SCOPE(PTR_BITWIDTH) \
-  typedef typename ELFTypes<PTR_BITWIDTH>::address address_t; \
-  typedef typename ELFTypes<PTR_BITWIDTH>::offset  offset_t; \
-  typedef typename ELFTypes<PTR_BITWIDTH>::byte    byte_t; \
-  typedef typename ELFTypes<PTR_BITWIDTH>::half    half_t; \
-  typedef typename ELFTypes<PTR_BITWIDTH>::word    word_t; \
-  typedef typename ELFTypes<PTR_BITWIDTH>::sword   sword_t; \
-  typedef typename ELFTypes<PTR_BITWIDTH>::xword   xword_t; \
-  typedef typename ELFTypes<PTR_BITWIDTH>::sxword  sxword_t;
+#define ELF_TYPE_INTRO_TO_SCOPE(BITWIDTH) \
+  typedef typename ELFTypes<BITWIDTH>::address address_t; \
+  typedef typename ELFTypes<BITWIDTH>::offset  offset_t; \
+  typedef typename ELFTypes<BITWIDTH>::byte    byte_t; \
+  typedef typename ELFTypes<BITWIDTH>::half    half_t; \
+  typedef typename ELFTypes<BITWIDTH>::word    word_t; \
+  typedef typename ELFTypes<BITWIDTH>::sword   sword_t; \
+  typedef typename ELFTypes<BITWIDTH>::xword   xword_t; \
+  typedef typename ELFTypes<BITWIDTH>::sxword  sxword_t;
 
 
 #endif // ELF_TYPES_H
