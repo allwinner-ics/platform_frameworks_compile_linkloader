@@ -14,19 +14,38 @@ build_configurations = {
     },
 }
 
+toolkits = {
+    'gcc': {
+        'CC': 'gcc',
+        'CXX': 'g++',
+    },
+
+    'clang': {
+        'CC': 'clang',
+        'CXX': 'clang++',
+    },
+}
+
 mode = ARGUMENTS.get('mode', 'release')
+toolkit = ARGUMENTS.get('toolkit', 'gcc')
 
 if not mode in build_configurations:
     print 'ERROR: Unknown building mode:', mode
     Exit(1)
 
 build_config = build_configurations[mode]
+build_toolkit = toolkits[toolkit]
 
 print '===> BUILDING IN ' + mode.upper() + ' MODE ...'
 
-env = Environment(CFLAGS=build_config['CFLAGS'],
+import os
+
+env = Environment(CC=build_toolkit['CC'],
+                  CXX=build_toolkit['CXX'],
+                  CFLAGS=build_config['CFLAGS'],
                   CXXFLAGS=build_config['CXXFLAGS'],
-                  CPPPATH=['utils'])
+                  CPPPATH=['utils'],
+                  ENV = {'PATH' : os.environ['PATH']})
 
 env.Program('elfreader',
             source=['ELFHeader.cpp',
