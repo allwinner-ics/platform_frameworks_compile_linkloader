@@ -124,7 +124,7 @@ struct ELFTypes<64> {
 };
 
 #define ELF_TYPE_INTRO_TO_TEMPLATE_SCOPE(BITWIDTH) \
-  typedef typename ELFTypes<BITWIDTH>::address address_t; \
+  typedef typename ELFTypes<BITWIDTH>::address addr_t; \
   typedef typename ELFTypes<BITWIDTH>::offset  offset_t; \
   typedef typename ELFTypes<BITWIDTH>::byte    byte_t; \
   typedef typename ELFTypes<BITWIDTH>::half    half_t; \
@@ -134,7 +134,7 @@ struct ELFTypes<64> {
   typedef typename ELFTypes<BITWIDTH>::sxword  sxword_t;
 
 #define ELF_TYPE_INTRO_TO_SCOPE(BITWIDTH) \
-  typedef ELFTypes<BITWIDTH>::address address_t; \
+  typedef ELFTypes<BITWIDTH>::address addr_t; \
   typedef ELFTypes<BITWIDTH>::offset  offset_t; \
   typedef ELFTypes<BITWIDTH>::byte    byte_t; \
   typedef ELFTypes<BITWIDTH>::half    half_t; \
