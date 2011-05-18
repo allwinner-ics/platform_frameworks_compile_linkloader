@@ -1,7 +1,6 @@
 #include "elf_object.h"
 
 #include "utils/serialize.h"
-#include "elf_header.h"
 #include "elf_strtab.h"
 #include "elf_symtab.h"
 #include "elf_section_header.h"
@@ -24,68 +23,18 @@ using namespace serialization;
 using namespace std;
 
 
-const std::string elf_object::SYMBOL_TABLE_NAME = ".symtab";
-const std::string elf_object::SYMBOL_STR_TAB_NAME = ".strtab";
-
 template <typename Archiver>
 inline void elf_object::read_header(Archiver &AR) {
-  header = elf_header::read(AR);
-}
-
-template <typename Archiver>
-inline void elf_object::read_section_header_table(Archiver &AR) {
-  elf_header const &header = get_header();
-
-  AR.seek(header.get_section_header_table_offset(), true);
-  for(size_t i = 0; i < header.get_section_header_num(); ++i) {
-    sh_table.push_back(elf_section_header::read(AR, *this));
-
-    // FIXME: AR should be seeked if sizeof(Elf_Shdr) != shentsize.
+  if (is64bit) {
+    header64 = ELFHeader<64>::read(AR);
+  } else {
+    header32 = ELFHeader<32>::read(AR);
   }
 }
 
 template <typename Archiver>
-inline void elf_object::read_section_header_str_tab(Archiver &AR) {
-  section_header_str_tab =
-    elf_strtab::read(AR, get_section_header(
-                         get_header().get_str_section_index()));
-}
-
-template <typename Archiver>
-inline void elf_object::read_symbol_table(Archiver &AR) {
-  symbol_table =
-    elf_symtab::read(AR,
-                     get_section_header(elf_object::SYMBOL_TABLE_NAME),
-                     *this);
-}
-
-template <typename Archiver>
-inline void elf_object::read_symbol_str_tab(Archiver &AR) {
-  symbol_str_tab =
-    elf_strtab::read(AR, get_section_header(
-                         elf_object::SYMBOL_STR_TAB_NAME));
-}
-
-template <typename archiver>
-void elf_object::read_internal(archiver &AR) {
+void elf_object::read_internal(Archiver &AR) {
   read_header(AR);
-  read_section_header_table(AR);
-  read_section_header_str_tab(AR);
-  read_symbol_table(AR);
-  read_symbol_str_tab(AR);
-
-  // TODO: Some section may have dependency.
-  s_table.resize(sh_table.size());
-  for (size_t i = 0; i < sh_table.size(); ++i) {
-    switch (sh_table[i]->get_type()) {
-      case SHT_PROGBITS:
-        s_table[i] = elf_progbits::read(AR, get_section_header(i));
-        break;
-      case SHT_NOBITS:
-        s_table[i] = elf_nobits::read(AR, get_section_header(i));
-        break;
-    }
-  }
 }
 
 shared_ptr<elf_object> elf_object::read(string const &filename) {
@@ -106,6 +55,8 @@ shared_ptr<elf_object> elf_object::read(string const &filename) {
 
   // Read the ELF object
   shared_ptr<elf_object> result(new elf_object());
+
+  result->is64bit = (image[EI_CLASS] == ELFCLASS64);
 
   if (image[EI_DATA] == ELFDATA2LSB) {
     archive_reader_le AR(image, size);
@@ -133,60 +84,12 @@ shared_ptr<elf_object> elf_object::read(string const &filename) {
   return result;
 }
 
-elf_section_header const &
-elf_object::get_section_header(const std::string &str) const {
-  for (size_t i = 0; i < sh_table.size(); ++i){ // TODO: Use hash map
-    if (str == string(sh_table[i]->get_name())){
-      return *sh_table[i];
-    }
-  }
-  // Return SHN_UNDEF section entry;
-  return *sh_table[0];
-}
-
 void elf_object::print() const{
   // Print elf header
-  get_header().print();
-
-  // Print elf section header
-  elf_section_header::print_header();
-  for(int i=0; i<get_header().get_section_header_num(); ++i) {
-    get_section_header(i).print();
-  }
-  elf_section_header::print_footer();
-
-  // Print elf symbol table
-  symbol_table->print();
-
-  for (size_t i = 0; i < sh_table.size(); ++i) {
-    if (s_table[i]) {
-      s_table[i]->print();
-#ifdef TEST_MPROTECT
-      switch (sh_table[i]->get_type()) {
-        case SHT_PROGBITS:
-          if ( sh_table[i]->get_size() > 0) {
-            dynamic_cast<elf_progbits&>(*s_table[i])[0] = 0;
-          }
-          break;
-        case SHT_NOBITS:
-          break;
-      }
-      std::cout << "Memory protect..." << std::endl;
-#endif
-      switch (sh_table[i]->get_type()) {
-        case SHT_PROGBITS:
-          dynamic_cast<elf_progbits&>(*s_table[i]).memory_protect();
-#ifdef TEST_MPROTECT
-          if ( sh_table[i]->get_size() > 0) {
-            dynamic_cast<elf_progbits&>(*s_table[i])[0] = 0;
-          }
-#endif
-          break;
-        case SHT_NOBITS:
-          dynamic_cast<elf_nobits&>(*s_table[i]).memory_protect();
-          break;
-      }
-    }
+  if (is64bit) {
+    header64->print();
+  } else {
+    header32->print();
   }
 }
 

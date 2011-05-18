@@ -29,15 +29,9 @@ env = Environment(CFLAGS=build_config['CFLAGS'],
                   CPPPATH=['utils'])
 
 env.Program('elfreader',
-            source=['elf_header.cpp',
-                    'elf_section_header.cpp',
+            source=['ELFHeader.cpp',
+                    'ELFTypes.cpp',
                     'elf_object.cpp',
-                    'elf_section.cpp',
-                    'elf_strtab.cpp',
-                    'elf_symtab.cpp',
-                    'elf_sym_entry.cpp',
-                    'elf_progbits.cpp',
-                    'elf_nobits.cpp',
                     'main.cpp',
                     'utils/helper.cpp',
                     'utils/term.cpp'])
