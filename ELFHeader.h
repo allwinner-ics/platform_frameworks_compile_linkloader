@@ -282,7 +282,6 @@ private:
   ELFHeader() { }
 
 public:
-
   template <typename Archiver>
   bool serialize(Archiver &AR) {
     AR.prologue(ELF_HEADER_SIZE);
