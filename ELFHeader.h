@@ -125,18 +125,18 @@ public:
     if (!AR) {
       // Archiver is in bad state before calling read function.
       // Return NULL and do nothing.
-      return 0;
+      return boost::shared_ptr<ConcreteELFHeader>();
     }
 
     boost::shared_ptr<ConcreteELFHeader> header(new ConcreteELFHeader());
     if (!header->serialize(AR)) {
       // Unable to read the structure.  Return NULL.
-      return 0;
+      return boost::shared_ptr<ConcreteELFHeader>();
     }
 
     if (!header->isValid()) {
       // Header read from archiver is not valid.  Return NULL.
-      return 0;
+      return boost::shared_ptr<ConcreteELFHeader>();
     }
 
     return header;
