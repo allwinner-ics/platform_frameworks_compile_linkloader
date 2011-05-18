@@ -177,57 +177,58 @@ public:
 
     cout << setw(79) << setfill('-') << '-' << endl << setfill(' ');
 
-    cout << setw(25) << "Class" << " : " << getClassStr(getClass()) << endl;
+    cout << "  " << setw(21) << "Class" << " : "
+         << getClassStr(getClass()) << endl;
 
-    cout << setw(25) << "Endianness" << " : "
+    cout << "  " << setw(21) << "Endianness" << " : "
          << getEndiannessStr(getEndianness()) << endl;
 
-    cout << setw(25) << "Header Version" << " : "
+    cout << "  " << setw(21) << "Header Version" << " : "
          << (unsigned)getVersion() << endl;
 
-    cout << setw(25) << "OS ABI" << " : "
+    cout << "  " << setw(21) << "OS ABI" << " : "
          << getOSABIStr(getOSABI()) << endl;
 
-    cout << setw(25) << "ABI Version" << " : "
+    cout << "  " << setw(21) << "ABI Version" << " : "
          << (unsigned)getABIVersion() << endl;
 
 
-    cout << setw(25) << "Object Type" << " : "
+    cout << "  " << setw(21) << "Object Type" << " : "
          << getObjectTypeStr(getObjectType()) << endl;
 
-    cout << setw(25) << "Machine" << " : "
+    cout << "  " << setw(21) << "Machine" << " : "
          << getMachineStr(getMachine()) << endl;
 
-    cout << setw(25) << "Version" << " : "
+    cout << "  " << setw(21) << "Version" << " : "
          << getVersionStr(getVersion()) << endl;
 
-    cout << setw(25) << "Entry Address" << " : "
+    cout << "  " << setw(21) << "Entry Address" << " : "
          << getEntryAddress() << endl;
 
-    cout << setw(25) << "Program Header Offset" << " : "
+    cout << "  " << setw(21) << "Program Header Offset" << " : "
          << getProgramHeaderTableOffset() << endl;
 
-    cout << setw(25) << "Section Header Offset" << " : "
+    cout << "  " << setw(21) << "Section Header Offset" << " : "
          << getSectionHeaderTableOffset() << endl;
 
-    cout << setw(25) << "Flags" << " : " << getFlags() << endl;
+    cout << "  " << setw(21) << "Flags" << " : " << getFlags() << endl;
 
-    cout << setw(25) << "ELF Header Size" << " : "
+    cout << "  " << setw(21) << "ELF Header Size" << " : "
          << getELFHeaderSize() << endl;
 
-    cout << setw(25) << "Program Header Size" << " : "
+    cout << "  " << setw(21) << "Program Header Size" << " : "
          << getProgramHeaderEntrySize() << endl;
 
-    cout << setw(25) << "Program Header Num" << " : "
+    cout << "  " << setw(21) << "Program Header Num" << " : "
          << getProgramHeaderNum() << endl;
 
-    cout << setw(25) << "Section Header Size" << " : "
+    cout << "  " << setw(21) << "Section Header Size" << " : "
          << getSectionHeaderEntrySize() << endl;
 
-    cout << setw(25) << "Section Header Num" << " : "
+    cout << "  " << setw(21) << "Section Header Num" << " : "
          << getSectionHeaderNum() << endl;
 
-    cout << setw(25) << "String Section Index" << " : "
+    cout << "  " << setw(21) << "String Section Index" << " : "
          << getStringSectionIndex() << endl;
 
     cout << setw(79) << setfill('=') << '=' << endl << endl;

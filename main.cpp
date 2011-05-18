@@ -3,6 +3,7 @@
 #include "utils/serialize.h"
 
 #include <boost/shared_ptr.hpp>
+#include <iomanip>
 #include <iostream>
 
 #include <elf.h>
@@ -33,6 +34,8 @@ int main(int argc, char **argv) {
   if (argc >= 2) {
     filename = argv[1];
   }
+
+  cout << left;
 
   // Open the file
   int fd = -1;

@@ -116,31 +116,34 @@ public:
            << "ELF Section Header " << index << " : " << normal() << endl;
     }
 
-    cout << setw(25) << "Name" << " : " << getNameIndex() << endl;
+    cout << "  " << setw(13) << "Name" << " : " << getNameIndex() << endl;
 
-    cout << setw(25) << "Type" << " : "
+    cout << "  " << setw(13) << "Type" << " : "
          << getSectionTypeStr(getType()) << endl;
 
-    cout << setw(25) << "Flags" << " : " << concrete()->getFlags() << endl;
+    cout << "  " << setw(13) << "Flags" << " : "
+         << concrete()->getFlags() << endl;
 
-    cout << setw(25) << "Address" << " : " << getAddress() << endl;
+    cout << "  " << setw(13) << "Address" << " : " << getAddress() << endl;
 
-    cout << setw(25) << "Offset" << " : " << getOffset() << endl;
+    cout << "  " << setw(13) << "Offset" << " : " << getOffset() << endl;
 
-    cout << setw(25) << "Size" << " : " << concrete()->getSize() << endl;
+    cout << "  " << setw(13) << "Size" << " : "
+         << concrete()->getSize() << endl;
 
-    cout << setw(25) << "Link" << " : " << getLink() << endl;
+    cout << "  " << setw(13) << "Link" << " : " << getLink() << endl;
 
-    cout << setw(25) << "Extra Info" << " : " << getExtraInfo() << endl;
+    cout << "  " << setw(13) << "Extra Info" << " : "
+         << getExtraInfo() << endl;
 
-    cout << setw(25) << "Address Align" << " : "
+    cout << "  " << setw(13) << "Address Align" << " : "
          << concrete()->getAddressAlign() << endl;
 
-    cout << setw(25) << "Entry Size" << " : "
+    cout << "  " << setw(13) << "Entry Size" << " : "
          << concrete()->getEntrySize() << endl;
 
     if (shouldPrintHeader) {
-      cout << setw(79) << setfill('=') << '=' << setfill(' ') << endl;
+      cout << setw(79) << setfill('=') << '=' << setfill(' ') << endl << endl;
     }
   }
 

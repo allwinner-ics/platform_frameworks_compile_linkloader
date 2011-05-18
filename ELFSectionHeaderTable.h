@@ -90,7 +90,7 @@ inline void ELFSectionHeaderTable<Bitwidth>::print() {
     table[i]->print();
   }
 
-  cout << setw(79) << setfill('=') << '=' << endl;
+  cout << setw(79) << setfill('=') << '=' << endl << endl;
 }
 
 #endif // ELF_SECTION_HEADER_TABLE_H
