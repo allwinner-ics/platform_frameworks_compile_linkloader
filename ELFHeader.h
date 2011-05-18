@@ -12,6 +12,11 @@
 #include <elf.h>
 #include <string.h>
 
+
+template <size_t Bitwidth> class ELFHeader;
+template <size_t Bitwidth> class ELFHeader_CRTP;
+
+
 class ELFHeaderHelperMixin {
 protected:
   static char const *getClassStr(int clazz);
@@ -22,10 +27,13 @@ protected:
   static char const *getVersionStr(uint32_t version);
 };
 
-template <size_t Bitwidth, class ConcreteELFHeader>
+
+template <size_t Bitwidth>
 class ELFHeader_CRTP : private ELFHeaderHelperMixin {
 public:
   ELF_TYPE_INTRO_TO_TEMPLATE_SCOPE(Bitwidth);
+
+  typedef ELFHeader<Bitwidth> ConcreteELFHeader;
 
 protected:
   byte_t   e_ident[EI_NIDENT];
@@ -284,12 +292,9 @@ private:
 };
 
 
-template <size_t Bitwidth>
-class ELFHeader;
-
 template <>
-class ELFHeader<32> : public ELFHeader_CRTP<32, ELFHeader<32> > {
-  friend class ELFHeader_CRTP<32, ELFHeader>;
+class ELFHeader<32> : public ELFHeader_CRTP<32> {
+  friend class ELFHeader_CRTP<32>;
 
 private:
   ELFHeader() { }
@@ -319,8 +324,8 @@ private:
 };
 
 template <>
-class ELFHeader<64> : public ELFHeader_CRTP<64, ELFHeader<64> > {
-  friend class ELFHeader_CRTP<64, ELFHeader>;
+class ELFHeader<64> : public ELFHeader_CRTP<64> {
+  friend class ELFHeader_CRTP<64>;
 
 private:
   ELFHeader() { }
