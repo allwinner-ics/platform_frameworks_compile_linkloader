@@ -89,7 +89,7 @@ void dump_file(unsigned char const *image, size_t size) {
   }
 
   bool isLittleEndian = (image[EI_DATA] == ELFDATA2LSB);
-  bool is32bit = (image[EI_DATA] == ELFCLASS32);
+  bool is32bit = (image[EI_CLASS] == ELFCLASS32);
 
   if (isLittleEndian) {
     archive_reader_le AR(image, size);
