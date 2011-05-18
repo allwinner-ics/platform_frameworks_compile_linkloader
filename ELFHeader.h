@@ -235,7 +235,8 @@ private:
   }
 
   bool isValidClass() const {
-    return static_cast<ConcreteELFHeader const *>(this)->isValidClass();
+    return ((Bitwidth == 32 && is32bit()) ||
+            (Bitwidth == 64 && is64bit()));
   }
 
   bool isValidEndianness() const {
@@ -264,8 +265,21 @@ private:
   }
 
   bool isCompatibleHeaderSize() const {
-    return static_cast<ConcreteELFHeader const *>(this)->
-                                                  isCompatibleHeaderSize();
+    if (e_ehsize < TypeTraits<ELFHeader<Bitwidth> >::size) {
+      return false;
+    }
+
+    if (e_phnum > 0 &&
+        e_phentsize < TypeTraits<ELFProgramHeader<Bitwidth> >::size) {
+      return false;
+    }
+
+    if (e_shnum > 0 &&
+        e_shentsize < TypeTraits<ELFSectionHeader<Bitwidth> >::size) {
+      return false;
+    }
+
+    return true;
   }
 };
 
@@ -304,16 +318,6 @@ public:
     AR.epilogue(ELF_HEADER_SIZE);
     return AR;
   }
-
-private:
-  bool isValidClass() const {
-    return is32bit();
-  }
-
-  bool isCompatibleHeaderSize() const {
-    // FIXME
-    return true;
-  }
 };
 
 template <>
@@ -345,16 +349,6 @@ public:
 
     AR.epilogue(ELF_HEADER_SIZE);
     return AR;
-  }
-
-private:
-  bool isValidClass() const {
-    return is32bit();
-  }
-
-  bool isCompatibleHeaderSize() const {
-    // FIXME
-    return true;
   }
 };
 
