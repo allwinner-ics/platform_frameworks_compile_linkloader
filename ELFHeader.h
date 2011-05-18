@@ -3,11 +3,27 @@
 
 #include "ELFTypes.h"
 
+#include "utils/term.h"
+
 #include <boost/shared_ptr.hpp>
+#include <iomanip>
+#include <iostream>
+
 #include <elf.h>
+#include <string.h>
+
+class ELFHeaderHelperMixin {
+protected:
+  static char const *getClassStr(int clazz);
+  static char const *getEndiannessStr(int endianness);
+  static char const *getOSABIStr(int abi);
+  static char const *getObjectTypeStr(uint16_t type);
+  static char const *getMachineStr(uint16_t machine);
+  static char const *getVersionStr(uint32_t version);
+};
 
 template <size_t Bitwidth, class ConcreteELFHeader>
-class ELFHeader_CRTP {
+class ELFHeader_CRTP : private ELFHeaderHelperMixin {
 public:
   ELF_TYPE_INTRO_TO_TEMPLATE_SCOPE(Bitwidth);
 
@@ -141,6 +157,77 @@ public:
 
     return header;
   }
+
+  void print() {
+    using namespace std;
+    using namespace term;
+    using namespace term::color;
+
+    cout << endl << setw(79) << setfill('=') << '=' << endl;
+
+    cout << light::white() << "ELF Header" << normal() << endl;
+
+    cout << setw(79) << setfill('-') << '-' << endl << setfill(' ');
+
+    cout << setw(25) << "Class" << " : " << getClassStr(getClass()) << endl;
+
+    cout << setw(25) << "Endianness" << " : "
+         << getEndiannessStr(getEndianness()) << endl;
+
+    cout << setw(25) << "Header Version" << " : "
+         << (unsigned)getVersion() << endl;
+
+    cout << setw(25) << "OS ABI" << " : "
+         << getOSABIStr(getOSABI()) << endl;
+
+    cout << setw(25) << "ABI Version" << " : "
+         << (unsigned)getABIVersion() << endl;
+
+
+    cout << setw(25) << "Object Type" << " : "
+         << getObjectTypeStr(getObjectType()) << endl;
+
+    cout << setw(25) << "Machine" << " : "
+         << getMachineStr(getMachine()) << endl;
+
+    cout << setw(25) << "Version" << " : "
+         << getVersionStr(getVersion()) << endl;
+
+    cout << setw(25) << "Entry Address" << " : "
+         << getEntryAddress() << endl;
+
+    cout << setw(25) << "Program Header Offset" << " : "
+         << getProgramHeaderTableOffset() << endl;
+
+    cout << setw(25) << "Section Header Offset" << " : "
+         << getSectionHeaderTableOffset() << endl;
+
+    cout << setw(25) << "Flags" << " : " << getFlags() << endl;
+
+    cout << setw(25) << "ELF Header Size" << " : "
+         << getELFHeaderSize() << endl;
+
+    cout << setw(25) << "Program Header Size" << " : "
+         << getProgramHeaderEntrySize() << endl;
+
+    cout << setw(25) << "Program Header Num" << " : "
+         << getProgramHeaderNum() << endl;
+
+    cout << setw(25) << "Section Header Size" << " : "
+         << getSectionHeaderEntrySize() << endl;
+
+    cout << setw(25) << "Section Header Num" << " : "
+         << getSectionHeaderNum() << endl;
+
+    cout << setw(25) << "String Section Index" << " : "
+         << getStringSectionIndex() << endl;
+
+    cout << setw(79) << setfill('=') << '=' << endl << endl;
+  }
+
+  bool isValid() const {
+    return true;
+  }
 };
 
 
@@ -149,13 +236,14 @@ class ELFHeader;
 
 template <>
 class ELFHeader<32> : public ELFHeader_CRTP<32, ELFHeader<32> > {
-private:
+  friend class ELFHeader_CRTP<32, ELFHeader<32> >;
   enum { ELF_HEADER_SIZE = 52 };
 
-protected:
+private:
   ELFHeader() { }
 
 public:
+
   template <typename Archiver>
   bool serialize(Archiver &AR) {
     AR.prologue(ELF_HEADER_SIZE);
@@ -182,13 +270,12 @@ public:
 
 template <>
 class ELFHeader<64> : public ELFHeader_CRTP<64, ELFHeader<64> > {
-private:
+  friend class ELFHeader_CRTP<64, ELFHeader<64> >;
   enum { ELF_HEADER_SIZE = 64 };
 
-protected:
+public:
   ELFHeader() { }
 
-public:
   template <typename Archiver>
   bool serialize(Archiver &AR) {
     AR.prologue(ELF_HEADER_SIZE);
