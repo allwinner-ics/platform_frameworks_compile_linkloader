@@ -30,6 +30,7 @@ env = Environment(CFLAGS=build_config['CFLAGS'],
 
 env.Program('elfreader',
             source=['ELFHeader.cpp',
+                    'ELFSectionHeader.cpp',
                     'ELFTypes.cpp',
                     'main.cpp',
                     'utils/helper.cpp',
