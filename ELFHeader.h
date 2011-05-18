@@ -226,7 +226,46 @@ public:
   }
 
   bool isValid() const {
+    return (isValidELFIdent() && isCompatibleHeaderSize());
+  }
+
+private:
+  bool isValidMagicWord() const {
+    return (memcmp(e_ident, "\x7f" "ELF", 4) == 0);
+  }
+
+  bool isValidClass() const {
+    return static_cast<ConcreteELFHeader const *>(this)->isValidClass();
+  }
+
+  bool isValidEndianness() const {
+    return (isBigEndian() || isLittleEndian());
+  }
+
+  bool isValidHeaderVersion() const {
+    return (getVersion() == EV_CURRENT);
+  }
+
+  bool isUnusedZeroedPadding() const {
+    for (size_t i = EI_PAD; i < EI_NIDENT; ++i) {
+      if (e_ident[i] != 0) {
+        return false;
+      }
+    }
     return true;
+  }
+
+  bool isValidELFIdent() const {
+    return (isValidMagicWord() &&
+            isValidClass() &&
+            isValidEndianness() &&
+            isValidHeaderVersion() &&
+            isUnusedZeroedPadding());
+  }
+
+  bool isCompatibleHeaderSize() const {
+    return static_cast<ConcreteELFHeader const *>(this)->
+                                                  isCompatibleHeaderSize();
   }
 };
 
@@ -266,6 +305,16 @@ public:
     AR.epilogue(ELF_HEADER_SIZE);
     return AR;
   }
+
+private:
+  bool isValidClass() const {
+    return is32bit();
+  }
+
+  bool isCompatibleHeaderSize() const {
+    // FIXME
+    return true;
+  }
 };
 
 template <>
@@ -297,6 +346,16 @@ public:
 
     AR.epilogue(ELF_HEADER_SIZE);
     return AR;
+  }
+
+private:
+  bool isValidClass() const {
+    return is32bit();
+  }
+
+  bool isCompatibleHeaderSize() const {
+    // FIXME
+    return true;
   }
 };
 
