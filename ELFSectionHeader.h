@@ -11,6 +11,7 @@
 
 #include <stdint.h>
 
+template <size_t Bitwidth> class ELFObject;
 template <size_t Bitwidth> class ELFSectionHeader;
 template <size_t Bitwidth> class ELFSectionHeader_CRTP;
 
@@ -29,6 +30,8 @@ public:
   typedef ELFSectionHeader<Bitwidth> ConcreteELFSectionHeader;
 
 protected:
+  ELFObject<Bitwidth> const *owner;
+
   unsigned int index;
 
   word_t sh_name;
@@ -45,6 +48,10 @@ protected:
 public:
   word_t getNameIndex() const {
     return sh_name;
+  }
+
+  char const *getName() const {
+    return owner->getSectionName(getNameIndex());
   }
 
   word_t getType() const {
@@ -74,7 +81,10 @@ public:
 
   template <typename Archiver>
   static boost::shared_ptr<ConcreteELFSectionHeader>
-  read(Archiver &AR, unsigned int index = 0) {
+  read(Archiver &AR,
+       ELFObject<Bitwidth> const *owner,
+       unsigned int index = 0) {
+
     if (!AR) {
       // Archiver is in bad state before calling read function.
       // Return NULL and do nothing.
@@ -97,6 +107,9 @@ public:
     // Set the section header index
     sh->index = index;
 
+    // Set the owner elf object
+    sh->owner = owner;
+
     return sh;
   }
 
@@ -116,7 +129,7 @@ public:
            << "ELF Section Header " << index << " : " << normal() << endl;
     }
 
-    cout << "  " << setw(13) << "Name" << " : " << getNameIndex() << endl;
+    cout << "  " << setw(13) << "Name" << " : " << getName() << endl;
 
     cout << "  " << setw(13) << "Type" << " : "
          << getSectionTypeStr(getType()) << endl;

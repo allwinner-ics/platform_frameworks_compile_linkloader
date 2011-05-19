@@ -72,7 +72,7 @@ ELFSectionHeaderTable<Bitwidth>::read(Archiver &AR,
 
   for (size_t i = 0; i < header->getSectionHeaderNum(); ++i) {
     boost::shared_ptr<ELFSectionHeader<Bitwidth> > sh(
-      ELFSectionHeader<Bitwidth>::read(AR, i));
+      ELFSectionHeader<Bitwidth>::read(AR, owner, i));
 
     if (!sh) {
       // Something wrong while reading the section header.

@@ -26,6 +26,8 @@ public:
     return header.get();
   }
 
+  char const *getSectionName(size_t i) const;
+
   void print() const;
 };
 
@@ -61,6 +63,20 @@ ELFObject<Bitwidth>::read(Archiver &AR) {
   }
 
   return object;
+}
+
+template <size_t Bitwidth>
+inline char const *ELFObject<Bitwidth>::getSectionName(size_t i) const {
+  ELFSection<Bitwidth> const *sec =
+    stab[header->getStringSectionIndex()].get();
+
+  if (sec) {
+    ELFSectionStrTab<Bitwidth> const &st =
+      static_cast<ELFSectionStrTab<Bitwidth> const &>(*sec);
+    return st[i];
+  }
+
+  return NULL;
 }
 
 template <size_t Bitwidth>
