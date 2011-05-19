@@ -24,12 +24,22 @@ public:
   static boost::shared_ptr<ELFSectionHeaderTable<Bitwidth> >
   read(Archiver &AR, ELFObject<Bitwidth> *owner);
 
+  ELFSectionHeader<Bitwidth> const *operator[](size_t i) const {
+    return table[i].get();
+  }
+
+  ELFSectionHeader<Bitwidth> *operator[](size_t i) {
+    return table[i].get();
+  }
+
   void print();
 };
+
 
 #include "ELFObject.h"
 #include "ELFHeader.h"
 #include "ELFSectionHeader.h"
+#include "ELFSection.h"
 #include "ELFTypes.h"
 
 
