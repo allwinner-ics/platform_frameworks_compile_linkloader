@@ -21,7 +21,7 @@ void dump_hex(unsigned char const *data,
   size_t upper = (end & (~0xfUL)) ? end : ((end + 16UL) & (~0xfUL));
 
   for (size_t i = lower; i < upper; i += 16) {
-    cout << hex << setfill('0') << setw(8) << i << ':';
+    cout << hex << setfill('0') << setw(8) << right << i << left << ':';
 
     if (i < begin) {
       cout << dark::magenta();
