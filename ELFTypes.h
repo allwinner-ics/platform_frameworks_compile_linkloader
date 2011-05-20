@@ -47,33 +47,24 @@ template <size_t Bitwidth> class ELFSectionHeader;
 // Note: Following TypeTraits specialization MUST be compliant to the
 // System V Application Binary Interface, Chap 4, Data Representation.
 
-#define ELF_TYPE_TRAITS_SPECIALIZE(TYPE, SIZE, ALIGN) \
-template <> \
-struct TypeTraits<TYPE> { \
-  enum { size = SIZE }; \
-  enum { align = ALIGN }; \
-};
+TYPE_TRAITS_SPECIALIZE(detail::ELFHalf      , 2, 2)
+TYPE_TRAITS_SPECIALIZE(detail::ELFWord      , 4, 4)
+TYPE_TRAITS_SPECIALIZE(detail::ELFSword     , 4, 4)
+TYPE_TRAITS_SPECIALIZE(detail::ELFXword     , 8, 8)
+TYPE_TRAITS_SPECIALIZE(detail::ELFSxword    , 8, 8)
+TYPE_TRAITS_SPECIALIZE(detail::ELF32Address , 4, 4)
+TYPE_TRAITS_SPECIALIZE(detail::ELF32Offset  , 4, 4)
+TYPE_TRAITS_SPECIALIZE(detail::ELF64Address , 8, 8)
+TYPE_TRAITS_SPECIALIZE(detail::ELF64Offset  , 8, 8)
 
-ELF_TYPE_TRAITS_SPECIALIZE(detail::ELFHalf      , 2, 2)
-ELF_TYPE_TRAITS_SPECIALIZE(detail::ELFWord      , 4, 4)
-ELF_TYPE_TRAITS_SPECIALIZE(detail::ELFSword     , 4, 4)
-ELF_TYPE_TRAITS_SPECIALIZE(detail::ELFXword     , 8, 8)
-ELF_TYPE_TRAITS_SPECIALIZE(detail::ELFSxword    , 8, 8)
-ELF_TYPE_TRAITS_SPECIALIZE(detail::ELF32Address , 4, 4)
-ELF_TYPE_TRAITS_SPECIALIZE(detail::ELF32Offset  , 4, 4)
-ELF_TYPE_TRAITS_SPECIALIZE(detail::ELF64Address , 8, 8)
-ELF_TYPE_TRAITS_SPECIALIZE(detail::ELF64Offset  , 8, 8)
+TYPE_TRAITS_SPECIALIZE(ELFHeader<32>        , 52, 4)
+TYPE_TRAITS_SPECIALIZE(ELFHeader<64>        , 64, 8)
 
-ELF_TYPE_TRAITS_SPECIALIZE(ELFHeader<32>        , 52, 4)
-ELF_TYPE_TRAITS_SPECIALIZE(ELFHeader<64>        , 64, 8)
+TYPE_TRAITS_SPECIALIZE(ELFProgramHeader<32> , 32, 4)
+TYPE_TRAITS_SPECIALIZE(ELFProgramHeader<64> , 56, 8)
 
-ELF_TYPE_TRAITS_SPECIALIZE(ELFProgramHeader<32> , 32, 4)
-ELF_TYPE_TRAITS_SPECIALIZE(ELFProgramHeader<64> , 56, 8)
-
-ELF_TYPE_TRAITS_SPECIALIZE(ELFSectionHeader<32> , 40, 4)
-ELF_TYPE_TRAITS_SPECIALIZE(ELFSectionHeader<64> , 64, 8)
-
-#undef ELF_TYPE_TRAITS_SPECIALIZE
+TYPE_TRAITS_SPECIALIZE(ELFSectionHeader<32> , 40, 4)
+TYPE_TRAITS_SPECIALIZE(ELFSectionHeader<64> , 64, 8)
 
 
 template <size_t Bitwidth>
