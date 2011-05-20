@@ -1,9 +1,9 @@
 #ifndef ELF_TYPES_H
 #define ELF_TYPES_H
 
-#include <iostream>
+#include "utils/traits.h"
 
-#include <stddef.h>
+#include <iostream>
 #include <stdint.h>
 
 namespace detail {
@@ -39,19 +39,6 @@ namespace detail {
   extern std::ostream &operator<<(std::ostream &, ELF64Offset const &);
 }
 
-
-template <typename Type>
-struct TypeTraits {
-private:
-  struct AlignmentTest {
-    char pending;
-    Type element;
-  };
-
-public:
-  enum { size = sizeof(Type) };
-  enum { align = offsetof(AlignmentTest, element) };
-};
 
 template <size_t Bitwidth> class ELFHeader;
 template <size_t Bitwidth> class ELFProgramHeader;

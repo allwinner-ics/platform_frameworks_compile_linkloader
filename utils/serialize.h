@@ -1,6 +1,8 @@
 #if !defined(SERIALIZE_H)
 #define SERIALIZE_H
 
+#include "traits.h"
+
 #include <algorithm>
 #include <vector>
 
@@ -36,18 +38,6 @@ namespace detail {
     std::swap(array[2], array[5]);
     std::swap(array[3], array[4]);
   }
-
-  template <typename T>
-  struct type_traits {
-  private:
-    struct alignment_test {
-      char pending;
-      T element;
-    };
-
-  public:
-    enum { alignment = offsetof(alignment_test, element) };
-  };
 }
 
 
@@ -153,7 +143,7 @@ private:
   template <typename T>
   void seek_to_next_address() {
     if (!packed) {
-      size_t align = detail::type_traits<T>::alignment;
+      size_t align = TypeTraits<T>::align;
       size_t delta = reinterpret_cast<uintptr_t>(cursor) % align;
 
       if (delta > 0) {
@@ -286,7 +276,7 @@ private:
   template <typename T>
   void seek_to_next_address() {
     if (!packed) {
-      size_t align = detail::type_traits<T>::alignment;
+      size_t align = TypeTraits<T>::alignment;
       size_t delta = cursor % align;
 
       if (delta > 0) {
