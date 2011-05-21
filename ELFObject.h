@@ -26,7 +26,12 @@ public:
     return header.get();
   }
 
+  ELFSectionHeaderTable<Bitwidth> const *getSectionHeaderTable() const {
+    return shtab.get();
+  }
+
   char const *getSectionName(size_t i) const;
+  ELFSection<Bitwidth> const *getSectionByIndex(size_t i) const;
 
   void print() const;
 };
@@ -77,6 +82,12 @@ inline char const *ELFObject<Bitwidth>::getSectionName(size_t i) const {
   }
 
   return NULL;
+}
+
+template <size_t Bitwidth>
+inline ELFSection<Bitwidth> const *
+ELFObject<Bitwidth>::getSectionByIndex(size_t i) const {
+  return stab[i].get();
 }
 
 template <size_t Bitwidth>
