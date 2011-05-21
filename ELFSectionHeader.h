@@ -46,6 +46,10 @@ protected:
   ~ELFSectionHeader_CRTP() { }
 
 public:
+  unsigned int getIndex() const {
+    return index;
+  }
+
   word_t getNameIndex() const {
     return sh_name;
   }
