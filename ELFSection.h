@@ -20,7 +20,9 @@ public:
 
   template <typename Archiver>
   static boost::shared_ptr<ELFSection>
-  read(Archiver &AR, ELFSectionHeader<Bitwidth> const *);
+  read(Archiver &AR,
+       ELFObject<Bitwidth> *owner,
+       ELFSectionHeader<Bitwidth> const *);
 };
 
 #include "ELFSectionHeader.h"
@@ -30,6 +32,7 @@ template <size_t Bitwidth>
 template <typename Archiver>
 inline boost::shared_ptr<ELFSection<Bitwidth> >
 ELFSection<Bitwidth>::read(Archiver &AR,
+                           ELFObject<Bitwidth> *owner,
                            ELFSectionHeader<Bitwidth> const *sh) {
   using namespace boost;
   using namespace std;

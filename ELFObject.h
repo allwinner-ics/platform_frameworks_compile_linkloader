@@ -63,7 +63,7 @@ ELFObject<Bitwidth>::read(Archiver &AR) {
   // Read each section
   for (size_t i = 0; i < object->header->getSectionHeaderNum(); ++i) {
     shared_ptr<ELFSection<Bitwidth> > sec(
-      ELFSection<Bitwidth>::read(AR, (*object->shtab)[i]));
+      ELFSection<Bitwidth>::read(AR, object.get(), (*object->shtab)[i]));
     object->stab.push_back(sec);
   }
 
