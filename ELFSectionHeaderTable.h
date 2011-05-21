@@ -3,6 +3,7 @@
 
 #include <boost/shared_ptr.hpp>
 #include <vector>
+#include <string>
 
 #include <assert.h>
 
@@ -31,6 +32,9 @@ public:
   ELFSectionHeader<Bitwidth> *operator[](size_t i) {
     return table[i].get();
   }
+
+  ELFSectionHeader<Bitwidth> const *operator[](const std::string &str) const;
+  ELFSectionHeader<Bitwidth> *operator[](const std::string &str);
 
   void print();
 };
@@ -103,4 +107,24 @@ inline void ELFSectionHeaderTable<Bitwidth>::print() {
   cout << setw(79) << setfill('=') << '=' << endl << endl;
 }
 
+template <size_t Bitwidth>
+inline ELFSectionHeader<Bitwidth> const *
+ELFSectionHeaderTable<Bitwidth>::operator[](const std::string &str) const {
+  // TODO: Use map
+  for (size_t i = 0; i < table.size(); ++i) {
+    if (str == string(table[i]->getName())) {
+      return table[i].get();
+    }
+  }
+  // Return SHN_UNDEF section header;
+  return table[0].get();
+}
+
+template <size_t Bitwidth>
+inline ELFSectionHeader<Bitwidth> *
+ELFSectionHeaderTable<Bitwidth>::operator[](const std::string &str) {
+  ELFSectionHeader<Bitwidth> const *shptr = (*this)[str];
+  // Const cast for the same API's const and non-const versions.
+  return const_cast<ELFSectionHeader<Bitwidth> *>(shptr);
+}
 #endif // ELF_SECTION_HEADER_TABLE_H
