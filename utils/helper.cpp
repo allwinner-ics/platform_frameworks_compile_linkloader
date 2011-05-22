@@ -17,11 +17,13 @@ void dump_hex(unsigned char const *data,
     return;
   }
 
+  std::ios_base::fmtflags prev_flags = cout.flags();
+
   size_t lower = begin & (~0xfUL);
   size_t upper = (end & (~0xfUL)) ? end : ((end + 16UL) & (~0xfUL));
 
   for (size_t i = lower; i < upper; i += 16) {
-    cout << hex << setfill('0') << setw(8) << right << i << left << ':';
+    cout << hex << setfill('0') << setw(8) << right << i << ':';
 
     if (i < begin) {
       cout << dark::magenta();
@@ -40,6 +42,10 @@ void dump_hex(unsigned char const *data,
         cout << ' ' << hex << setfill('0') << setw(2) << (unsigned)data[j];
       }
     }
+
+    // Only setw affects the next out, other will affect all outputs. So we
+    // should recover the flags.
+    cout.flags( prev_flags );
 
     cout << normal() << endl;
   }
