@@ -32,7 +32,7 @@ public:
 protected:
   ELFObject<Bitwidth> const *owner;
 
-  unsigned int index;
+  size_t index;
 
   word_t sh_name;
   word_t sh_type;
@@ -46,7 +46,7 @@ protected:
   ~ELFSectionHeader_CRTP() { }
 
 public:
-  unsigned int getIndex() const {
+  size_t getIndex() const {
     return index;
   }
 
@@ -87,7 +87,7 @@ public:
   static boost::shared_ptr<ConcreteELFSectionHeader>
   read(Archiver &AR,
        ELFObject<Bitwidth> const *owner,
-       unsigned int index = 0) {
+       size_t index = 0) {
 
     if (!AR) {
       // Archiver is in bad state before calling read function.

@@ -6,6 +6,7 @@
 #include <boost/shared_ptr.hpp>
 #include <iostream>
 
+template <size_t Bitwidth> class ELFObject;
 template <size_t Bitwidth> class ELFSectionHeader;
 
 template <size_t Bitwidth>
@@ -27,6 +28,7 @@ public:
 
 #include "ELFSectionHeader.h"
 #include "ELFSectionStrTab.h"
+#include "ELFSectionSymTab.h"
 
 template <size_t Bitwidth>
 template <typename Archiver>
@@ -47,6 +49,8 @@ ELFSection<Bitwidth>::read(Archiver &AR,
       return ELFSectionStrTab<Bitwidth>::read(AR, sh);
 
     case SHT_SYMTAB:
+      return ELFSectionSymTab<Bitwidth>::read(AR, owner, sh);
+
     case SHT_PROGBITS:
     case SHT_NOBITS:
     case SHT_REL:

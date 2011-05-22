@@ -112,7 +112,7 @@ inline ELFSectionHeader<Bitwidth> const *
 ELFSectionHeaderTable<Bitwidth>::operator[](const std::string &str) const {
   // TODO: Use map
   for (size_t i = 0; i < table.size(); ++i) {
-    if (str == string(table[i]->getName())) {
+    if (str == std::string(table[i]->getName())) {
       return table[i].get();
     }
   }

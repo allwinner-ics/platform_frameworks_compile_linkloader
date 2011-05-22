@@ -43,6 +43,7 @@ namespace detail {
 template <size_t Bitwidth> class ELFHeader;
 template <size_t Bitwidth> class ELFProgramHeader;
 template <size_t Bitwidth> class ELFSectionHeader;
+template <size_t Bitwidth> class ELFSectionSymTabEntry;
 
 // Note: Following TypeTraits specialization MUST be compliant to the
 // System V Application Binary Interface, Chap 4, Data Representation.
@@ -66,6 +67,9 @@ TYPE_TRAITS_SPECIALIZE(ELFProgramHeader<64> , 56, 8)
 TYPE_TRAITS_SPECIALIZE(ELFSectionHeader<32> , 40, 4)
 TYPE_TRAITS_SPECIALIZE(ELFSectionHeader<64> , 64, 8)
 
+TYPE_TRAITS_SPECIALIZE(ELFSectionSymTabEntry<32> , 16, 4)
+TYPE_TRAITS_SPECIALIZE(ELFSectionSymTabEntry<64> , 24, 8)
+
 
 template <size_t Bitwidth>
 struct ELFTypes;
@@ -80,11 +84,18 @@ struct ELFTypes<32> {
   typedef detail::ELFWord       word;
   typedef detail::ELFSword      sword;
 
-  // Note: Don't use these types.  They are not in the specification of
-  // ELF 32.  However, we need these typedefs to define the type introduce
-  // macro.
-  typedef void xword;
-  typedef void sxword;
+  //// Note: Don't use these types.  They are not in the specification of
+  //// ELF 32.  However, we need these typedefs to define the type introduce
+  //// macro.
+  //typedef void xword;
+  //typedef void sxword;
+
+  // Note: By experience(Chapter 4 - Object Files and Chapter 5 - Program
+  // Loading and Dynamic Linking), if it use xword and sxsword in ELF 64, it
+  // use word and sword in ELF 32. Also, it is not specified in ELF 32, We may
+  // use these to simplify our code?
+  typedef detail::ELFWord       xword;
+  typedef detail::ELFSword      sxword;
 };
 
 template <>
