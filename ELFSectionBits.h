@@ -6,7 +6,6 @@
  */
 
 #include "ELFSection.h"
-#include "ELFTypes.h"
 
 #include "utils/helper.h"
 #include "utils/serialize.h"

@@ -47,10 +47,8 @@ public:
 
 //==================Inline Member Function Definition==========================
 
-//#include "ELFObject.h"
-//#include "ELFHeader.h"
 #include "ELFSectionSymTabEntry.h"
-//#include "ELFSection.h"
+#include "ELFSectionHeader.h"
 #include "ELFTypes.h"
 
 template <size_t Bitwidth>
