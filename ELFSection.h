@@ -29,6 +29,8 @@ public:
 #include "ELFSectionHeader.h"
 #include "ELFSectionStrTab.h"
 #include "ELFSectionSymTab.h"
+#include "ELFSectionProgBits.h"
+#include "ELFSectionNoBits.h"
 
 template <size_t Bitwidth>
 template <typename Archiver>
@@ -52,7 +54,11 @@ ELFSection<Bitwidth>::read(Archiver &AR,
       return ELFSectionSymTab<Bitwidth>::read(AR, owner, sh);
 
     case SHT_PROGBITS:
+      return ELFSectionProgBits<Bitwidth>::read(AR, sh);
+
     case SHT_NOBITS:
+      return ELFSectionNoBits<Bitwidth>::read(AR, sh);
+
     case SHT_REL:
     case SHT_RELA:
       // TODO: Not Yet Implemented
