@@ -31,6 +31,7 @@ public:
 #include "ELFSectionSymTab.h"
 #include "ELFSectionProgBits.h"
 #include "ELFSectionNoBits.h"
+#include "ELFSectionRelTable.h"
 
 template <size_t Bitwidth>
 template <typename Archiver>
@@ -60,6 +61,8 @@ ELFSection<Bitwidth>::read(Archiver &AR,
       return ELFSectionNoBits<Bitwidth>::read(AR, sh);
 
     case SHT_REL:
+      return ELFSectionRelTable<Bitwidth>::read(AR, owner, sh);
+
     case SHT_RELA:
       // TODO: Not Yet Implemented
       return shared_ptr<ELFSection>();

@@ -44,6 +44,8 @@ template <size_t Bitwidth> class ELFHeader;
 template <size_t Bitwidth> class ELFProgramHeader;
 template <size_t Bitwidth> class ELFSectionHeader;
 template <size_t Bitwidth> class ELFSectionSymTabEntry;
+template <size_t Bitwidth> class ELFSectionRel;
+template <size_t Bitwidth> class ELFSectionRela;
 
 // Note: Following TypeTraits specialization MUST be compliant to the
 // System V Application Binary Interface, Chap 4, Data Representation.
@@ -69,6 +71,13 @@ TYPE_TRAITS_SPECIALIZE(ELFSectionHeader<64> , 64, 8)
 
 TYPE_TRAITS_SPECIALIZE(ELFSectionSymTabEntry<32> , 16, 4)
 TYPE_TRAITS_SPECIALIZE(ELFSectionSymTabEntry<64> , 24, 8)
+
+TYPE_TRAITS_SPECIALIZE(ELFSectionRel<32> , 8, 4)
+TYPE_TRAITS_SPECIALIZE(ELFSectionRel<64> , 16, 8)
+
+TYPE_TRAITS_SPECIALIZE(ELFSectionRela<32> , 12, 4)
+TYPE_TRAITS_SPECIALIZE(ELFSectionRela<64> , 24, 8)
+
 
 
 template <size_t Bitwidth>
