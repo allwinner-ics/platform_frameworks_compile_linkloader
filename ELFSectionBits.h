@@ -24,7 +24,13 @@ protected:
   size_t buf_size;
 
 protected:
-  ELFSectionBits() { }
+  ELFSectionBits() : buf(NULL), buf_size(0) { }
+
+  ~ELFSectionBits() {
+    if (buf) {
+      munmap(buf, buf_size);
+    }
+  }
 
 public:
   template <typename Archiver>
