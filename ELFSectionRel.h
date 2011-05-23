@@ -127,6 +127,8 @@ inline void ELFSectionRel_CRTP<Bitwidth>::
   using namespace term::color;
   using namespace std;
 
+  std::ios_base::fmtflags prev_flags = cout.flags();
+
   if (shouldPrintHeader) {
     cout << endl << setw(79) << setfill('=') << '=' << setfill(' ') << endl;
     cout << light::white()
@@ -148,6 +150,7 @@ inline void ELFSectionRel_CRTP<Bitwidth>::
   PRINT_LINT("Type",         concrete()->getType()         );
 #undef PRINT_LINT
 
+  cout.flags( prev_flags );
 }
 
 

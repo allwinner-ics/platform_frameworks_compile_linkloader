@@ -4,8 +4,8 @@
 /*
  * This class is a table prototype.
  */
-
-#include "ELFSection.h"
+#include "ELFTypes.h"
+#include "ELFHeader.h"
 
 #include "utils/serialize.h"
 #include "utils/term.h"
@@ -14,15 +14,16 @@
 #include <vector>
 
 template <size_t Bitwidth> class ELFObject;
+template <size_t Bitwidth> class ELFSection;
 template <size_t Bitwidth> class ELFSectionHeader;
 
 template <size_t Bitwidth, typename ConcreteTable, typename TableEntry>
 class ELFSectionTable_CRTP : public ELFSection<Bitwidth> {
 //  friend class ConcreteTable;
-private:
-  std::vector<boost::shared_ptr<TableEntry> > table;
 
 protected:
+  std::vector<boost::shared_ptr<TableEntry> > table;
+
   ELFSectionTable_CRTP() { }
 
 public:
@@ -50,6 +51,8 @@ public:
 
 //==================Inline Member Function Definition==========================
 
+
+#include "ELFSection.h"
 #include "ELFSectionHeader.h"
 
 template <size_t Bitwidth, typename ConcreteTable, typename TableEntry>

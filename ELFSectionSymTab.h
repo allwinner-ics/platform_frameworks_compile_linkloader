@@ -2,11 +2,11 @@
 #define ELF_SECTION_SYMTAB_H
 
 #include "ELFSectionTable_CRTP.h"
-#include "ELFSectionSymTabEntry.h"
 
 #include <vector>
 #include <string>
 
+template <size_t Bitwidth> class ELFSectionSymTabEntry;
 
 template <size_t Bitwidth>
 class ELFSectionSymTab :
@@ -47,6 +47,8 @@ public:
 
 
 //==================Inline Member Function Definition==========================
+
+#include "ELFSectionSymTabEntry.h"
 
 template <size_t Bitwidth>
 std::string const ELFSectionSymTab<Bitwidth>::TABLE_NAME("Symbol Table");
