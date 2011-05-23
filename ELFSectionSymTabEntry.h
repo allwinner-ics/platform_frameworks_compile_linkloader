@@ -123,7 +123,7 @@ template <size_t Bitwidth>
 inline char const *ELFSectionSymTabEntry_CRTP<Bitwidth>::getName() const {
   ELFSectionHeaderTable<Bitwidth> const &shtab =
     *owner->getSectionHeaderTable();
-  size_t const index = shtab[std::string(".strtab")]->getIndex();
+  size_t const index = shtab.getByName(std::string(".strtab"))->getIndex();
   ELFSection<Bitwidth> const *section = owner->getSectionByIndex(index);
   ELFSectionStrTab<Bitwidth> const &strtab =
     *static_cast<ELFSectionStrTab<Bitwidth> const *>(section);

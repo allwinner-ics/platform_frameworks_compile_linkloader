@@ -1,6 +1,9 @@
 #ifndef ELF_SECTION_HEADER_TABLE_H
 #define ELF_SECTION_HEADER_TABLE_H
 
+#include "ELFSectionHeader.h"
+#include "ELFSectionTable_CRTP.h"
+
 #include <boost/shared_ptr.hpp>
 #include <vector>
 #include <string>
@@ -8,13 +11,19 @@
 #include <assert.h>
 
 template <size_t Bitwidth> class ELFObject;
-template <size_t Bitwidth> class ELFSectionHeader;
 
 template <size_t Bitwidth>
-class ELFSectionHeaderTable {
+class ELFSectionHeaderTable :
+  public ELFSectionTable_CRTP<Bitwidth,
+                              ELFSectionHeaderTable<Bitwidth>,
+                              ELFSectionHeader<Bitwidth> > {
+  friend class ELFSectionTable_CRTP<Bitwidth,
+                                    ELFSectionHeaderTable<Bitwidth>,
+                                    ELFSectionHeader<Bitwidth> >;
 private:
-  ELFObject<Bitwidth> *owner;
-  std::vector<boost::shared_ptr<ELFSectionHeader<Bitwidth> > > table;
+  static std::string const TABLE_NAME;
+private:
+  //std::vector<boost::shared_ptr<ELFSectionHeader<Bitwidth> > > table;
 
 private:
   ELFSectionHeaderTable() {
@@ -25,27 +34,18 @@ public:
   static boost::shared_ptr<ELFSectionHeaderTable<Bitwidth> >
   read(Archiver &AR, ELFObject<Bitwidth> *owner);
 
-  ELFSectionHeader<Bitwidth> const *operator[](size_t i) const {
-    return table[i].get();
-  }
+  //ELFSectionHeader<Bitwidth> const *operator[](size_t i) const;
+  //ELFSectionHeader<Bitwidth> *operator[](size_t i);
 
-  ELFSectionHeader<Bitwidth> *operator[](size_t i) {
-    return table[i].get();
-  }
+  ELFSectionHeader<Bitwidth> const *getByName(const std::string &str) const;
+  ELFSectionHeader<Bitwidth> *getByName(const std::string &str);
 
-  ELFSectionHeader<Bitwidth> const *operator[](const std::string &str) const;
-  ELFSectionHeader<Bitwidth> *operator[](const std::string &str);
-
-  void print();
+  //virtual void print() const;
 };
 
 
 #include "ELFObject.h"
 #include "ELFHeader.h"
-#include "ELFSectionHeader.h"
-#include "ELFSection.h"
-#include "ELFTypes.h"
-
 
 template <size_t Bitwidth>
 template <typename Archiver>
@@ -60,7 +60,6 @@ ELFSectionHeaderTable<Bitwidth>::read(Archiver &AR,
 
   // Allocate a new section header table and assign the owner.
   boost::shared_ptr<ELFSectionHeaderTable> tab(new ELFSectionHeaderTable());
-  tab->owner = owner;
 
   // Get ELF header
   ELFHeader<Bitwidth> const *header = owner->getHeader();
@@ -91,38 +90,25 @@ ELFSectionHeaderTable<Bitwidth>::read(Archiver &AR,
 }
 
 template <size_t Bitwidth>
-inline void ELFSectionHeaderTable<Bitwidth>::print() {
-  using namespace std;
-  using namespace term;
-  using namespace term::color;
-
-  cout << endl << setw(79) << setfill('=') << '=' << endl;
-  cout << light::white()
-       << "ELF Section Header Table" << normal() << endl;
-
-  for (size_t i = 0; i < table.size(); ++i) {
-    table[i]->print();
-  }
-
-  cout << setw(79) << setfill('=') << '=' << endl << endl;
-}
+std::string const ELFSectionHeaderTable<Bitwidth>::
+  TABLE_NAME("ELF Section Header Table");
 
 template <size_t Bitwidth>
 inline ELFSectionHeader<Bitwidth> const *
-ELFSectionHeaderTable<Bitwidth>::operator[](const std::string &str) const {
+ELFSectionHeaderTable<Bitwidth>::getByName(const std::string &str) const {
   // TODO: Use map
-  for (size_t i = 0; i < table.size(); ++i) {
-    if (str == std::string(table[i]->getName())) {
-      return table[i].get();
+  for (size_t i = 0; i < this->table.size(); ++i) {
+    if (str == std::string(this->table[i]->getName())) {
+      return this->table[i].get();
     }
   }
   // Return SHN_UNDEF section header;
-  return table[0].get();
+  return this->table[0].get();
 }
 
 template <size_t Bitwidth>
 inline ELFSectionHeader<Bitwidth> *
-ELFSectionHeaderTable<Bitwidth>::operator[](const std::string &str) {
+ELFSectionHeaderTable<Bitwidth>::getByName(const std::string &str) {
   ELFSectionHeader<Bitwidth> const *shptr = (*this)[str];
   // Const cast for the same API's const and non-const versions.
   return const_cast<ELFSectionHeader<Bitwidth> *>(shptr);
