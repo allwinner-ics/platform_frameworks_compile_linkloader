@@ -40,14 +40,18 @@ print '===> BUILDING IN ' + mode.upper() + ' MODE ...'
 
 import os
 
+c_include_path = os.environ['C_INCLUDE_PATH'] if 'C_INCLUDE_PATH' in os.environ else '';
+cplus_include_path = os.environ['CPLUS_INCLUDE_PATH'] if 'CPLUS_INCLUDE_PATH' in os.environ else '';
+
+
 env = Environment(CC=build_toolkit['CC'],
                   CXX=build_toolkit['CXX'],
                   CFLAGS=build_config['CFLAGS'],
                   CXXFLAGS=build_config['CXXFLAGS'],
                   CPPPATH=['utils'],
                   ENV = {'PATH' : os.environ['PATH'],
-                         'C_INCLUDE_PATH' : os.environ['C_INCLUDE_PATH'],
-                         'CPLUS_INCLUDE_PATH' : os.environ['CPLUS_INCLUDE_PATH'],})
+                         'C_INCLUDE_PATH' : c_include_path,
+                         'CPLUS_INCLUDE_PATH' : cplus_include_path})
 
 env.Program('elfreader',
             source=['ELFHeader.cpp',
