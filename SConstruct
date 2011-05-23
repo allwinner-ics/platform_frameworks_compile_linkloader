@@ -45,7 +45,9 @@ env = Environment(CC=build_toolkit['CC'],
                   CFLAGS=build_config['CFLAGS'],
                   CXXFLAGS=build_config['CXXFLAGS'],
                   CPPPATH=['utils'],
-                  ENV = {'PATH' : os.environ['PATH']})
+                  ENV = {'PATH' : os.environ['PATH'],
+                         'C_INCLUDE_PATH' : os.environ['C_INCLUDE_PATH'],
+                         'CPLUS_INCLUDE_PATH' : os.environ['CPLUS_INCLUDE_PATH'],})
 
 env.Program('elfreader',
             source=['ELFHeader.cpp',
