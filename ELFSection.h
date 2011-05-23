@@ -64,6 +64,7 @@ ELFSection<Bitwidth>::read(Archiver &AR,
       return ELFSectionRelTable<Bitwidth>::read(AR, owner, sh);
 
     case SHT_RELA:
+    case SHT_NULL:
       // TODO: Not Yet Implemented
       return shared_ptr<ELFSection>();
   };
