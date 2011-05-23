@@ -170,6 +170,8 @@ inline void ELFSectionSymTabEntry_CRTP<Bitwidth>::
   using namespace term::color;
   using namespace std;
 
+  std::ios_base::fmtflags prev_flags = cout.flags();
+
   if (shouldPrintHeader) {
     cout << endl << setw(79) << setfill('=') << '=' << setfill(' ') << endl;
     cout << light::white()
@@ -183,7 +185,8 @@ inline void ELFSectionSymTabEntry_CRTP<Bitwidth>::
 
   cout << setw(79) << setfill('-') << '-' << endl << setfill(' ');
 #define PRINT_LINT(title, value) \
-  cout << "  " << setw(11) << (title) << " : " << (value) << endl
+  cout << left << "  " << setw(11) \
+       << (title) << " : " << right << (value) << endl
   PRINT_LINT("Name",        getName()                                    );
   PRINT_LINT("Type",        getTypeStr(getType())                        );
   PRINT_LINT("Bind",        getBindingAttributeStr(getBindingAttribute()));
@@ -207,6 +210,8 @@ inline void ELFSectionSymTabEntry_CRTP<Bitwidth>::
           setw(7) << getSize() <<
           endl;
 #endif
+
+  cout.flags( prev_flags );
 }
 
 

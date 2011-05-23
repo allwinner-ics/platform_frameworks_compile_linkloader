@@ -6,11 +6,12 @@ namespace detail {
 #define ELF_TYPE_PRINT_OPERATOR(TYPE, FORMAT_WIDTH)                         \
   std::ostream &operator<<(std::ostream &os, TYPE const &val) {             \
     char prev_fill = os.fill('0');                                          \
-    std::ios_base::fmtflags prev_flags = os.setf(std::ios_base::hex,        \
-                                                 std::ios_base::basefield); \
+    std::ios_base::fmtflags prev_flags = os.flags();                        \
+    os.setf(std::ios_base::hex, std::ios_base::basefield);                  \
+    os.setf(std::ios_base::right);                                          \
     os.width(FORMAT_WIDTH);                                                 \
     os << val.value;                                                        \
-    os.setf(prev_flags);                                                    \
+    os.flags(prev_flags);                                                   \
     os.fill(prev_fill);                                                     \
     return os;                                                              \
   }

@@ -21,6 +21,8 @@ private:
     using namespace term;
     using namespace term::color;
 
+    std::ios_base::fmtflags prev_flags = cout.flags();
+
     cout << endl << setw(79) << setfill('=') << '=' << endl;
 
     cout << light::white() << "NOGBITS:" <<
@@ -28,13 +30,15 @@ private:
 
     cout << setw(79) << setfill('-') << '-' << endl << setfill(' ');
 
-    cout << "Size         : " << this->size() << endl;
-    cout << "Start Address: " <<
-            static_cast<addr_t>((size_t)this->buf) << endl;
+    cout << "  Size         : " << right << this->size() << endl;
+    cout << "  Start Address: " << right
+         << static_cast<addr_t>((size_t)this->buf) << endl;
 
     dump_hex(this->buf, this->buf_size, 0, 16);
 
     cout << endl << setw(79) << setfill('=') << '=' << endl;
+
+    cout.flags( prev_flags );
   }
 };
 

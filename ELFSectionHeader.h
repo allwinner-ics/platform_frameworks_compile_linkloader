@@ -122,6 +122,8 @@ public:
     using namespace term;
     using namespace term::color;
 
+    std::ios_base::fmtflags prev_flags = cout.flags();
+
     if (shouldPrintHeader) {
       cout << endl << setw(79) << setfill('=') << '=' << setfill(' ') << endl;
       cout << light::white()
@@ -162,6 +164,8 @@ public:
     if (shouldPrintHeader) {
       cout << setw(79) << setfill('=') << '=' << setfill(' ') << endl << endl;
     }
+
+    cout.flags( prev_flags );
   }
 
 private:

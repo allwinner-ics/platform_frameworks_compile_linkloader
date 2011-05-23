@@ -47,6 +47,8 @@ public:
     using namespace term;
     using namespace term::color;
 
+    std::ios_base::fmtflags prev_flags = cout.flags();
+
     cout << endl << setw(79) << setfill('=') << '=' << endl;
 
     cout << light::white() << "ELF String Table" << normal() << endl;
@@ -56,6 +58,8 @@ public:
     dump_hex((unsigned char const *)&*buf.begin(), buf.size(), 0, buf.size());
 
     cout << setw(79) << setfill('=') << '=' << endl << endl;
+
+    cout.flags( prev_flags );
   }
 
   char const *operator[](size_t index) const {
