@@ -160,7 +160,8 @@ template <>
 class ELFSectionRel<32> : public ELFSectionRel_CRTP<32> {
   friend class ELFSectionRel_CRTP<32>;
 
-private:
+// Note: Protected for Rela
+protected:
   ELFSectionRel() {
   }
 
@@ -183,7 +184,8 @@ template <>
 class ELFSectionRel<64> : public ELFSectionRel_CRTP<64> {
   friend class ELFSectionRel_CRTP<64>;
 
-private:
+// Note: Protected for Rela
+protected:
   ELFSectionRel() {
   }
 
