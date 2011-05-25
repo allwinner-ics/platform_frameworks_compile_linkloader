@@ -40,8 +40,11 @@ print '===> BUILDING IN ' + mode.upper() + ' MODE ...'
 
 import os
 
-c_include_path = os.environ['C_INCLUDE_PATH'] if 'C_INCLUDE_PATH' in os.environ else '';
-cplus_include_path = os.environ['CPLUS_INCLUDE_PATH'] if 'CPLUS_INCLUDE_PATH' in os.environ else '';
+c_include_path = os.environ['C_INCLUDE_PATH'] \
+                      if 'C_INCLUDE_PATH' in os.environ else ''
+
+cplus_include_path = os.environ['CPLUS_INCLUDE_PATH'] \
+                      if 'CPLUS_INCLUDE_PATH' in os.environ else ''
 
 
 env = Environment(CC=build_toolkit['CC'],
