@@ -9,7 +9,6 @@
 
 #include "utils/helper.h"
 #include "utils/serialize.h"
-#include "utils/term.h"
 
 #include <sys/mman.h>
 #include <boost/shared_ptr.hpp>

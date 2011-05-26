@@ -3,8 +3,6 @@
 
 #include "ELFTypes.h"
 
-#include "utils/term.h"
-
 #include <boost/shared_ptr.hpp>
 #include <iomanip>
 #include <iostream>
