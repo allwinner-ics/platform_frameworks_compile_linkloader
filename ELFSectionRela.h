@@ -9,6 +9,8 @@
 #include <iomanip>
 #include <iostream>
 #include <string>
+#include <llvm/Support/raw_ostream.h>
+#include <llvm/Support/Format.h>
 
 #include <stdint.h>
 
@@ -106,36 +108,31 @@ ELFSectionRela<Bitwidth>::read(Archiver &AR,
 template <size_t Bitwidth>
 inline void ELFSectionRela<Bitwidth>::
   print(bool shouldPrintHeader) const {
-  using namespace term::color;
-  using namespace std;
-
-  std::ios_base::fmtflags prev_flags = cout.flags();
-
+  using namespace llvm;
   if (shouldPrintHeader) {
-    cout << endl << setw(79) << setfill('=') << '=' << setfill(' ') << endl;
-    cout << light::white()
-         << "ELF Relaocation Table(with Addend) Entry "
-         << this->getIndex() << normal() << endl;
-    cout << setw(79) << setfill('-') << '-' << setfill(' ') << endl;
+    out() << '\n' << fillformat('=', 79) << '\n';
+    out().changeColor(raw_ostream::WHITE, true);
+    out() << "ELF Relaocation Table(with Addend) Entry "
+          << this->getIndex() << '\n';
+    out().resetColor();
+    out() << fillformat('-', 79) << '\n';
   } else {
-    cout << setw(79) << setfill('-') << '-' << setfill(' ') << endl;
-    cout << light::yellow()
-         << "ELF Relaocation Table(with Addend) Entry "
-         << this->getIndex() << " : "
-         << normal() << endl;
+    out() << fillformat('-', 79) << '\n';
+    out().changeColor(raw_ostream::YELLOW, true);
+    out() << "ELF Relaocation Table(with Addend) Entry "
+          << this->getIndex() << " : ";
+    out().resetColor();
+    out() << '\n';
   }
 
-  cout << setw(79) << setfill('-') << '-' << endl << setfill(' ');
+  out() << fillformat('-', 79) << '\n';
 #define PRINT_LINT(title, value) \
-  cout << left << "  " << setw(13) \
-       << (title) << " : " << right << (value) << endl
+  out() << format("  %-13s : ", (char const *)(title)) << (value) << '\n'
   PRINT_LINT("Offset",       this->getOffset()       );
   PRINT_LINT("SymTab Index", this->getSymTabIndex()  );
   PRINT_LINT("Type",         this->getType()         );
   PRINT_LINT("Addend",       this->getAddend()       );
 #undef PRINT_LINT
-
-  cout.flags( prev_flags );
 }
 
 #endif // ELF_SECTION_RELA_H

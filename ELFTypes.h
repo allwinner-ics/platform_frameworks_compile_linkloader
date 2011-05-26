@@ -20,8 +20,7 @@ namespace detail {
                                                                             \
     operator IMPL() const { return value; }                                 \
     operator IMPL &() { return value; }                                     \
-  };                                                                        \
-  extern llvm::raw_ostream &operator<<(llvm::raw_ostream &, TYPE const &);
+  };
 
   ELF_TYPE_WRAPPER(ELFHalf      , uint16_t)
   ELF_TYPE_WRAPPER(ELFWord      , uint32_t)
@@ -39,6 +38,14 @@ namespace detail {
   extern std::ostream &operator<<(std::ostream &, ELF32Offset const &);
   extern std::ostream &operator<<(std::ostream &, ELF64Address const &);
   extern std::ostream &operator<<(std::ostream &, ELF64Offset const &);
+  extern llvm::raw_ostream &operator<<(llvm::raw_ostream &,
+                                       ELF32Address const &);
+  extern llvm::raw_ostream &operator<<(llvm::raw_ostream &,
+                                       ELF32Offset const &);
+  extern llvm::raw_ostream &operator<<(llvm::raw_ostream &,
+                                       ELF64Address const &);
+  extern llvm::raw_ostream &operator<<(llvm::raw_ostream &,
+                                       ELF64Offset const &);
 }
 
 extern llvm::raw_ostream &out();
