@@ -3,11 +3,11 @@
 
 #include "ELFTypes.h"
 
-#include "utils/term.h"
+#include "utils/raw_ostream.h"
 
 #include <boost/shared_ptr.hpp>
-#include <iomanip>
-#include <iostream>
+#include <llvm/Support/raw_ostream.h>
+#include <llvm/Support/Format.h>
 
 #include <elf.h>
 #include <string.h>
@@ -167,71 +167,37 @@ public:
   }
 
   void print() {
-    using namespace std;
-    using namespace term;
-    using namespace term::color;
+    using namespace llvm;
 
-    cout << endl << setw(79) << setfill('=') << '=' << endl;
+    out() << fillformat('=', 79) << '\n';
+    out().changeColor(raw_ostream::WHITE, true);
+    out() << "ELF Header\n";
+    out().resetColor();
+    out() << fillformat('-', 79) << '\n';
 
-    cout << light::white() << "ELF Header" << normal() << endl;
+#define PRINT_LINT(title, value) \
+  out() << format("  %-32s : ", (char const *)(title)) << (value) << '\n'
+    PRINT_LINT("Class",                 getClassStr(getClass()));
+    PRINT_LINT("Endianness",            getEndiannessStr(getEndianness()));
+    PRINT_LINT("Header Version",        (unsigned)getVersion());
+    PRINT_LINT("OS ABI",                getOSABIStr(getOSABI()));
+    PRINT_LINT("ABI Version",           (unsigned)getABIVersion());
+    PRINT_LINT("Object Type",           getObjectTypeStr(getObjectType()));
+    PRINT_LINT("Machine",               getMachineStr(getMachine()));
+    PRINT_LINT("Version",               getVersionStr(getVersion()));
+    PRINT_LINT("Entry Address",         getEntryAddress());
+    PRINT_LINT("Program Header Offset", getProgramHeaderTableOffset());
+    PRINT_LINT("Section Header Offset", getSectionHeaderTableOffset());
+    PRINT_LINT("Flags",                 getFlags());
+    PRINT_LINT("ELF Header Size",       getELFHeaderSize());
+    PRINT_LINT("Program Header Size",   getProgramHeaderEntrySize());
+    PRINT_LINT("Program Header Num",    getProgramHeaderNum());
+    PRINT_LINT("Section Header Size",   getSectionHeaderEntrySize());
+    PRINT_LINT("Section Header Num",    getSectionHeaderNum());
+    PRINT_LINT("String Section Index",  getStringSectionIndex());
+#undef PRINT_LINT
 
-    cout << setw(79) << setfill('-') << '-' << endl << setfill(' ');
-
-    cout << "  " << setw(21) << "Class" << " : "
-         << getClassStr(getClass()) << endl;
-
-    cout << "  " << setw(21) << "Endianness" << " : "
-         << getEndiannessStr(getEndianness()) << endl;
-
-    cout << "  " << setw(21) << "Header Version" << " : "
-         << (unsigned)getVersion() << endl;
-
-    cout << "  " << setw(21) << "OS ABI" << " : "
-         << getOSABIStr(getOSABI()) << endl;
-
-    cout << "  " << setw(21) << "ABI Version" << " : "
-         << (unsigned)getABIVersion() << endl;
-
-
-    cout << "  " << setw(21) << "Object Type" << " : "
-         << getObjectTypeStr(getObjectType()) << endl;
-
-    cout << "  " << setw(21) << "Machine" << " : "
-         << getMachineStr(getMachine()) << endl;
-
-    cout << "  " << setw(21) << "Version" << " : "
-         << getVersionStr(getVersion()) << endl;
-
-    cout << "  " << setw(21) << "Entry Address" << " : "
-         << getEntryAddress() << endl;
-
-    cout << "  " << setw(21) << "Program Header Offset" << " : "
-         << getProgramHeaderTableOffset() << endl;
-
-    cout << "  " << setw(21) << "Section Header Offset" << " : "
-         << getSectionHeaderTableOffset() << endl;
-
-    cout << "  " << setw(21) << "Flags" << " : " << getFlags() << endl;
-
-    cout << "  " << setw(21) << "ELF Header Size" << " : "
-         << getELFHeaderSize() << endl;
-
-    cout << "  " << setw(21) << "Program Header Size" << " : "
-         << getProgramHeaderEntrySize() << endl;
-
-    cout << "  " << setw(21) << "Program Header Num" << " : "
-         << getProgramHeaderNum() << endl;
-
-    cout << "  " << setw(21) << "Section Header Size" << " : "
-         << getSectionHeaderEntrySize() << endl;
-
-    cout << "  " << setw(21) << "Section Header Num" << " : "
-         << getSectionHeaderNum() << endl;
-
-    cout << "  " << setw(21) << "String Section Index" << " : "
-         << getStringSectionIndex() << endl;
-
-    cout << setw(79) << setfill('=') << '=' << endl << endl;
+    out() << fillformat('=', 79) << "\n\n";
   }
 
   bool isValid() const {

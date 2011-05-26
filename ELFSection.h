@@ -4,7 +4,7 @@
 #include "utils/serialize.h"
 
 #include <boost/shared_ptr.hpp>
-#include <iostream>
+#include <llvm/Support/raw_ostream.h>
 
 template <size_t Bitwidth> class ELFObject;
 template <size_t Bitwidth> class ELFSectionHeader;
@@ -46,7 +46,7 @@ ELFSection<Bitwidth>::read(Archiver &AR,
   switch ((uint32_t)sh->getType()) {
     default:
       // Uknown type of ELF section.  Return NULL.
-      cerr << "WARNING: Unknown section type." << endl;
+      llvm::errs() << "WARNING: Unknown section type.\n";
       return shared_ptr<ELFSection>();
 
     case SHT_STRTAB:

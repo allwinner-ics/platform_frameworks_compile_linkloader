@@ -12,6 +12,7 @@
 
 #include <sys/mman.h>
 #include <boost/shared_ptr.hpp>
+#include <llvm/Support/raw_ostream.h>
 
 template <size_t Bitwidth> class ELFSectionHeader;
 
@@ -113,7 +114,7 @@ ELFSectionBits<Bitwidth, ConcreteELFSectionBits>::memory_protect() const {
     int ret = mprotect((void *)buf, buf_size, protect_type);
     if (ret == -1) {
       // FIXME: Throws excetion?
-      std::cerr<<"Error: Can't mprotect."<<std::endl;
+      llvm::errs()<<"Error: Can't mprotect.\n";
       return 0;
     }
   }

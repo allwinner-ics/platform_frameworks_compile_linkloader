@@ -3,7 +3,6 @@
 
 #include "utils/traits.h"
 
-#include <iostream>
 #include <stdint.h>
 #include <llvm/Support/raw_ostream.h>
 
@@ -34,10 +33,6 @@ namespace detail {
 
 #undef ELF_TYPE_WRAPPER
 
-  extern std::ostream &operator<<(std::ostream &, ELF32Address const &);
-  extern std::ostream &operator<<(std::ostream &, ELF32Offset const &);
-  extern std::ostream &operator<<(std::ostream &, ELF64Address const &);
-  extern std::ostream &operator<<(std::ostream &, ELF64Offset const &);
   extern llvm::raw_ostream &operator<<(llvm::raw_ostream &,
                                        ELF32Address const &);
   extern llvm::raw_ostream &operator<<(llvm::raw_ostream &,
