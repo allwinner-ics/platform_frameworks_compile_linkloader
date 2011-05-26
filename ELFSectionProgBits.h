@@ -4,6 +4,8 @@
 #include <llvm/Support/raw_ostream.h>
 #include <llvm/Support/Format.h>
 
+#include "utils/raw_ostream.h"
+
 
 template <size_t Bitwidth>
 class ELFSectionProgBits :

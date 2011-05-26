@@ -48,16 +48,6 @@ namespace detail {
                                        ELF64Offset const &);
 }
 
-extern llvm::raw_ostream &out();
-struct MyFormat {
-  char *ptr;
-};
-extern MyFormat const fillformat(char const,        // Fill character.
-                                 int const,         // Fill Width.
-                                 char const * = "", // Format string.
-                                 ...);              // Format variable.
-extern llvm::raw_ostream &operator<<(llvm::raw_ostream &, MyFormat const &);
-
 template <size_t Bitwidth> class ELFHeader;
 template <size_t Bitwidth> class ELFProgramHeader;
 template <size_t Bitwidth> class ELFSectionHeader;

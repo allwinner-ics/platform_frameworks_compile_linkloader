@@ -8,6 +8,7 @@
 #include "ELFHeader.h"
 
 #include "utils/serialize.h"
+#include "utils/raw_ostream.h"
 
 #include <boost/shared_ptr.hpp>
 #include <vector>

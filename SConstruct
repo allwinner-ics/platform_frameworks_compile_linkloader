@@ -69,4 +69,5 @@ env.Program('elfreader',
                     'ELFTypes.cpp',
                     'main.cpp',
                     'utils/helper.cpp',
+                    'utils/raw_ostream.cpp',
                     'utils/term.cpp'])
