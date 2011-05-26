@@ -19,14 +19,6 @@ template <size_t Bitwidth> class ELFSectionRela;
 template <size_t Bitwidth> class ELFSectionRela_CRTP;
 
 
-class ELFSectionRelaHelperMixin {
-protected:
-//  static char const *getTypeStr(uint8_t);
-//  static char const *getBindingAttributeStr(uint8_t);
-//  static char const *getVisibilityStr(uint8_t);
-};
-
-
 template <size_t Bitwidth>
 class ELFSectionRela : public ELFSectionRel<Bitwidth> {
 public:
