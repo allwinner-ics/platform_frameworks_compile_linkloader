@@ -5,6 +5,7 @@
 
 #include <iostream>
 #include <stdint.h>
+#include <llvm/Support/raw_ostream.h>
 
 namespace detail {
 #define ELF_TYPE_WRAPPER(TYPE, IMPL)                                        \
@@ -19,7 +20,8 @@ namespace detail {
                                                                             \
     operator IMPL() const { return value; }                                 \
     operator IMPL &() { return value; }                                     \
-  };
+  };                                                                        \
+  extern llvm::raw_ostream &operator<<(llvm::raw_ostream &, TYPE const &);
 
   ELF_TYPE_WRAPPER(ELFHalf      , uint16_t)
   ELF_TYPE_WRAPPER(ELFWord      , uint32_t)
@@ -39,6 +41,15 @@ namespace detail {
   extern std::ostream &operator<<(std::ostream &, ELF64Offset const &);
 }
 
+extern llvm::raw_ostream &out();
+struct MyFormat {
+  char *ptr;
+};
+extern MyFormat const fillformat(char const,        // Fill character.
+                                 int const,         // Fill Width.
+                                 char const * = "", // Format string.
+                                 ...);              // Format variable.
+extern llvm::raw_ostream &operator<<(llvm::raw_ostream &, MyFormat const &);
 
 template <size_t Bitwidth> class ELFHeader;
 template <size_t Bitwidth> class ELFProgramHeader;

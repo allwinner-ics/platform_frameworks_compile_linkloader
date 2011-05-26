@@ -46,7 +46,6 @@ c_include_path = os.environ['C_INCLUDE_PATH'] \
 cplus_include_path = os.environ['CPLUS_INCLUDE_PATH'] \
                       if 'CPLUS_INCLUDE_PATH' in os.environ else ''
 
-
 env = Environment(CC=build_toolkit['CC'],
                   CXX=build_toolkit['CXX'],
                   CFLAGS=build_config['CFLAGS'],
@@ -55,6 +54,13 @@ env = Environment(CC=build_toolkit['CC'],
                   ENV = {'PATH' : os.environ['PATH'],
                          'C_INCLUDE_PATH' : c_include_path,
                          'CPLUS_INCLUDE_PATH' : cplus_include_path})
+
+env.AppendUnique(CPPDEFINES = ['__STDC_LIMIT_MACROS',
+                               '__STDC_CONSTANT_MACROS',
+                               'HAVE_STDINT_H'])
+
+env.ParseConfig('llvm-config --ldflags --libs support')
+
 
 env.Program('elfreader',
             source=['ELFHeader.cpp',
