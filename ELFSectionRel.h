@@ -6,8 +6,6 @@
 #include "utils/raw_ostream.h"
 
 #include <boost/shared_ptr.hpp>
-#include <iomanip>
-#include <iostream>
 #include <string>
 #include <llvm/Support/raw_ostream.h>
 #include <llvm/Support/Format.h>
@@ -138,9 +136,8 @@ inline void ELFSectionRel_CRTP<Bitwidth>::
     out() << fillformat('-', 79) << '\n';
     out().changeColor(raw_ostream::YELLOW, true);
     out() << "ELF Relaocation Table Entry "
-          << this->getIndex() << " : ";
+          << this->getIndex() << " : " << '\n';
     out().resetColor();
-    out() << '\n';
   }
 
   out() << fillformat('-', 79) << '\n';

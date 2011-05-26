@@ -1,14 +1,9 @@
 #include "helper.h"
-
-#include <iostream>
-#include <iomanip>
+#include "raw_ostream.h"
 
 #include <stdlib.h>
 
-#include "term.h"
-
-using namespace std;
-using namespace term::color;
+using namespace llvm;
 
 void dump_hex(unsigned char const *data,
               size_t size, size_t begin, size_t end) {
@@ -17,36 +12,31 @@ void dump_hex(unsigned char const *data,
     return;
   }
 
-  std::ios_base::fmtflags prev_flags = cout.flags();
-
   size_t lower = begin & (~0xfUL);
   size_t upper = (end & (~0xfUL)) ? end : ((end + 16UL) & (~0xfUL));
 
   for (size_t i = lower; i < upper; i += 16) {
-    cout << hex << setfill('0') << setw(8) << right << i << ':';
+    out() << format("%08x", i) << ':';
 
     if (i < begin) {
-      cout << dark::magenta();
+      out().changeColor(raw_ostream::MAGENTA);
     }
 
     for (size_t j = i, k = i + 16; j < k; ++j) {
       if (j == begin) {
-        cout << normal();
+        out().resetColor();
       }
 
       if (j == end) {
-        cout << dark::magenta();
+        out().changeColor(raw_ostream::MAGENTA);
       }
 
       if (j < size) {
-        cout << ' ' << hex << setfill('0') << setw(2) << (unsigned)data[j];
+        out() << ' ' << format("%02x", (unsigned)data[j]);
       }
     }
 
-    // Only setw affects the next out, other will affect all outputs. So we
-    // should recover the flags.
-    cout.flags( prev_flags );
-
-    cout << normal() << endl;
+    out().resetColor();
+    out() << '\n';
   }
 }

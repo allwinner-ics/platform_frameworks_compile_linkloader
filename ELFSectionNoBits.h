@@ -25,9 +25,8 @@ private:
 
     out() << '\n' << fillformat('=', 79) << '\n';
     out().changeColor(raw_ostream::WHITE, true);
-    out() << "ELF NOBITS: " << this->section_header->getName();
+    out() << "ELF NOBITS: " << this->section_header->getName() << '\n';
     out().resetColor();
-    out() << '\n';
     out() << fillformat('-', 79) << '\n';
 
     out() << " Size         : " << this->size() << '\n';

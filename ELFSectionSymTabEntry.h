@@ -3,11 +3,7 @@
 
 #include "ELFTypes.h"
 
-#include "utils/term.h"
-
 #include <boost/shared_ptr.hpp>
-#include <iomanip>
-#include <iostream>
 #include <string>
 
 #include <stdint.h>
@@ -167,26 +163,26 @@ ELFSectionSymTabEntry_CRTP<Bitwidth>::read(Archiver &AR,
 template <size_t Bitwidth>
 inline void ELFSectionSymTabEntry_CRTP<Bitwidth>::
   print(bool shouldPrintHeader) const {
-  using namespace term::color;
-  using namespace std;
-
-  std::ios_base::fmtflags prev_flags = cout.flags();
+  using namespace llvm;
 
   if (shouldPrintHeader) {
-    cout << endl << setw(79) << setfill('=') << '=' << setfill(' ') << endl;
-    cout << light::white()
-         << "ELF Symbol Table Entry " << getIndex() << normal() << endl;
-    cout << setw(79) << setfill('-') << '-' << setfill(' ') << endl;
+    out() << '\n' << fillformat('=', 79) << '\n';
+    out().changeColor(raw_ostream::WHITE, true);
+    out() << "ELF Symbol Table Entry "
+          << this->getIndex() << '\n';
+    out().resetColor();
+    out() << fillformat('-', 79) << '\n';
   } else {
-    cout << setw(79) << setfill('-') << '-' << setfill(' ') << endl;
-    cout << light::yellow()
-         << "ELF Symbol Table Entry " << getIndex() << " : " << normal() << endl;
+    out() << fillformat('-', 79) << '\n';
+    out().changeColor(raw_ostream::YELLOW, true);
+    out() << "ELF Symbol Table Entry "
+          << this->getIndex() << " : " << '\n';
+    out().resetColor();
   }
 
-  cout << setw(79) << setfill('-') << '-' << endl << setfill(' ');
+  out() << fillformat('-', 79) << '\n';
 #define PRINT_LINT(title, value) \
-  cout << left << "  " << setw(11) \
-       << (title) << " : " << right << (value) << endl
+  out() << format("  %-11s : ", (char const *)(title)) << (value) << '\n'
   PRINT_LINT("Name",        getName()                                    );
   PRINT_LINT("Type",        getTypeStr(getType())                        );
   PRINT_LINT("Bind",        getBindingAttributeStr(getBindingAttribute()));
@@ -210,8 +206,6 @@ inline void ELFSectionSymTabEntry_CRTP<Bitwidth>::
           setw(7) << getSize() <<
           endl;
 #endif
-
-  cout.flags( prev_flags );
 }
 
 

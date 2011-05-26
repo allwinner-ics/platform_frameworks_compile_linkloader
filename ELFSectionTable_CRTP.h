@@ -96,9 +96,8 @@ ELFSectionTable_CRTP<Bitwidth, ConcreteTable, TableEntry>::print() const {
 
   out() << '\n' << fillformat('=', 79) << '\n';
   out().changeColor(raw_ostream::WHITE, true);
-  out() << ConcreteTable::TABLE_NAME;
+  out() << ConcreteTable::TABLE_NAME << '\n';
   out().resetColor();
-  out() << '\n';
 
   for (size_t i = 0; i < this->size(); ++i) {
       (*this)[i]->print();
