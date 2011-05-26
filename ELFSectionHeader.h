@@ -3,11 +3,11 @@
 
 #include "ELFTypes.h"
 
-#include "utils/term.h"
+#include "utils/raw_ostream.h"
 
 #include <boost/shared_ptr.hpp>
-#include <iomanip>
-#include <iostream>
+#include <llvm/Support/raw_ostream.h>
+#include <llvm/Support/Format.h>
 
 #include <stdint.h>
 
@@ -118,54 +118,40 @@ public:
   }
 
   void print(bool shouldPrintHeader = false) const {
-    using namespace std;
-    using namespace term;
-    using namespace term::color;
-
-    std::ios_base::fmtflags prev_flags = cout.flags();
+    using namespace llvm;
 
     if (shouldPrintHeader) {
-      cout << endl << setw(79) << setfill('=') << '=' << setfill(' ') << endl;
-      cout << light::white()
-           << "ELF Section Header " << index << normal() << endl;
-      cout << setw(79) << setfill('-') << '-' << setfill(' ') << endl;
+      out() << '\n' << fillformat('=', 79) << '\n';
+      out().changeColor(raw_ostream::WHITE, true);
+      out() << "ELF Section Header "
+            << this->getIndex() << '\n';
+      out().resetColor();
+      out() << fillformat('-', 79) << '\n';
     } else {
-      cout << setw(79) << setfill('-') << '-' << setfill(' ') << endl;
-      cout << light::yellow()
-           << "ELF Section Header " << index << " : " << normal() << endl;
+      out() << fillformat('-', 79) << '\n';
+      out().changeColor(raw_ostream::YELLOW, true);
+      out() << "ELF Section Header "
+            << this->getIndex() << " : " << '\n';
+      out().resetColor();
     }
 
-    cout << "  " << setw(13) << "Name" << " : " << getName() << endl;
-
-    cout << "  " << setw(13) << "Type" << " : "
-         << getSectionTypeStr(getType()) << endl;
-
-    cout << "  " << setw(13) << "Flags" << " : "
-         << concrete()->getFlags() << endl;
-
-    cout << "  " << setw(13) << "Address" << " : " << getAddress() << endl;
-
-    cout << "  " << setw(13) << "Offset" << " : " << getOffset() << endl;
-
-    cout << "  " << setw(13) << "Size" << " : "
-         << concrete()->getSize() << endl;
-
-    cout << "  " << setw(13) << "Link" << " : " << getLink() << endl;
-
-    cout << "  " << setw(13) << "Extra Info" << " : "
-         << getExtraInfo() << endl;
-
-    cout << "  " << setw(13) << "Address Align" << " : "
-         << concrete()->getAddressAlign() << endl;
-
-    cout << "  " << setw(13) << "Entry Size" << " : "
-         << concrete()->getEntrySize() << endl;
+#define PRINT_LINT(title, value) \
+  out() << format("  %-13s : ", (char const *)(title)) << (value) << '\n'
+  PRINT_LINT("Name",          getName() );
+  PRINT_LINT("Type",          getSectionTypeStr(getType()));
+  PRINT_LINT("Flags",         concrete()->getFlags());
+  PRINT_LINT("Address",       getAddress());
+  PRINT_LINT("Offset",        getOffset());
+  PRINT_LINT("Size",          concrete()->getSize());
+  PRINT_LINT("Link",          getLink());
+  PRINT_LINT("Extra Info",    getExtraInfo());
+  PRINT_LINT("Address Align", concrete()->getAddressAlign());
+  PRINT_LINT("Entry Size",    concrete()->getEntrySize());
+#undef PRINT_LINT
 
     if (shouldPrintHeader) {
-      cout << setw(79) << setfill('=') << '=' << setfill(' ') << endl << endl;
+      out() << fillformat('=', 79) << '\n';
     }
-
-    cout.flags( prev_flags );
   }
 
 private:

@@ -18,7 +18,7 @@ template <size_t Bitwidth> class ELFSectionHeader;
 template <size_t Bitwidth, typename ConcreteELFSectionBits>
 class ELFSectionBits : public ELFSection<Bitwidth> {
 protected:
-  ELFSectionHeader<Bitwidth> const*section_header;
+  ELFSectionHeader<Bitwidth> const *section_header;
   unsigned char *buf;
   size_t buf_size;
 

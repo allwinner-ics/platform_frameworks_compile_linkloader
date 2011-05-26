@@ -114,7 +114,6 @@ inline void ELFSectionRela<Bitwidth>::
     out().resetColor();
   }
 
-  out() << fillformat('-', 79) << '\n';
 #define PRINT_LINT(title, value) \
   out() << format("  %-13s : ", (char const *)(title)) << (value) << '\n'
   PRINT_LINT("Offset",       this->getOffset()       );

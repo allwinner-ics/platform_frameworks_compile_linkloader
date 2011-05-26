@@ -180,7 +180,6 @@ inline void ELFSectionSymTabEntry_CRTP<Bitwidth>::
     out().resetColor();
   }
 
-  out() << fillformat('-', 79) << '\n';
 #define PRINT_LINT(title, value) \
   out() << format("  %-11s : ", (char const *)(title)) << (value) << '\n'
   PRINT_LINT("Name",        getName()                                    );
