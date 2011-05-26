@@ -8,10 +8,11 @@
 #include "ELFHeader.h"
 
 #include "utils/serialize.h"
-#include "utils/term.h"
 
 #include <boost/shared_ptr.hpp>
 #include <vector>
+#include <llvm/Support/raw_ostream.h>
+#include <llvm/Support/Format.h>
 
 template <size_t Bitwidth> class ELFObject;
 template <size_t Bitwidth> class ELFSection;
@@ -90,18 +91,19 @@ ELFSectionTable_CRTP<Bitwidth, ConcreteTable, TableEntry>::
 template <size_t Bitwidth, typename ConcreteTable, typename TableEntry>
 inline void
 ELFSectionTable_CRTP<Bitwidth, ConcreteTable, TableEntry>::print() const {
-  using namespace std;
-  using namespace term::color;
+  using namespace llvm;
 
-  cout << endl << setw(79) << setfill('=') << '=' << endl;
-  cout << light::white() << ConcreteTable::TABLE_NAME << normal() << endl;
+  out() << '\n' << fillformat('=', 79) << '\n';
+  out().changeColor(raw_ostream::WHITE, true);
+  out() << ConcreteTable::TABLE_NAME;
+  out().resetColor();
+  out() << '\n';
 
   for (size_t i = 0; i < this->size(); ++i) {
       (*this)[i]->print();
   }
 
-  cout << setw(79) << setfill('=') << '=' << endl << endl;
-
+  out() << fillformat('=', 79) << '\n';
 }
 
 #endif // ELF_SECTION_TABLE_CRTP_H

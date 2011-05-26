@@ -1,6 +1,8 @@
 #include "ELFTypes.h"
 #include "ELFSectionBits.h"
 #include "ELFSectionHeader.h"
+#include <llvm/Support/raw_ostream.h>
+#include <llvm/Support/Format.h>
 
 
 template <size_t Bitwidth>
@@ -20,28 +22,23 @@ private:
   void print() const {
     ELF_TYPE_INTRO_TO_TEMPLATE_SCOPE(Bitwidth);
 
-    using namespace std;
-    using namespace term;
-    using namespace term::color;
+    using namespace llvm;
 
-    std::ios_base::fmtflags prev_flags = cout.flags();
+    out() << '\n' << fillformat('=', 79) << '\n';
+    out().changeColor(raw_ostream::WHITE, true);
+    out() << "ELF PROGBITS: " << this->section_header->getName();
+    out().resetColor();
+    out() << '\n';
+    out() << fillformat('-', 79) << '\n';
 
-    cout << endl << setw(79) << setfill('=') << '=' << endl;
-
-    cout << light::white() << "PROGBITS:" <<
-            this->section_header->getName() << normal() << endl;
-
-    cout << setw(79) << setfill('-') << '-' << endl << setfill(' ');
-
-    cout << "Size         : " << right << this->size() << endl;
-    cout << "Start Address: " << right
-         << static_cast<addr_t>((size_t)this->buf) << endl;
+    out() << " Size         : " << this->size() << '\n';
+    out() << " Start Address: "
+          << static_cast<addr_t>((size_t)this->buf) << '\n';
+    out() << fillformat('-', 79) << '\n';
 
     dump_hex(this->buf, this->buf_size, 0, this->buf_size);
 
-    cout << endl << setw(79) << setfill('=') << '=' << endl;
-
-    cout.flags( prev_flags );
+    out() << fillformat('=', 79) << '\n';
   }
 };
 
