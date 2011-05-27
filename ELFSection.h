@@ -28,8 +28,8 @@ public:
 #include "ELFSectionHeader.h"
 #include "ELFSectionStrTab.h"
 #include "ELFSectionSymTab.h"
-//#include "ELFSectionProgBits.h"
-//#include "ELFSectionNoBits.h"
+#include "ELFSectionProgBits.h"
+#include "ELFSectionNoBits.h"
 //#include "ELFSectionRelTable.h"
 //#include "ELFSectionRelaTable.h"
 
@@ -53,11 +53,11 @@ ELFSection<Bitwidth>::read(Archiver &AR,
     case SHT_SYMTAB:
       return ELFSectionSymTab<Bitwidth>::read(AR, owner, sh);
 
-    //case SHT_PROGBITS:
-    //  return ELFSectionProgBits<Bitwidth>::read(AR, sh);
+    case SHT_PROGBITS:
+      return ELFSectionProgBits<Bitwidth>::read(AR, sh);
 
-    //case SHT_NOBITS:
-    //  return ELFSectionNoBits<Bitwidth>::read(AR, sh);
+    case SHT_NOBITS:
+      return ELFSectionNoBits<Bitwidth>::read(AR, sh);
 
     //case SHT_REL:
     //  return ELFSectionRelTable<Bitwidth>::read(AR, owner, sh);

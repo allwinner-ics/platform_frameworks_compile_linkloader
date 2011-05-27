@@ -11,7 +11,7 @@
 #include "utils/serialize.h"
 
 #include <sys/mman.h>
-#include <boost/shared_ptr.hpp>
+#include <llvm/ADT/OwningPtr.h>
 #include <llvm/Support/raw_ostream.h>
 
 template <size_t Bitwidth> class ELFSectionHeader;
@@ -34,7 +34,7 @@ protected:
 
 public:
   template <typename Archiver>
-  static boost::shared_ptr<ConcreteELFSectionBits>
+  static ConcreteELFSectionBits *
   read(Archiver &AR,
        ELFSectionHeader<Bitwidth> const *sh);
 
@@ -63,13 +63,11 @@ public:
 
 template <size_t Bitwidth, typename ConcreteELFSectionBits>
 template <typename Archiver>
-inline boost::shared_ptr<ConcreteELFSectionBits>
+inline ConcreteELFSectionBits *
 ELFSectionBits<Bitwidth, ConcreteELFSectionBits>::
 read(Archiver &AR,
      ELFSectionHeader<Bitwidth> const *sh) {
-  using namespace boost;
-
-  shared_ptr<ConcreteELFSectionBits> result(new ConcreteELFSectionBits());
+  llvm::OwningPtr<ConcreteELFSectionBits> result(new ConcreteELFSectionBits());
   // TODO: Align.
   result->buf_size = sh->getSize();
   if (result->buf_size > 0) {
@@ -80,7 +78,7 @@ read(Archiver &AR,
 
   // Check map success.
   if (result->buf == MAP_FAILED) {
-    return shared_ptr<ConcreteELFSectionBits>();
+    return 0;
   }
 
   // Save section_header
@@ -89,15 +87,15 @@ read(Archiver &AR,
   // Read the buffer from string tab
   if (!result->serialize(AR)) {
     // Unable to read the structure.  Return NULL.
-    return boost::shared_ptr<ConcreteELFSectionBits>();
+    return 0;
   }
 
   if (!AR) {
     // Unable to read the progbits tab
-    return shared_ptr<ConcreteELFSectionBits>();
+    return 0;
   }
 
-  return result;
+  return result.take();
 }
 
 template <size_t Bitwidth, typename ConcreteELFSectionBits>
