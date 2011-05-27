@@ -32,8 +32,8 @@ private:
     out().resetColor();
     out() << fillformat('-', 79) << '\n';
 
-    out() << " Size         : " << this->size() << '\n';
-    out() << " Start Address: "
+    out() << "  Size         : " << this->size() << '\n';
+    out() << "  Start Address: "
           << static_cast<addr_t>((size_t)this->buf) << '\n';
     out() << fillformat('-', 79) << '\n';
 
