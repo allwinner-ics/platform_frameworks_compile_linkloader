@@ -137,16 +137,16 @@ public:
 
 #define PRINT_LINT(title, value) \
   out() << format("  %-13s : ", (char const *)(title)) << (value) << '\n'
-  PRINT_LINT("Name",          getName() );
-  PRINT_LINT("Type",          getSectionTypeStr(getType()));
-  PRINT_LINT("Flags",         concrete()->getFlags());
-  PRINT_LINT("Address",       getAddress());
-  PRINT_LINT("Offset",        getOffset());
-  PRINT_LINT("Size",          concrete()->getSize());
-  PRINT_LINT("Link",          getLink());
-  PRINT_LINT("Extra Info",    getExtraInfo());
-  PRINT_LINT("Address Align", concrete()->getAddressAlign());
-  PRINT_LINT("Entry Size",    concrete()->getEntrySize());
+    PRINT_LINT("Name",          getName() );
+    PRINT_LINT("Type",          getSectionTypeStr(getType()));
+    PRINT_LINT("Flags",         concrete()->getFlags());
+    PRINT_LINT("Address",       getAddress());
+    PRINT_LINT("Offset",        getOffset());
+    PRINT_LINT("Size",          concrete()->getSize());
+    PRINT_LINT("Link",          getLink());
+    PRINT_LINT("Extra Info",    getExtraInfo());
+    PRINT_LINT("Address Align", concrete()->getAddressAlign());
+    PRINT_LINT("Entry Size",    concrete()->getEntrySize());
 #undef PRINT_LINT
 
     if (shouldPrintHeader) {
