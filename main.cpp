@@ -2,7 +2,7 @@
 
 #include "utils/serialize.h"
 
-#include <boost/shared_ptr.hpp>
+#include <llvm/ADT/OwningPtr.h>
 #include <iomanip>
 #include <iostream>
 
@@ -13,7 +13,6 @@
 #include <sys/stat.h>
 #include <sys/types.h>
 
-using namespace boost;
 using namespace serialization;
 using namespace std;
 
@@ -57,7 +56,7 @@ int main(int argc, char **argv) {
 
 template <size_t Bitwidth, typename Archiver>
 void dump_object(Archiver &AR) {
-  shared_ptr<ELFObject<Bitwidth> > object(ELFObject<Bitwidth>::read(AR));
+  llvm::OwningPtr<ELFObject<Bitwidth> > object(ELFObject<Bitwidth>::read(AR));
 
   if (!object) {
     cerr << "ERROR: Unable to load object" << endl;

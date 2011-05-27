@@ -5,7 +5,7 @@
 
 #include "utils/raw_ostream.h"
 
-#include <boost/shared_ptr.hpp>
+#include <llvm/ADT/OwningPtr.h>
 #include <llvm/Support/raw_ostream.h>
 #include <llvm/Support/Format.h>
 
@@ -145,25 +145,25 @@ public:
   }
 
   template <typename Archiver>
-  static boost::shared_ptr<ConcreteELFHeader> read(Archiver &AR) {
+  static ConcreteELFHeader *read(Archiver &AR) {
     if (!AR) {
       // Archiver is in bad state before calling read function.
       // Return NULL and do nothing.
-      return boost::shared_ptr<ConcreteELFHeader>();
+      return 0;
     }
 
-    boost::shared_ptr<ConcreteELFHeader> header(new ConcreteELFHeader());
+    llvm::OwningPtr<ConcreteELFHeader> header(new ConcreteELFHeader());
     if (!header->serialize(AR)) {
       // Unable to read the structure.  Return NULL.
-      return boost::shared_ptr<ConcreteELFHeader>();
+      return 0;
     }
 
     if (!header->isValid()) {
       // Header read from archiver is not valid.  Return NULL.
-      return boost::shared_ptr<ConcreteELFHeader>();
+      return 0;
     }
 
-    return header;
+    return header.take();
   }
 
   void print() {

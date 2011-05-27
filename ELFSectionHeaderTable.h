@@ -4,7 +4,7 @@
 #include "ELFSectionHeader.h"
 #include "ELFSectionTable_CRTP.h"
 
-#include <boost/shared_ptr.hpp>
+#include <llvm/ADT/OwningPtr.h>
 #include <vector>
 #include <string>
 
@@ -23,7 +23,7 @@ class ELFSectionHeaderTable :
 private:
   static std::string const TABLE_NAME;
 private:
-  //std::vector<boost::shared_ptr<ELFSectionHeader<Bitwidth> > > table;
+  //std::vector<ELFSectionHeader<Bitwidth> *> table;
 
 private:
   ELFSectionHeaderTable() {
@@ -31,7 +31,7 @@ private:
 
 public:
   template <typename Archiver>
-  static boost::shared_ptr<ELFSectionHeaderTable<Bitwidth> >
+  static ELFSectionHeaderTable<Bitwidth> *
   read(Archiver &AR, ELFObject<Bitwidth> *owner);
 
   //ELFSectionHeader<Bitwidth> const *operator[](size_t i) const;
@@ -49,17 +49,17 @@ public:
 
 template <size_t Bitwidth>
 template <typename Archiver>
-inline boost::shared_ptr<ELFSectionHeaderTable<Bitwidth> >
+inline ELFSectionHeaderTable<Bitwidth> *
 ELFSectionHeaderTable<Bitwidth>::read(Archiver &AR,
                                       ELFObject<Bitwidth> *owner) {
   if (!AR) {
     // Archiver is in bad state before calling read function.
     // Return NULL and do nothing.
-    return boost::shared_ptr<ELFSectionHeaderTable>();
+    return 0;
   }
 
   // Allocate a new section header table and assign the owner.
-  boost::shared_ptr<ELFSectionHeaderTable> tab(new ELFSectionHeaderTable());
+  llvm::OwningPtr<ELFSectionHeaderTable> tab(new ELFSectionHeaderTable());
 
   // Get ELF header
   ELFHeader<Bitwidth> const *header = owner->getHeader();
@@ -74,19 +74,19 @@ ELFSectionHeaderTable<Bitwidth>::read(Archiver &AR,
   AR.seek(header->getSectionHeaderTableOffset(), true);
 
   for (size_t i = 0; i < header->getSectionHeaderNum(); ++i) {
-    boost::shared_ptr<ELFSectionHeader<Bitwidth> > sh(
+    llvm::OwningPtr<ELFSectionHeader<Bitwidth> > sh(
       ELFSectionHeader<Bitwidth>::read(AR, owner, i));
 
     if (!sh) {
       // Something wrong while reading the section header.
-      return boost::shared_ptr<ELFSectionHeaderTable>();
+      return 0;
     }
 
     AR.seek(pending);
-    tab->table.push_back(sh);
+    tab->table.push_back(sh.take());
   }
 
-  return tab;
+  return tab.take();
 }
 
 template <size_t Bitwidth>

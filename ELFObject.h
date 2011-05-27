@@ -1,7 +1,7 @@
 #ifndef ELF_OBJECT_H
 #define ELF_OBJECT_H
 
-#include <boost/shared_ptr.hpp>
+#include <llvm/ADT/OwningPtr.h>
 #include <vector>
 
 template <size_t Bitwidth> class ELFHeader;
@@ -11,16 +11,16 @@ template <size_t Bitwidth> class ELFSectionHeaderTable;
 template <size_t Bitwidth>
 class ELFObject {
 private:
-  boost::shared_ptr<ELFHeader<Bitwidth> > header;
-  boost::shared_ptr<ELFSectionHeaderTable<Bitwidth> > shtab;
-  std::vector<boost::shared_ptr<ELFSection<Bitwidth> > > stab;
+  llvm::OwningPtr<ELFHeader<Bitwidth> > header;
+  llvm::OwningPtr<ELFSectionHeaderTable<Bitwidth> > shtab;
+  std::vector<ELFSection<Bitwidth> *> stab;
 
 private:
   ELFObject() { }
 
 public:
   template <typename Archiver>
-  static boost::shared_ptr<ELFObject> read(Archiver &AR);
+  static ELFObject *read(Archiver &AR);
 
   ELFHeader<Bitwidth> const *getHeader() const {
     return header.get();
@@ -34,6 +34,13 @@ public:
   ELFSection<Bitwidth> const *getSectionByIndex(size_t i) const;
 
   void print() const;
+
+  ~ELFObject() {
+    for (size_t i = 0; i < stab.size(); ++i) {
+      // Delete will check the pointer is nullptr or not by himself.
+      delete stab[i];
+    }
+  }
 };
 
 #include "ELFHeader.h"
@@ -42,38 +49,36 @@ public:
 
 template <size_t Bitwidth>
 template <typename Archiver>
-inline boost::shared_ptr<ELFObject<Bitwidth> >
+inline ELFObject<Bitwidth> *
 ELFObject<Bitwidth>::read(Archiver &AR) {
-  using namespace boost;
-
-  shared_ptr<ELFObject<Bitwidth> > object(new ELFObject<Bitwidth>());
+  llvm::OwningPtr<ELFObject<Bitwidth> > object(new ELFObject<Bitwidth>());
 
   // Read header
-  object->header = ELFHeader<Bitwidth>::read(AR);
+  object->header.reset(ELFHeader<Bitwidth>::read(AR));
   if (!object->header) {
-    return shared_ptr<ELFObject<Bitwidth> >();
+    return 0;
   }
 
   // Read section table
-  object->shtab = ELFSectionHeaderTable<Bitwidth>::read(AR, object.get());
+  object->shtab.reset(ELFSectionHeaderTable<Bitwidth>::read(AR, object.get()));
   if (!object->shtab) {
-    return shared_ptr<ELFObject<Bitwidth> >();
+    return 0;
   }
 
   // Read each section
   for (size_t i = 0; i < object->header->getSectionHeaderNum(); ++i) {
-    shared_ptr<ELFSection<Bitwidth> > sec(
+    llvm::OwningPtr<ELFSection<Bitwidth> > sec(
       ELFSection<Bitwidth>::read(AR, object.get(), (*object->shtab)[i]));
-    object->stab.push_back(sec);
+    object->stab.push_back(sec.take());
   }
 
-  return object;
+  return object.take();
 }
 
 template <size_t Bitwidth>
 inline char const *ELFObject<Bitwidth>::getSectionName(size_t i) const {
   ELFSection<Bitwidth> const *sec =
-    stab[header->getStringSectionIndex()].get();
+    stab[header->getStringSectionIndex()];
 
   if (sec) {
     ELFSectionStrTab<Bitwidth> const &st =
@@ -96,7 +101,7 @@ inline void ELFObject<Bitwidth>::print() const {
   shtab->print();
 
   for (size_t i = 0; i < stab.size(); ++i) {
-    ELFSection<Bitwidth> *sec = stab[i].get();
+    ELFSection<Bitwidth> *sec = stab[i];
     if (sec) {
       sec->print();
     }

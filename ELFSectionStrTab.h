@@ -7,8 +7,8 @@
 #include "utils/serialize.h"
 #include "utils/raw_ostream.h"
 
-#include <boost/shared_ptr.hpp>
 #include <vector>
+#include <llvm/ADT/OwningPtr.h>
 #include <llvm/Support/raw_ostream.h>
 #include <llvm/Support/Format.h>
 
@@ -17,7 +17,7 @@ template <size_t Bitwidth> class ELFSectionHeader;
 template <size_t Bitwidth>
 class ELFSectionStrTab : public ELFSection<Bitwidth> {
 private:
-  ELFSectionHeader<Bitwidth> const*section_header;
+  ELFSectionHeader<Bitwidth> const *section_header;
   std::vector<char> buf;
 
 private:
@@ -25,11 +25,9 @@ private:
 
 public:
   template <typename Archiver>
-  static boost::shared_ptr<ELFSectionStrTab>
+  static ELFSectionStrTab *
   read(Archiver &AR, ELFSectionHeader<Bitwidth> const *sh) {
-    using namespace boost;
-
-    shared_ptr<ELFSectionStrTab> st(new ELFSectionStrTab());
+    llvm::OwningPtr<ELFSectionStrTab> st(new ELFSectionStrTab());
     st->buf.resize(sh->getSize());
 
     // Save section_header
@@ -42,10 +40,10 @@ public:
 
     if (!AR) {
       // Unable to read the string table.
-      return shared_ptr<ELFSectionStrTab>();
+      return 0;
     }
 
-    return st;
+    return st.take();
   }
 
   virtual void print() const {

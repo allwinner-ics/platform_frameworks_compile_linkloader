@@ -10,8 +10,8 @@
 #include "utils/serialize.h"
 #include "utils/raw_ostream.h"
 
-#include <boost/shared_ptr.hpp>
 #include <vector>
+#include <llvm/ADT/OwningPtr.h>
 #include <llvm/Support/raw_ostream.h>
 #include <llvm/Support/Format.h>
 
@@ -24,13 +24,13 @@ class ELFSectionTable_CRTP : public ELFSection<Bitwidth> {
 //  friend class ConcreteTable;
 
 protected:
-  std::vector<boost::shared_ptr<TableEntry> > table;
+  std::vector<TableEntry *> table;
 
   ELFSectionTable_CRTP() { }
 
 public:
   template <typename Archiver>
-  static boost::shared_ptr<ConcreteTable>
+  static ConcreteTable *
   read(Archiver &AR,
        ELFObject<Bitwidth> *owner,
        ELFSectionHeader<Bitwidth> const *sh);
@@ -42,11 +42,18 @@ public:
   }
 
   TableEntry const *operator[](size_t index) const {
-    return table[index].get();
+    return table[index];
   }
 
   TableEntry *operator[](size_t index) {
-    return table[index].get();
+    return table[index];
+  }
+
+  ~ELFSectionTable_CRTP() {
+    for (size_t i = 0; i < table.size(); ++i) {
+      // Delete will check the pointer is nullptr or not by himself.
+      delete table[i];
+    }
   }
 };
 
@@ -59,14 +66,13 @@ public:
 
 template <size_t Bitwidth, typename ConcreteTable, typename TableEntry>
 template <typename Archiver>
-inline boost::shared_ptr<ConcreteTable>
+inline ConcreteTable *
 ELFSectionTable_CRTP<Bitwidth, ConcreteTable, TableEntry>::
-  read(Archiver &AR,
-       ELFObject<Bitwidth> *owner,
-       ELFSectionHeader<Bitwidth> const *sh) {
-  using namespace boost;
+read(Archiver &AR,
+     ELFObject<Bitwidth> *owner,
+     ELFSectionHeader<Bitwidth> const *sh) {
 
-  shared_ptr<ConcreteTable> st(new ConcreteTable());
+  llvm::OwningPtr<ConcreteTable> st(new ConcreteTable());
 
   // Assert that entry size will be the same as standard.
   assert(sh->getEntrySize() ==
@@ -83,10 +89,10 @@ ELFSectionTable_CRTP<Bitwidth, ConcreteTable, TableEntry>::
 
   if (!AR) {
     // Unable to read the string table.
-    return shared_ptr<ConcreteTable>();
+    return 0;
   }
 
-  return st;
+  return st.take();
 }
 
 template <size_t Bitwidth, typename ConcreteTable, typename TableEntry>
@@ -100,7 +106,7 @@ ELFSectionTable_CRTP<Bitwidth, ConcreteTable, TableEntry>::print() const {
   out().resetColor();
 
   for (size_t i = 0; i < this->size(); ++i) {
-      (*this)[i]->print();
+    (*this)[i]->print();
   }
 
   out() << fillformat('=', 79) << '\n';

@@ -5,7 +5,7 @@
 
 #include "utils/raw_ostream.h"
 
-#include <boost/shared_ptr.hpp>
+#include <llvm/ADT/OwningPtr.h>
 #include <llvm/Support/raw_ostream.h>
 #include <llvm/Support/Format.h>
 
@@ -84,7 +84,7 @@ public:
   }
 
   template <typename Archiver>
-  static boost::shared_ptr<ConcreteELFSectionHeader>
+  static ConcreteELFSectionHeader *
   read(Archiver &AR,
        ELFObject<Bitwidth> const *owner,
        size_t index = 0) {
@@ -92,20 +92,20 @@ public:
     if (!AR) {
       // Archiver is in bad state before calling read function.
       // Return NULL and do nothing.
-      return boost::shared_ptr<ConcreteELFSectionHeader>();
+      return 0;
     }
 
-    boost::shared_ptr<ConcreteELFSectionHeader> sh(
+    llvm::OwningPtr<ConcreteELFSectionHeader> sh(
       new ConcreteELFSectionHeader());
 
     if (!sh->serialize(AR)) {
       // Unable to read the structure.  Return NULL.
-      return boost::shared_ptr<ConcreteELFSectionHeader>();
+      return 0;
     }
 
     if (!sh->isValid()) {
       // Header read from archiver is not valid.  Return NULL.
-      return boost::shared_ptr<ConcreteELFSectionHeader>();
+      return 0;
     }
 
     // Set the section header index
@@ -114,7 +114,7 @@ public:
     // Set the owner elf object
     sh->owner = owner;
 
-    return sh;
+    return sh.take();
   }
 
   void print(bool shouldPrintHeader = false) const {
