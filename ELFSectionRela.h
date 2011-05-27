@@ -5,8 +5,8 @@
 
 #include "utils/raw_ostream.h"
 
-#include <boost/shared_ptr.hpp>
 #include <string>
+#include <llvm/ADT/OwningPtr.h>
 #include <llvm/Support/raw_ostream.h>
 #include <llvm/Support/Format.h>
 
@@ -39,7 +39,7 @@ public:
   }
 
   template <typename Archiver>
-  static boost::shared_ptr<ELFSectionRela>
+  static ELFSectionRela *
   read(Archiver &AR, ELFObject<Bitwidth> const *owner, size_t index = 0);
 
   void print(bool shouldPrintHeader = false) const;
@@ -63,27 +63,26 @@ private:
 
 template <size_t Bitwidth>
 template <typename Archiver>
-inline boost::shared_ptr<ELFSectionRela<Bitwidth> >
+inline ELFSectionRela<Bitwidth> *
 ELFSectionRela<Bitwidth>::read(Archiver &AR,
                                ELFObject<Bitwidth> const *owner,
                                size_t index) {
   if (!AR) {
     // Archiver is in bad state before calling read function.
     // Return NULL and do nothing.
-    return boost::shared_ptr<ELFSectionRela>();
+    return 0;
   }
 
-  boost::shared_ptr<ELFSectionRela> sh(
-    new ELFSectionRela());
+  llvm::OwningPtr<ELFSectionRela> sh(new ELFSectionRela());
 
   if (!sh->serialize(AR)) {
     // Unable to read the structure.  Return NULL.
-    return boost::shared_ptr<ELFSectionRela>();
+    return 0;
   }
 
   if (!sh->isValid()) {
     // Rela read from archiver is not valid.  Return NULL.
-    return boost::shared_ptr<ELFSectionRela>();
+    return 0;
   }
 
   // Set the section header index
@@ -92,7 +91,7 @@ ELFSectionRela<Bitwidth>::read(Archiver &AR,
   // Set the owner elf object
   sh->owner = owner;
 
-  return sh;
+  return sh.take();
 }
 
 template <size_t Bitwidth>

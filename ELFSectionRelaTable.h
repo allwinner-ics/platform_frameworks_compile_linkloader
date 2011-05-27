@@ -23,7 +23,7 @@ public:
   typedef ELFSectionRela<Bitwidth> Rela;
 
 private:
-  //std::vector<boost::shared_ptr<Rela> > rel_table;
+  //std::vector<Rela *> rel_table;
 
 private:
   ELFSectionRelaTable() { }
@@ -32,7 +32,7 @@ public:
   // Note: Inherit from Table CRTP.
 
   //template <typename Archiver>
-  //static boost::shared_ptr<ELFSectionRelaTable>
+  //static ELFSectionRelaTable *
   //read(Archiver &AR,
   //     ELFObject<Bitwidth> *owner,
   //     ELFSectionHeader<Bitwidth> const *sh);

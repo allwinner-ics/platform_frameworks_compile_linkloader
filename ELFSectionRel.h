@@ -5,8 +5,8 @@
 
 #include "utils/raw_ostream.h"
 
-#include <boost/shared_ptr.hpp>
 #include <string>
+#include <llvm/ADT/OwningPtr.h>
 #include <llvm/Support/raw_ostream.h>
 #include <llvm/Support/Format.h>
 
@@ -59,7 +59,7 @@ public:
   }
 
   template <typename Archiver>
-  static boost::shared_ptr<ConcreteELFSectionRel>
+  static ConcreteELFSectionRel *
   read(Archiver &AR, ELFObject<Bitwidth> const *owner, size_t index = 0);
 
   void print(bool shouldPrintHeader = false) const;
@@ -89,27 +89,26 @@ private:
 
 template <size_t Bitwidth>
 template <typename Archiver>
-inline boost::shared_ptr<ELFSectionRel<Bitwidth> >
+inline ELFSectionRel<Bitwidth> *
 ELFSectionRel_CRTP<Bitwidth>::read(Archiver &AR,
                                    ELFObject<Bitwidth> const *owner,
                                    size_t index) {
   if (!AR) {
     // Archiver is in bad state before calling read function.
     // Return NULL and do nothing.
-    return boost::shared_ptr<ConcreteELFSectionRel>();
+    return 0;
   }
 
-  boost::shared_ptr<ConcreteELFSectionRel> sh(
-    new ConcreteELFSectionRel());
+  llvm::OwningPtr<ConcreteELFSectionRel> sh(new ConcreteELFSectionRel());
 
   if (!sh->serialize(AR)) {
     // Unable to read the structure.  Return NULL.
-    return boost::shared_ptr<ConcreteELFSectionRel>();
+    return 0;
   }
 
   if (!sh->isValid()) {
     // Rel read from archiver is not valid.  Return NULL.
-    return boost::shared_ptr<ConcreteELFSectionRel>();
+    return 0;
   }
 
   // Set the section header index
@@ -118,7 +117,7 @@ ELFSectionRel_CRTP<Bitwidth>::read(Archiver &AR,
   // Set the owner elf object
   sh->owner = owner;
 
-  return sh;
+  return sh.take();
 }
 
 template <size_t Bitwidth>
