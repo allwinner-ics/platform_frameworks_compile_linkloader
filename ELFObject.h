@@ -92,7 +92,7 @@ inline char const *ELFObject<Bitwidth>::getSectionName(size_t i) const {
 template <size_t Bitwidth>
 inline ELFSection<Bitwidth> const *
 ELFObject<Bitwidth>::getSectionByIndex(size_t i) const {
-  return stab[i].get();
+  return stab[i];
 }
 
 template <size_t Bitwidth>

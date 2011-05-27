@@ -3,7 +3,8 @@
 
 #include "ELFTypes.h"
 
-#include <boost/shared_ptr.hpp>
+#include <llvm/ADT/OwningPtr.h>
+
 #include <string>
 
 #include <stdint.h>
@@ -94,7 +95,7 @@ public:
   }
 
   template <typename Archiver>
-  static boost::shared_ptr<ConcreteELFSectionSymTabEntry>
+  static ConcreteELFSectionSymTabEntry *
   read(Archiver &AR, ELFObject<Bitwidth> const *owner, size_t index = 0);
 
   void print(bool shouldPrintHeader = false) const;
@@ -128,27 +129,27 @@ inline char const *ELFSectionSymTabEntry_CRTP<Bitwidth>::getName() const {
 
 template <size_t Bitwidth>
 template <typename Archiver>
-inline boost::shared_ptr<ELFSectionSymTabEntry<Bitwidth> >
+inline ELFSectionSymTabEntry<Bitwidth> *
 ELFSectionSymTabEntry_CRTP<Bitwidth>::read(Archiver &AR,
                                            ELFObject<Bitwidth> const *owner,
                                            size_t index) {
   if (!AR) {
     // Archiver is in bad state before calling read function.
     // Return NULL and do nothing.
-    return boost::shared_ptr<ConcreteELFSectionSymTabEntry>();
+    return 0;
   }
 
-  boost::shared_ptr<ConcreteELFSectionSymTabEntry> sh(
+  llvm::OwningPtr<ConcreteELFSectionSymTabEntry> sh(
     new ConcreteELFSectionSymTabEntry());
 
   if (!sh->serialize(AR)) {
     // Unable to read the structure.  Return NULL.
-    return boost::shared_ptr<ConcreteELFSectionSymTabEntry>();
+    return 0;
   }
 
   if (!sh->isValid()) {
     // SymTabEntry read from archiver is not valid.  Return NULL.
-    return boost::shared_ptr<ConcreteELFSectionSymTabEntry>();
+    return 0;
   }
 
   // Set the section header index
@@ -157,7 +158,7 @@ ELFSectionSymTabEntry_CRTP<Bitwidth>::read(Archiver &AR,
   // Set the owner elf object
   sh->owner = owner;
 
-  return sh;
+  return sh.take();
 }
 
 template <size_t Bitwidth>

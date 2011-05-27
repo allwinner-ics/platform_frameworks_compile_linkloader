@@ -99,11 +99,11 @@ ELFSectionHeaderTable<Bitwidth>::getByName(const std::string &str) const {
   // TODO: Use map
   for (size_t i = 0; i < this->table.size(); ++i) {
     if (str == std::string(this->table[i]->getName())) {
-      return this->table[i].get();
+      return this->table[i];
     }
   }
   // Return SHN_UNDEF section header;
-  return this->table[0].get();
+  return this->table[0];
 }
 
 template <size_t Bitwidth>

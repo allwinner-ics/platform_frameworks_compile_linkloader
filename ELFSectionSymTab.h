@@ -22,7 +22,7 @@ public:
   typedef ELFSectionSymTabEntry<Bitwidth> SymTabEntry;
 
 private:
-  //std::vector<boost::shared_ptr<SymTabEntry> > symbol_table;
+  //std::vector<SymTabEntry> *> symbol_table;
 
 private:
   ELFSectionSymTab() { }
@@ -31,7 +31,7 @@ public:
   // Note: Inherit from Table CRTP.
 
   //template <typename Archiver>
-  //static boost::shared_ptr<ELFSectionSymTab>
+  //static ELFSectionSymTab *
   //read(Archiver &AR,
   //     ELFObject<Bitwidth> *owner,
   //     ELFSectionHeader<Bitwidth> const *sh);
