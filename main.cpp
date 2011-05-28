@@ -54,6 +54,13 @@ int main(int argc, char **argv) {
   return EXIT_SUCCESS;
 }
 
+void *find_sym(char const *name, void *context) {
+  if (std::string(name) == std::string("printf")) {
+    return (void *)printf;
+  }
+  return 0;
+}
+
 template <size_t Bitwidth, typename Archiver>
 void dump_object(Archiver &AR) {
   llvm::OwningPtr<ELFObject<Bitwidth> > object(ELFObject<Bitwidth>::read(AR));
@@ -61,6 +68,16 @@ void dump_object(Archiver &AR) {
   if (!object) {
     cerr << "ERROR: Unable to load object" << endl;
   }
+
+  object->print();
+
+  ELFSectionSymTab<Bitwidth> *symtab =
+    static_cast<ELFSectionSymTab<Bitwidth> *>(
+        object->getSectionByName(".symtab"));
+  cout << "main address: " << symtab->getByName("main")->getAddress() << endl;
+  cout << "printf address: " << (void *)printf << endl;
+
+  object->relocate(find_sym, 0);
 
   object->print();
 }

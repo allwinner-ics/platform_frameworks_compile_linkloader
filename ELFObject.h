@@ -3,6 +3,9 @@
 
 #include <llvm/ADT/OwningPtr.h>
 #include <vector>
+#include <elf.h>
+#include <cassert>
+#include <string>
 
 template <size_t Bitwidth> class ELFHeader;
 template <size_t Bitwidth> class ELFSection;
@@ -32,6 +35,12 @@ public:
 
   char const *getSectionName(size_t i) const;
   ELFSection<Bitwidth> const *getSectionByIndex(size_t i) const;
+  ELFSection<Bitwidth> *getSectionByIndex(size_t i);
+  ELFSection<Bitwidth> const *getSectionByName(std::string const &str) const;
+  ELFSection<Bitwidth> *getSectionByName(std::string const &str);
+
+  void relocate(void *(find_sym)(char const *name, void *context),
+                void *context);
 
   void print() const;
 
@@ -42,6 +51,9 @@ public:
     }
   }
 };
+
+//==================Inline Member Function Definition==========================
+
 
 #include "ELFHeader.h"
 #include "ELFSection.h"
@@ -93,6 +105,125 @@ template <size_t Bitwidth>
 inline ELFSection<Bitwidth> const *
 ELFObject<Bitwidth>::getSectionByIndex(size_t i) const {
   return stab[i];
+}
+
+template <size_t Bitwidth>
+inline ELFSection<Bitwidth> *
+ELFObject<Bitwidth>::getSectionByIndex(size_t i) {
+  return stab[i];
+}
+
+template <size_t Bitwidth>
+inline ELFSection<Bitwidth> const *
+ELFObject<Bitwidth>::getSectionByName(std::string const &str) const {
+  size_t idx = getSectionHeaderTable()->getByName(str)->getIndex();
+  return stab[idx];
+}
+
+template <size_t Bitwidth>
+inline ELFSection<Bitwidth> *
+ELFObject<Bitwidth>::getSectionByName(std::string const &str) {
+  ELFObject<Bitwidth> const *const_this = this;
+  ELFSection<Bitwidth> const *sptr = const_this->getSectionByName(str);
+  // Const cast for the same API's const and non-const versions.
+  return const_cast<ELFSection<Bitwidth> *>(sptr);
+}
+
+
+template <size_t Bitwidth>
+inline void ELFObject<Bitwidth>::
+relocate(void *(find_sym)(char const *name, void *context), void *context) {
+  // FIXME: Can not implement here!
+  assert(Bitwidth == 32 && "Only support 32 bits relocation.");
+  switch ((uint32_t)getHeader()->getMachine()) {
+    default:
+      assert(0 && "Only support ARM relocation.");
+      break;
+
+    case EM_ARM:
+      // FIXME: Can not implement here!
+      {
+        // FIXME: Can not only relocate .rel.text!
+        ELFSectionRelTable<Bitwidth> *reltab =
+          static_cast<ELFSectionRelTable<Bitwidth> *>(
+              getSectionByName(".rel.text"));
+        ELFSectionProgBits<Bitwidth> *text =
+          static_cast<ELFSectionProgBits<Bitwidth> *>(
+              getSectionByName(".text"));
+        ELFSectionSymTab<Bitwidth> *symtab =
+          static_cast<ELFSectionSymTab<Bitwidth> *>(
+              getSectionByName(".symtab"));
+        for (size_t i = 0; i < reltab->size(); ++i) {
+          // FIXME: Can not implement here, use Fixup!
+          ELFSectionRel<Bitwidth> *rel = (*reltab)[i];
+          ELFSectionSymTabEntry<Bitwidth> *sym =
+            (*symtab)[rel->getSymTabIndex()];
+          //typedef uint64_t Inst_t;
+          typedef int32_t Inst_t;
+          Inst_t *inst = (Inst_t *)&(*text)[rel->getOffset()];
+          Inst_t P = (Inst_t)(int64_t)inst;
+          Inst_t A = 0;
+          Inst_t S = (Inst_t)(int64_t)sym->getAddress();
+          switch ((uint32_t)rel->getType()) {
+            // FIXME: Predefine relocation codes.
+            case 28: // R_ARM_CALL
+              {
+                // FIXME: May be not uint32_t *.
+#define SIGN_EXTEND(x, l) (((x)^(1<<((l)-1)))-(1<<(l-1)))
+                A = (Inst_t)(int64_t)SIGN_EXTEND(*inst & 0xFFFFFF, 24);
+#undef SIGN_EXTEND
+                if (S == 0) {
+                  S = (Inst_t)(int64_t)find_sym(sym->getName(), context);
+                  sym->setAddress((void *)S);
+                }
+                //switch (sym->getType()) {
+                //  default:
+                //    assert(0 && "Wrong type for R_ARM_CALL relocation.");
+                //    break;
+                //  case STT_FUNC:
+                //    {
+                //      S = (uint32_t)sym->getAddress();
+                //    }
+                //    break;
+                //  case STT_NOTYPE:
+                //    {
+                //      if (sym->getAddress() == 0) {
+                //        sym->setAddress(find_sym(sym->getName(), context));
+                //      }
+                //      S = (uint32_t)sym->getAddress();
+                //    }
+                //    break;
+                //}
+                S >>= 2;
+                P >>= 2;
+                uint32_t result = (S+A-P);
+                // TODO: Stub.
+                assert(((result & 0xFF000000) == 0) && "Too far, need stub.");
+                *inst = ((result) & 0x00FFFFFF) | (*inst & 0xFF000000);
+              }
+              break;
+            case 44: // R_ARM_MOVT_ABS
+              S >>= 16;
+            case 43: // R_ARM_MOVW_ABS_NC
+              {
+                // No need sign extend.
+                A = ((*inst & 0xF0000) >> 4) | (*inst & 0xFFF);
+                uint32_t result = (S+A);
+                *inst = (((result) & 0xF000) << 4) |
+                        ((result) & 0xFFF) |
+                        (*inst & 0xFFF0F000);
+              }
+              break;
+          }
+          //llvm::errs() << "S:     " << (void *)S << '\n';
+          //llvm::errs() << "A:     " << (void *)A << '\n';
+          //llvm::errs() << "P:     " << (void *)P << '\n';
+          //llvm::errs() << "S+A:   " << (void *)(S+A) << '\n';
+          //llvm::errs() << "S+A-P: " << (void *)(S+A-P) << '\n';
+        }
+      }
+  }
+  // FIXME: Need memory_protect all Bits section.
 }
 
 template <size_t Bitwidth>

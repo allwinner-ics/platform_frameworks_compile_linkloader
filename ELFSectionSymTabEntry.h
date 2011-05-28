@@ -103,6 +103,10 @@ public:
 
   void *getAddress() const;
 
+  void setAddress(void *addr) {
+    my_addr = addr;
+  }
+
   bool isValid() const {
     // FIXME: Should check the correctness of the section header.
     return true;
@@ -328,8 +332,10 @@ void *ELFSectionSymTabEntry_CRTP<Bitwidth>::getAddress() const {
       }
       break;
 
-    case STT_COMMON:
     case STT_NOTYPE:
+      return 0;
+
+    case STT_COMMON:
     case STT_FILE:
     case STT_TLS:
     case STT_LOOS:

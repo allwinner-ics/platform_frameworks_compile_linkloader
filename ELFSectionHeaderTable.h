@@ -110,7 +110,8 @@ ELFSectionHeaderTable<Bitwidth>::getByName(const std::string &str) const {
 template <size_t Bitwidth>
 inline ELFSectionHeader<Bitwidth> *
 ELFSectionHeaderTable<Bitwidth>::getByName(const std::string &str) {
-  ELFSectionHeader<Bitwidth> const *shptr = (*this)[str];
+  ELFSectionHeaderTable<Bitwidth> const *const_this = this;
+  ELFSectionHeader<Bitwidth> const *shptr = const_this->getByName(str);
   // Const cast for the same API's const and non-const versions.
   return const_cast<ELFSectionHeader<Bitwidth> *>(shptr);
 }
