@@ -80,6 +80,7 @@ read(Archiver &AR,
 
   // Check map success.
   if (result->buf == MAP_FAILED) {
+    assert(0 && "MAP_FAILED");
     return 0;
   }
 

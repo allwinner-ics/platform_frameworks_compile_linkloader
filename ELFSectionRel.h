@@ -159,6 +159,7 @@ protected:
   ELFSectionRel() {
   }
 
+public:
 //#define ELF32_R_SYM(i)  ((i)>>8)
   xword_t getSymTabIndex() const {
     return ELF32_R_SYM(this->r_info);
@@ -183,6 +184,7 @@ protected:
   ELFSectionRel() {
   }
 
+public:
 //#define ELF64_R_SYM(i)    ((i)>>32)
   xword_t getSymTabIndex() const {
     return ELF64_R_SYM(this->r_info);
