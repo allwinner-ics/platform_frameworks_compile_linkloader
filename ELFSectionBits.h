@@ -16,7 +16,7 @@
 
 template <size_t Bitwidth> class ELFSectionHeader;
 
-template <size_t Bitwidth, typename ConcreteELFSectionBits>
+template <size_t Bitwidth>
 class ELFSectionBits : public ELFSection<Bitwidth> {
 protected:
   ELFSectionHeader<Bitwidth> const *section_header;
@@ -33,10 +33,11 @@ protected:
   }
 
 public:
-  template <typename Archiver>
+  template <typename Archiver, typename ConcreteELFSectionBits>
   static ConcreteELFSectionBits *
   read(Archiver &AR,
-       ELFSectionHeader<Bitwidth> const *sh);
+       ELFSectionHeader<Bitwidth> const *sh,
+       ConcreteELFSectionBits *concrete);
 
   virtual void print() const {}
 
@@ -61,13 +62,14 @@ public:
 //==================Inline Member Function Definition==========================
 
 
-template <size_t Bitwidth, typename ConcreteELFSectionBits>
-template <typename Archiver>
+template <size_t Bitwidth>
+template <typename Archiver, typename ConcreteELFSectionBits>
 inline ConcreteELFSectionBits *
-ELFSectionBits<Bitwidth, ConcreteELFSectionBits>::
+ELFSectionBits<Bitwidth>::
 read(Archiver &AR,
-     ELFSectionHeader<Bitwidth> const *sh) {
-  llvm::OwningPtr<ConcreteELFSectionBits> result(new ConcreteELFSectionBits());
+     ELFSectionHeader<Bitwidth> const *sh,
+     ConcreteELFSectionBits *concrete) {
+  llvm::OwningPtr<ConcreteELFSectionBits> result(concrete);
   // TODO: Align.
   result->buf_size = sh->getSize();
   if (result->buf_size > 0) {
@@ -98,9 +100,9 @@ read(Archiver &AR,
   return result.take();
 }
 
-template <size_t Bitwidth, typename ConcreteELFSectionBits>
+template <size_t Bitwidth>
 inline unsigned char const *
-ELFSectionBits<Bitwidth, ConcreteELFSectionBits>::memory_protect() const {
+ELFSectionBits<Bitwidth>::memory_protect() const {
   int protect_type = PROT_READ;
   if (this->section_header->get_flags() & SHF_WRITE) {
     protect_type &= PROT_WRITE;

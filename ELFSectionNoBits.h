@@ -1,3 +1,6 @@
+#ifndef ELF_SECTION_NOBITS_H
+#define ELF_SECTION_NOBITS_H
+
 #include "ELFTypes.h"
 #include "ELFSectionBits.h"
 #include "ELFSectionHeader.h"
@@ -8,9 +11,16 @@
 
 
 template <size_t Bitwidth>
-class ELFSectionNoBits :
-  public ELFSectionBits<Bitwidth, ELFSectionNoBits<Bitwidth> > {
-    friend class ELFSectionBits<Bitwidth, ELFSectionNoBits<Bitwidth> >;
+class ELFSectionNoBits : public ELFSectionBits<Bitwidth> {
+  friend class ELFSectionBits<Bitwidth>;
+
+public:
+  template <typename Archiver>
+  static ELFSectionNoBits *
+  read(Archiver &AR, ELFSectionHeader<Bitwidth> const *sh) {
+    return ELFSectionBits<Bitwidth>::read(AR, sh, new ELFSectionNoBits);
+  }
+
 private:
   template <typename Archiver>
   bool serialize(Archiver &AR) {
@@ -40,3 +50,4 @@ private:
   }
 };
 
+#endif // ELF_SECTION_NOBITS_H

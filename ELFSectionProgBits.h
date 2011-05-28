@@ -1,3 +1,6 @@
+#ifndef ELF_SECTION_PROGBITS_H
+#define ELF_SECTION_PROGBITS_H
+
 #include "ELFTypes.h"
 #include "ELFSectionBits.h"
 #include "ELFSectionHeader.h"
@@ -8,9 +11,16 @@
 
 
 template <size_t Bitwidth>
-class ELFSectionProgBits :
-  public ELFSectionBits<Bitwidth, ELFSectionProgBits<Bitwidth> > {
-    friend class ELFSectionBits<Bitwidth, ELFSectionProgBits<Bitwidth> >;
+class ELFSectionProgBits : public ELFSectionBits<Bitwidth> {
+  friend class ELFSectionBits<Bitwidth>;
+
+public:
+  template <typename Archiver>
+  static ELFSectionProgBits *
+  read(Archiver &AR, ELFSectionHeader<Bitwidth> const *sh) {
+    return ELFSectionBits<Bitwidth>::read(AR, sh, new ELFSectionProgBits);
+  }
+
 private:
   template <typename Archiver>
   bool serialize(Archiver &AR) {
@@ -43,3 +53,4 @@ private:
   }
 };
 
+#endif // ELF_SECTION_PROGBITS_H
