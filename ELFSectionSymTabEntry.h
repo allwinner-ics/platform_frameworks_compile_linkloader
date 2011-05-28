@@ -4,8 +4,11 @@
 #include "ELFTypes.h"
 
 #include <llvm/ADT/OwningPtr.h>
+#include <elf.h>
 
 #include <string>
+#include <cassert>
+#include <cstdlib>
 
 #include <stdint.h>
 
@@ -41,9 +44,17 @@ protected:
   addr_t st_value;
   xword_t st_size;
 
+  mutable void *my_addr;
+
 protected:
-  ELFSectionSymTabEntry_CRTP() { }
-  ~ELFSectionSymTabEntry_CRTP() { }
+  ELFSectionSymTabEntry_CRTP() { my_addr = 0; }
+  ~ELFSectionSymTabEntry_CRTP() {
+    if (my_addr != 0 &&
+        getType() == STT_OBJECT &&
+        getSectionIndex() == SHN_COMMON) {
+      std::free(my_addr);
+    }
+  }
 
 public:
   size_t getIndex() const {
@@ -89,6 +100,8 @@ public:
     return st_size;
   }
 
+  void *getAddress() const;
+
   bool isValid() const {
     // FIXME: Should check the correctness of the section header.
     return true;
@@ -115,6 +128,11 @@ private:
 #include "ELFSectionHeaderTable.h"
 #include "ELFSection.h"
 #include "ELFSectionStrTab.h"
+
+#include "ELFObject.h"
+#include "ELFSectionHeaderTable.h"
+#include "ELFSectionProgBits.h"
+#include "ELFSectionNoBits.h"
 
 template <size_t Bitwidth>
 inline char const *ELFSectionSymTabEntry_CRTP<Bitwidth>::getName() const {
@@ -208,6 +226,119 @@ inline void ELFSectionSymTabEntry_CRTP<Bitwidth>::
 #endif
 }
 
+template <size_t Bitwidth>
+void *ELFSectionSymTabEntry_CRTP<Bitwidth>::getAddress() const {
+  if (my_addr != 0) {
+    return my_addr;
+  }
+  size_t idx = (size_t)getSectionIndex();
+  switch (getType()) {
+    default:
+      break;
+
+    case STT_OBJECT:
+      switch (idx) {
+        default:
+          {
+            ELFSectionHeaderTable<Bitwidth> const *header =
+              owner->getSectionHeaderTable();
+            assert(((*header)[idx]->getType() == SHT_PROGBITS ||
+                    (*header)[idx]->getType() == SHT_NOBITS) &&
+                   "STT_OBJECT with not BITS section.");
+            ELFSection<Bitwidth> const *sec = owner->getSectionByIndex(idx);
+            assert(sec != 0 && "STT_OBJECT with null section.");
+
+            ELFSectionBits<Bitwidth> const &st =
+              static_cast<ELFSectionBits<Bitwidth> const &>(*sec);
+            my_addr = const_cast<unsigned char *>(&st[0] + (off_t)getValue());
+          }
+          break;
+
+        case SHN_COMMON:
+          {
+            int r = posix_memalign(&my_addr,
+                                   (size_t)getValue(),
+                                   (size_t)getSize());
+            assert(r==0 && "posix_memalign failed.");
+          }
+          break;
+
+        case SHN_ABS:
+        case SHN_UNDEF:
+        case SHN_XINDEX:
+          assert(0 && "STT_OBJECT with special st_shndx.");
+          break;
+      }
+      break;
+
+
+    case STT_FUNC:
+      switch (idx) {
+        default:
+          {
+            ELFSectionHeaderTable<Bitwidth> const *header =
+              owner->getSectionHeaderTable();
+            assert((*header)[idx]->getType() == SHT_PROGBITS &&
+                   "STT_FUNC with not PROGBITS section.");
+            ELFSection<Bitwidth> const *sec = owner->getSectionByIndex(idx);
+            assert(sec != 0 && "STT_FUNC with null section.");
+
+            ELFSectionProgBits<Bitwidth> const &st =
+              static_cast<ELFSectionProgBits<Bitwidth> const &>(*sec);
+            my_addr = const_cast<unsigned char *>(&st[0] + (off_t)getValue());
+          }
+          break;
+
+        case SHN_ABS:
+        case SHN_COMMON:
+        case SHN_UNDEF:
+        case SHN_XINDEX:
+          assert(0 && "STT_FUNC with special st_shndx.");
+          break;
+      }
+      break;
+
+
+    case STT_SECTION:
+      switch (idx) {
+        default:
+          {
+            ELFSectionHeaderTable<Bitwidth> const *header =
+              owner->getSectionHeaderTable();
+            assert(((*header)[idx]->getType() == SHT_PROGBITS ||
+                    (*header)[idx]->getType() == SHT_NOBITS) &&
+                   "STT_SECTION with not BITS section.");
+            ELFSection<Bitwidth> const *sec = owner->getSectionByIndex(idx);
+            assert(sec != 0 && "STT_SECTION with null section.");
+
+            ELFSectionBits<Bitwidth> const &st =
+              static_cast<ELFSectionBits<Bitwidth> const &>(*sec);
+            my_addr = const_cast<unsigned char *>(&st[0] + (off_t)getValue());
+          }
+          break;
+
+        case SHN_ABS:
+        case SHN_COMMON:
+        case SHN_UNDEF:
+        case SHN_XINDEX:
+          assert(0 && "STT_SECTION with special st_shndx.");
+          break;
+      }
+      break;
+
+    case STT_COMMON:
+    case STT_NOTYPE:
+    case STT_FILE:
+    case STT_TLS:
+    case STT_LOOS:
+    case STT_HIOS:
+    case STT_LOPROC:
+    case STT_HIPROC:
+      assert(0 && "Not implement.");
+      return 0;
+  }
+  return my_addr;
+}
 
 
 
