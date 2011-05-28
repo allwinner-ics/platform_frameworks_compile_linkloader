@@ -9,6 +9,7 @@
 #include <string>
 #include <cassert>
 #include <cstdlib>
+#include <algorithm>
 
 #include <stdint.h>
 
@@ -257,7 +258,8 @@ void *ELFSectionSymTabEntry_CRTP<Bitwidth>::getAddress() const {
         case SHN_COMMON:
           {
             int r = posix_memalign(&my_addr,
-                                   (size_t)getValue(),
+                                   std::max((size_t)getValue(),
+                                            sizeof(void *)),
                                    (size_t)getSize());
             assert(r==0 && "posix_memalign failed.");
           }
