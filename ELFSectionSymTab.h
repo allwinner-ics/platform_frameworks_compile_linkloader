@@ -42,7 +42,7 @@ public:
 
   //SymTabEntry const *operator[](size_t index) const;
 
-  SymTabEntry const *operator[](const std::string &str) const;
+  SymTabEntry const *getByName(const std::string &str) const;
 };
 
 
@@ -55,7 +55,7 @@ char const *ELFSectionSymTab<Bitwidth>::TABLE_NAME = "Symbol Table";
 
 template <size_t Bitwidth>
 inline ELFSectionSymTabEntry<Bitwidth> const *
-ELFSectionSymTab<Bitwidth>::operator[](const std::string &str) const {
+ELFSectionSymTab<Bitwidth>::getByName(const std::string &str) const {
   // TODO: Use map
   for (size_t i = 0; i < this->table.size(); ++i) {
     if (str == string(this->table[i]->getName())) {
