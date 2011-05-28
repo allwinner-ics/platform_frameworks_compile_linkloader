@@ -58,12 +58,12 @@ inline ELFSectionSymTabEntry<Bitwidth> const *
 ELFSectionSymTab<Bitwidth>::getByName(const std::string &str) const {
   // TODO: Use map
   for (size_t i = 0; i < this->table.size(); ++i) {
-    if (str == string(this->table[i]->getName())) {
-      return this->table[i].get();
+    if (str == std::string(this->table[i]->getName())) {
+      return this->table[i];
     }
   }
   // Return STN_UNDEF entry.
-  return this->table[0].get();
+  return this->table[0];
 }
 
 #endif // ELF_SECTION_SYMTAB_H
