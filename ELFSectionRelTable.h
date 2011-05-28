@@ -17,7 +17,7 @@ class ELFSectionRelTable :
                                     ELFSectionRelTable<Bitwidth>,
                                     ELFSectionRel<Bitwidth> >;
 private:
-  static std::string const TABLE_NAME;
+  static char const *TABLE_NAME;
 
 public:
   typedef ELFSectionRel<Bitwidth> Rel;
@@ -48,6 +48,6 @@ public:
 //==================Inline Member Function Definition==========================
 
 template <size_t Bitwidth>
-std::string const ELFSectionRelTable<Bitwidth>::TABLE_NAME("Relocation Table");
+char const *ELFSectionRelTable<Bitwidth>::TABLE_NAME = "Relocation Table";
 
 #endif // ELF_SECTION_REL_TABLE_H

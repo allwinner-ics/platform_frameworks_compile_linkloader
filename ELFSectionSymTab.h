@@ -17,7 +17,7 @@ class ELFSectionSymTab :
                                     ELFSectionSymTab<Bitwidth>,
                                     ELFSectionSymTabEntry<Bitwidth> >;
 private:
-  static std::string const TABLE_NAME;
+  static char const *TABLE_NAME;
 public:
   typedef ELFSectionSymTabEntry<Bitwidth> SymTabEntry;
 
@@ -51,7 +51,7 @@ public:
 #include "ELFSectionSymTabEntry.h"
 
 template <size_t Bitwidth>
-std::string const ELFSectionSymTab<Bitwidth>::TABLE_NAME("Symbol Table");
+char const *ELFSectionSymTab<Bitwidth>::TABLE_NAME = "Symbol Table";
 
 template <size_t Bitwidth>
 inline ELFSectionSymTabEntry<Bitwidth> const *

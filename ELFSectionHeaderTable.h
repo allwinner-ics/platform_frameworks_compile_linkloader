@@ -21,7 +21,8 @@ class ELFSectionHeaderTable :
                                     ELFSectionHeaderTable<Bitwidth>,
                                     ELFSectionHeader<Bitwidth> >;
 private:
-  static std::string const TABLE_NAME;
+  static char const *TABLE_NAME;
+
 private:
   //std::vector<ELFSectionHeader<Bitwidth> *> table;
 
@@ -90,8 +91,8 @@ ELFSectionHeaderTable<Bitwidth>::read(Archiver &AR,
 }
 
 template <size_t Bitwidth>
-std::string const ELFSectionHeaderTable<Bitwidth>::
-  TABLE_NAME("ELF Section Header Table");
+char const *ELFSectionHeaderTable<Bitwidth>::
+  TABLE_NAME = "ELF Section Header Table";
 
 template <size_t Bitwidth>
 inline ELFSectionHeader<Bitwidth> const *
