@@ -2,6 +2,24 @@
 
 #include <elf.h>
 
+// ARM Section Header Type Definitions
+
+// TODO: These definitions are not defined in external/elfutils/libelf/
+// elf.h.  So we to this by ourself.  Maybe we should update elf.h
+// instead.
+
+#ifndef SHT_ARM_EXIDX
+#define SHT_ARM_EXIDX (SHT_LOPROC + 1)
+#endif
+
+#ifndef SHT_ARM_PREEMPTMAP
+#define SHT_ARM_PREEMPTMAP (SHT_LOPROC + 2)
+#endif
+
+#ifndef SHT_ARM_ATTRIBUTES
+#define SHT_ARM_ATTRIBUTES (SHT_LOPROC + 3)
+#endif
+
 char const *ELFSectionHeaderHelperMixin::getSectionTypeStr(uint32_t type) {
   switch (type) {
     default: return "(UNKNOWN)";
