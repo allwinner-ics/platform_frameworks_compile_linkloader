@@ -245,11 +245,13 @@ void *ELFSectionSymTabEntry_CRTP<Bitwidth>::getAddress() const {
       switch (idx) {
         default:
           {
+#ifndef NDEBUG
             ELFSectionHeaderTable<Bitwidth> const *header =
               owner->getSectionHeaderTable();
             assert(((*header)[idx]->getType() == SHT_PROGBITS ||
                     (*header)[idx]->getType() == SHT_NOBITS) &&
                    "STT_OBJECT with not BITS section.");
+#endif
             ELFSection<Bitwidth> const *sec = owner->getSectionByIndex(idx);
             assert(sec != 0 && "STT_OBJECT with null section.");
 
@@ -282,10 +284,12 @@ void *ELFSectionSymTabEntry_CRTP<Bitwidth>::getAddress() const {
       switch (idx) {
         default:
           {
+#ifndef NDEBUG
             ELFSectionHeaderTable<Bitwidth> const *header =
               owner->getSectionHeaderTable();
             assert((*header)[idx]->getType() == SHT_PROGBITS &&
                    "STT_FUNC with not PROGBITS section.");
+#endif
             ELFSection<Bitwidth> const *sec = owner->getSectionByIndex(idx);
             assert(sec != 0 && "STT_FUNC with null section.");
 
@@ -309,11 +313,13 @@ void *ELFSectionSymTabEntry_CRTP<Bitwidth>::getAddress() const {
       switch (idx) {
         default:
           {
+#ifndef NDEBUG
             ELFSectionHeaderTable<Bitwidth> const *header =
               owner->getSectionHeaderTable();
             assert(((*header)[idx]->getType() == SHT_PROGBITS ||
                     (*header)[idx]->getType() == SHT_NOBITS) &&
                    "STT_SECTION with not BITS section.");
+#endif
             ELFSection<Bitwidth> const *sec = owner->getSectionByIndex(idx);
             assert(sec != 0 && "STT_SECTION with null section.");
 
