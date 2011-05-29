@@ -136,7 +136,7 @@ relocate(void *(find_sym)(char const *name, void *context), void *context) {
   // FIXME: Can not implement here!
   switch ((uint32_t)getHeader()->getMachine()) {
     default:
-      assert(0 && "Only support ARM relocation.");
+      assert(0 && "Only support ARM ans X86_64 relocation.");
       break;
 
     case EM_ARM:
@@ -158,7 +158,7 @@ relocate(void *(find_sym)(char const *name, void *context), void *context) {
           ELFSectionRel<Bitwidth> *rel = (*reltab)[i];
           ELFSectionSymTabEntry<Bitwidth> *sym =
             (*symtab)[rel->getSymTabIndex()];
-          //typedef uint64_t Inst_t;
+          // FIXME: May be not uint32_t *.
           typedef int32_t Inst_t;
           Inst_t *inst = (Inst_t *)&(*text)[rel->getOffset()];
           Inst_t P = (Inst_t)(int64_t)inst;
@@ -172,7 +172,6 @@ relocate(void *(find_sym)(char const *name, void *context), void *context) {
             // FIXME: Predefine relocation codes.
             case 28: // R_ARM_CALL
               {
-                // FIXME: May be not uint32_t *.
 #define SIGN_EXTEND(x, l) (((x)^(1<<((l)-1)))-(1<<(l-1)))
                 A = (Inst_t)(int64_t)SIGN_EXTEND(*inst & 0xFFFFFF, 24);
 #undef SIGN_EXTEND
@@ -269,18 +268,9 @@ relocate(void *(find_sym)(char const *name, void *context), void *context) {
 
               case 10: // R_X86_64_32
               case 11: // R_X86_64_32S
-                llvm::errs() << "inst:   " << inst << '\n';
-                llvm::errs() << "*inst:   " << *inst << '\n';
                 *inst = (S+A);
-                llvm::errs() << "inst:   " << inst << '\n';
-                llvm::errs() << "*inst:   " << *inst << '\n';
                 break;
             }
-            llvm::errs() << "S:     " << (void *)S << '\n';
-            llvm::errs() << "A:     " << (void *)A << '\n';
-            llvm::errs() << "P:     " << (void *)P << '\n';
-            llvm::errs() << "S+A:   " << (void *)(S+A) << '\n';
-            llvm::errs() << "S+A-P: " << (void *)(S+A-P) << '\n';
           }
         }
       }
@@ -289,7 +279,7 @@ relocate(void *(find_sym)(char const *name, void *context), void *context) {
   for (size_t i = 0; i < stab.size(); ++i) {
     ELFSectionHeader<Bitwidth> *sh = (*shtab)[i];
     if (sh && (sh->getType() == SHT_PROGBITS ||
-                sh->getType() == SHT_NOBITS)) {
+               sh->getType() == SHT_NOBITS)) {
       static_cast<ELFSectionBits<Bitwidth> *>(stab[i])->memory_protect();
     }
   }

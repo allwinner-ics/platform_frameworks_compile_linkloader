@@ -77,7 +77,6 @@ void dump_object(Archiver &AR) {
 
   object->relocate(find_sym, 0);
 
-  object->print();
   cout << "main address: " << symtab->getByName("main")->getAddress() << endl;
   cout << "printf address: " << (void *)printf << endl;
   void *ptr = symtab->getByName("main")->getAddress();
