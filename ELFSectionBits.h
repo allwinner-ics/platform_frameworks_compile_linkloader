@@ -105,11 +105,11 @@ template <size_t Bitwidth>
 inline unsigned char const *
 ELFSectionBits<Bitwidth>::memory_protect() const {
   int protect_type = PROT_READ;
-  if (this->section_header->get_flags() & SHF_WRITE) {
-    protect_type &= PROT_WRITE;
+  if (this->section_header->getFlags() & SHF_WRITE) {
+    protect_type |= PROT_WRITE;
   }
-  if (this->section_header->get_flags() &SHF_EXECINSTR) {
-    protect_type &= PROT_EXEC;
+  if (this->section_header->getFlags() &SHF_EXECINSTR) {
+    protect_type |= PROT_EXEC;
   }
   if (buf_size > 0) {
     int ret = mprotect((void *)buf, buf_size, protect_type);
