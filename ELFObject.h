@@ -134,7 +134,6 @@ template <size_t Bitwidth>
 inline void ELFObject<Bitwidth>::
 relocate(void *(find_sym)(char const *name, void *context), void *context) {
   // FIXME: Can not implement here!
-  assert(Bitwidth == 32 && "Only support 32 bits relocation.");
   switch ((uint32_t)getHeader()->getMachine()) {
     default:
       assert(0 && "Only support ARM relocation.");
@@ -143,6 +142,7 @@ relocate(void *(find_sym)(char const *name, void *context), void *context) {
     case EM_ARM:
       // FIXME: Can not implement here!
       {
+        assert(Bitwidth == 32 && "ARM only have 32 bits.");
         // FIXME: Can not only relocate .rel.text!
         ELFSectionRelTable<Bitwidth> *reltab =
           static_cast<ELFSectionRelTable<Bitwidth> *>(
@@ -165,6 +165,10 @@ relocate(void *(find_sym)(char const *name, void *context), void *context) {
           Inst_t A = 0;
           Inst_t S = (Inst_t)(int64_t)sym->getAddress();
           switch ((uint32_t)rel->getType()) {
+            default:
+              assert(0 && "Not implemented relocation type.");
+              break;
+
             // FIXME: Predefine relocation codes.
             case 28: // R_ARM_CALL
               {
@@ -222,8 +226,73 @@ relocate(void *(find_sym)(char const *name, void *context), void *context) {
           //llvm::errs() << "S+A-P: " << (void *)(S+A-P) << '\n';
         }
       }
+      break;
+
+    case EM_X86_64:
+      {
+        assert(Bitwidth == 64 && "Only support X86_64.");
+        ELFSectionSymTab<Bitwidth> *symtab =
+          static_cast<ELFSectionSymTab<Bitwidth> *>(
+              getSectionByName(".symtab"));
+        size_t const size = 2;
+        char const *name[size] = {".text", ".eh_frame"};
+        for (size_t i = 0; i < size; ++i) {
+          ELFSectionRelaTable<Bitwidth> *relatab =
+            static_cast<ELFSectionRelaTable<Bitwidth> *>(
+                getSectionByName((std::string(".rela") + name[i]).c_str()));
+          ELFSectionProgBits<Bitwidth> *text =
+            static_cast<ELFSectionProgBits<Bitwidth> *>(
+                getSectionByName(name[i]));
+          for (size_t i = 0; i < relatab->size(); ++i) {
+            // FIXME: Can not implement here, use Fixup!
+            ELFSectionRela<Bitwidth> *rela = (*relatab)[i];
+            ELFSectionSymTabEntry<Bitwidth> *sym =
+              (*symtab)[rela->getSymTabIndex()];
+            //typedef uint64_t Inst_t;
+            typedef int32_t Inst_t;
+            Inst_t *inst = (Inst_t *)&(*text)[rela->getOffset()];
+            Inst_t P = (Inst_t)(int64_t)inst;
+            Inst_t A = (Inst_t)(int64_t)rela->getAddend();
+            Inst_t S = (Inst_t)(int64_t)sym->getAddress();
+            if (S == 0) {
+              S = (Inst_t)(int64_t)find_sym(sym->getName(), context);
+              sym->setAddress((void *)S);
+            }
+            switch ((uint32_t)rela->getType()) {
+              default:
+                assert(0 && "Not implemented relocation type.");
+                break;
+
+              case 2: // R_X86_64_PC32
+                *inst = (S+A-P);
+                break;
+
+              case 10: // R_X86_64_32
+              case 11: // R_X86_64_32S
+                llvm::errs() << "inst:   " << inst << '\n';
+                llvm::errs() << "*inst:   " << *inst << '\n';
+                *inst = (S+A);
+                llvm::errs() << "inst:   " << inst << '\n';
+                llvm::errs() << "*inst:   " << *inst << '\n';
+                break;
+            }
+            llvm::errs() << "S:     " << (void *)S << '\n';
+            llvm::errs() << "A:     " << (void *)A << '\n';
+            llvm::errs() << "P:     " << (void *)P << '\n';
+            llvm::errs() << "S+A:   " << (void *)(S+A) << '\n';
+            llvm::errs() << "S+A-P: " << (void *)(S+A-P) << '\n';
+          }
+        }
+      }
+      break;
   }
-  // FIXME: Need memory_protect all Bits section.
+  for (size_t i = 0; i < stab.size(); ++i) {
+    ELFSectionHeader<Bitwidth> *sh = (*shtab)[i];
+    if (sh && (sh->getType() == SHT_PROGBITS ||
+                sh->getType() == SHT_NOBITS)) {
+      static_cast<ELFSectionBits<Bitwidth> *>(stab[i])->memory_protect();
+    }
+  }
 }
 
 template <size_t Bitwidth>

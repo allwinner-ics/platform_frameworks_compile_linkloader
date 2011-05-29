@@ -74,12 +74,14 @@ void dump_object(Archiver &AR) {
   ELFSectionSymTab<Bitwidth> *symtab =
     static_cast<ELFSectionSymTab<Bitwidth> *>(
         object->getSectionByName(".symtab"));
-  cout << "main address: " << symtab->getByName("main")->getAddress() << endl;
-  cout << "printf address: " << (void *)printf << endl;
 
   object->relocate(find_sym, 0);
 
   object->print();
+  cout << "main address: " << symtab->getByName("main")->getAddress() << endl;
+  cout << "printf address: " << (void *)printf << endl;
+  void *ptr = symtab->getByName("main")->getAddress();
+  ((int (*)(int, char **))ptr)(0,0);
 }
 
 template <typename Archiver>

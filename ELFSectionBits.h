@@ -75,7 +75,9 @@ read(Archiver &AR,
   if (result->buf_size > 0) {
     result->buf = (unsigned char *)mmap(0, result->buf_size,
                                         PROT_READ | PROT_WRITE,
-                                        MAP_PRIVATE | MAP_ANONYMOUS, -1, 0);
+                                        MAP_PRIVATE |
+                                        MAP_ANONYMOUS |
+                                        MAP_32BIT, -1, 0);
   }
 
   // Check map success.
