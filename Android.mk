@@ -19,6 +19,7 @@ LOCAL_SRC_FILES := \
   ELFSectionSymTabEntry.cpp \
   ELFSectionHeader.cpp \
   ELFTypes.cpp \
+  StubLayout.cpp \
   utils/raw_ostream.cpp \
   utils/term.cpp \
   utils/helper.cpp \

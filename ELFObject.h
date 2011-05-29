@@ -1,7 +1,10 @@
 #ifndef ELF_OBJECT_H
 #define ELF_OBJECT_H
 
+#include "StubLayout.h"
+
 #include <llvm/ADT/OwningPtr.h>
+
 #include <vector>
 #include <elf.h>
 #include <cassert>
@@ -17,6 +20,10 @@ private:
   llvm::OwningPtr<ELFHeader<Bitwidth> > header;
   llvm::OwningPtr<ELFSectionHeaderTable<Bitwidth> > shtab;
   std::vector<ELFSection<Bitwidth> *> stab;
+
+#ifdef __arm__
+  llvm::OwningPtr<StubLayout> stubs;
+#endif
 
 private:
   ELFObject() { }
@@ -38,6 +45,15 @@ public:
   ELFSection<Bitwidth> *getSectionByIndex(size_t i);
   ELFSection<Bitwidth> const *getSectionByName(std::string const &str) const;
   ELFSection<Bitwidth> *getSectionByName(std::string const &str);
+
+#ifdef __arm__
+  StubLayout *getStubLayout() {
+    if (!stubs) {
+      stubs.reset(new StubLayout());
+    }
+    return stubs.get();
+  }
+#endif
 
   void relocate(void *(find_sym)(char const *name, void *context),
                 void *context);
@@ -200,8 +216,22 @@ relocate(void *(find_sym)(char const *name, void *context), void *context) {
                 S >>= 2;
                 P >>= 2;
                 uint32_t result = (S+A-P);
+#ifdef __arm__
+                if ((result & 0xFF000000) != 0) {
+                  out() << "far stub for: " << sym->getAddress() << " ";
+                  void *stub = getStubLayout()->allocateStub((void *)sym->getAddress());
+                  if (!stub) {
+                    out() << "unable to allocate stub." << "\n";
+                    exit(EXIT_FAILURE);
+                  }
+                  out() << "is at " << stub << "\n";
+                  S = ((uint32_t)stub) >> 2;
+                  result = (S+A-P);
+                }
+#else
                 // TODO: Stub.
                 assert(((result & 0xFF000000) == 0) && "Too far, need stub.");
+#endif
                 *inst = ((result) & 0x00FFFFFF) | (*inst & 0xFF000000);
               }
               break;

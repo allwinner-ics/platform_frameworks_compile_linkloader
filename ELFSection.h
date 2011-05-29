@@ -54,7 +54,12 @@ ELFSection<Bitwidth>::read(Archiver &AR,
       return ELFSectionSymTab<Bitwidth>::read(AR, owner, sh);
 
     case SHT_PROGBITS:
+    {
+#ifdef __arm__
+      owner->getStubLayout();
+#endif
       return ELFSectionProgBits<Bitwidth>::read(AR, sh);
+    }
 
     case SHT_NOBITS:
       return ELFSectionNoBits<Bitwidth>::read(AR, sh);
