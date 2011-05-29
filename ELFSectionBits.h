@@ -14,6 +14,12 @@
 #include <llvm/ADT/OwningPtr.h>
 #include <llvm/Support/raw_ostream.h>
 
+#ifndef MAP_32BIT
+#define MAP_32BIT 0
+// Note: If the <sys/mman.h> does not come with MAP_32BIT, then we
+// define it as zero, so that it won't manipulate the flags.
+#endif
+
 template <size_t Bitwidth> class ELFSectionHeader;
 
 template <size_t Bitwidth>
