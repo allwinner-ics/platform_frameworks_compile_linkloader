@@ -11,6 +11,7 @@
 #include <cstdlib>
 #include <algorithm>
 
+#include <malloc.h>
 #include <stdint.h>
 
 template <size_t Bitwidth> class ELFObject;
@@ -263,11 +264,17 @@ void *ELFSectionSymTabEntry_CRTP<Bitwidth>::getAddress() const {
 
         case SHN_COMMON:
           {
+#if _POSIX_C_SOURCE >= 200112L || _XOPEN_SOURCE >= 600
             int r = posix_memalign(&my_addr,
-                                   std::max((size_t)getValue(),
-                                            sizeof(void *)),
+                                   std::max((size_t)getValue(), sizeof(void*)),
                                    (size_t)getSize());
             assert(r==0 && "posix_memalign failed.");
+#else
+            my_addr = memalign(std::max((size_t)getValue(), sizeof(void *)),
+                               (size_t)getSize());
+
+            assert(my_addr != NULL && "memalign failed.");
+#endif
           }
           break;
 
