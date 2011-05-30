@@ -37,15 +37,14 @@ int main(int argc, char **argv) {
   // Filename from argument
   char const *filename = argv[1];
 
-  cout << left;
-
   // Open the file
   int fd = -1;
   unsigned char const *image = NULL;
   size_t image_size = 0;
 
   if (!open_mmap_file(filename, fd, image, image_size)) {
-    cerr << "ERROR: Unable to open the file: " << filename << endl;
+    llvm::errs() << "ERROR: Unable to open the file: " << filename << "\n";
+    exit(EXIT_FAILURE);
   }
 
   // Dump the file
@@ -90,10 +89,9 @@ void dump_object(Archiver &AR) {
 
   object->relocate(find_sym, 0);
 
-  cout << "main address: " << symtab->getByName("main")->getAddress() << endl;
-  cout << "printf address: " << (void *)printf << endl;
-  void *ptr = symtab->getByName("main")->getAddress();
-  ((int (*)(int, char **))ptr)(0,0);
+  void *main_addr = symtab->getByName("main")->getAddress();
+  out() << "main address: " << main_addr << "\n";
+  ((int (*)(int, char **))main_addr)(0,0);
 }
 
 template <typename Archiver>
