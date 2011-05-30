@@ -152,7 +152,7 @@ relocate(void *(find_sym)(char const *name, void *context), void *context) {
   // FIXME: Can not implement here!
   switch ((uint32_t)getHeader()->getMachine()) {
     default:
-      assert(0 && "Only support ARM ans X86_64 relocation.");
+      assert(0 && "Only support ARM and X86_64 relocation.");
       break;
 
     case EM_ARM:
