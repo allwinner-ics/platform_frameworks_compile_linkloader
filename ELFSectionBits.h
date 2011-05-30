@@ -7,6 +7,7 @@
 
 #include "ELFSection.h"
 
+#include "utils/flush_cpu_cache.h"
 #include "utils/helper.h"
 #include "utils/serialize.h"
 
@@ -125,6 +126,10 @@ ELFSectionBits<Bitwidth>::memory_protect() const {
       // FIXME: Throws excetion?
       llvm::errs()<<"Error: Can't mprotect.\n";
       return 0;
+    }
+
+    if (protect_type & PROT_EXEC) {
+      FLUSH_CPU_CACHE(buf, buf + buf_size);
     }
   }
   return buf;

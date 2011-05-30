@@ -1,10 +1,15 @@
 LOCAL_PATH := $(call my-dir)
 
-include $(CLEAR_VARS)
-
 LLVM_ROOT_PATH := external/llvm
 
-LOCAL_MODULE := rsloader-run
+
+#=============================================================================
+# rsloader
+#-----------------------------------------------------------------------------
+
+include $(CLEAR_VARS)
+
+LOCAL_MODULE := rsloader
 
 LOCAL_MODULE_TAGS := tests
 
@@ -33,3 +38,35 @@ LOCAL_C_INCLUDES := \
 
 include $(LLVM_ROOT_PATH)/llvm-device-build.mk
 include $(BUILD_EXECUTABLE)
+
+
+#=============================================================================
+# stub-layout-unit-test
+#-----------------------------------------------------------------------------
+
+ifeq BUILD_STUB_LAYOUT_TEST
+include $(CLEAR_VARS)
+
+LOCAL_MODULE := stub-layout-unit-test
+
+LOCAL_MODULE_TAGS := tests
+
+LOCAL_SHARED_LIBRARIES := \
+  libstlport
+
+LOCAL_SRC_FILES := \
+  StubLayout.cpp \
+  utils/raw_ostream.cpp \
+  utils/term.cpp \
+  utils/helper.cpp \
+  tests/stub-test.cpp
+
+LOCAL_C_INCLUDES := \
+  bionic \
+  external/elfutils/libelf \
+  external/stlport/stlport \
+  $(LOCAL_C_INCLUDES)
+
+include $(LLVM_ROOT_PATH)/llvm-device-build.mk
+include $(BUILD_EXECUTABLE)
+endif

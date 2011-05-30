@@ -1,5 +1,6 @@
 #include "StubLayout.h"
 
+#include "utils/flush_cpu_cache.h"
 #include "utils/raw_ostream.h"
 
 #include <stdint.h>
@@ -48,7 +49,7 @@ void StubLayout::updateStubAddress(void *stub, void *addr) {
 #ifdef __arm__
   mprotect(table, STUB_TABLE_SIZE, PROT_WRITE);
   setStubAddress(stub, addr);
-  __clear_cache(table, table + STUB_TABLE_SIZE);
+  FLUSH_CPU_CACHE(table, table + STUB_TABLE_SIZE);
   mprotect(table, STUB_TABLE_SIZE, PROT_EXEC);
 #endif
 }
