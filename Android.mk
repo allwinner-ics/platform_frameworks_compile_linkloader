@@ -44,7 +44,7 @@ include $(BUILD_EXECUTABLE)
 # stub-layout-unit-test
 #-----------------------------------------------------------------------------
 
-ifeq BUILD_STUB_LAYOUT_TEST
+ifdef BUILD_STUB_LAYOUT_TEST
 include $(CLEAR_VARS)
 
 LOCAL_MODULE := stub-layout-unit-test
