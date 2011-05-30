@@ -15,8 +15,8 @@ static int global_static_big_z_i[1000];
 static double global_static_big_z_d[1000];
 int global_z_i_init = 1;
 double global_z_d_init = 1.1;
-extern int extern_z_i;
-extern double extern_z_d;
+/*extern int extern_z_i;   */
+/*extern double extern_z_d;*/
 int main(){
         static int local_static_z_i;
         static double local_static_z_d;
@@ -47,7 +47,7 @@ int main(){
         global_z_i_init = 6;
         global_z_d_init = 6.6;
         printf("%d %f\n", global_z_i_init, global_z_d_init);
-        printf("%d %f\n", extern_z_i, extern_z_d);
+        /*printf("%d %f\n", extern_z_i, extern_z_d);*/
         return 0;
 }
 

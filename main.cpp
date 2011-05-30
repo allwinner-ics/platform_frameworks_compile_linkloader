@@ -12,6 +12,8 @@
 #include <sys/mman.h>
 #include <sys/stat.h>
 #include <sys/types.h>
+#include <map>
+#include <stdio.h>
 
 using namespace serialization;
 using namespace std;
@@ -58,9 +60,10 @@ int main(int argc, char **argv) {
 
 void *find_sym(char const *name_, void *context) {
   std::string name = name_;
+  std::map<std::string, void *> fptr;
 
 #define DEF_FUNC(FUNC) \
-  if (name == #FUNC) { return (void *)&FUNC; }
+  fptr.insert(make_pair(#FUNC, (void *)&FUNC));
 
   DEF_FUNC(rand);
   DEF_FUNC(printf);
@@ -70,6 +73,12 @@ void *find_sym(char const *name_, void *context) {
 
 #undef DEF_FUNC
 
+  fptr.insert(make_pair("__isoc99_scanf", (void*)scanf));
+
+  if (fptr.count(name) > 0) {
+    return fptr[name];
+  }
+  assert(0 && "Can't find symbol.");
   return 0;
 }
 
