@@ -18,7 +18,7 @@
 
 #else
 
-#define FLUSH_CPU_CACHE(BEGIN, END) do { } while ()
+#define FLUSH_CPU_CACHE(BEGIN, END) do { } while (0)
 
 #endif
 
