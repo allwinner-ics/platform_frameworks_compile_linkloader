@@ -28,11 +28,14 @@ void close_mmap_file(int fd,
 void dump_file(unsigned char const *image, size_t size);
 
 int main(int argc, char **argv) {
-  // Filename from argument
-  char const *filename = argv[0];
-  if (argc >= 2) {
-    filename = argv[1];
+  // Check arguments
+  if (argc < 2) {
+    llvm::errs() << "USAGE: " << argv[0] << " [ELFObjectFile]\n";
+    exit(EXIT_FAILURE);
   }
+
+  // Filename from argument
+  char const *filename = argv[1];
 
   cout << left;
 
