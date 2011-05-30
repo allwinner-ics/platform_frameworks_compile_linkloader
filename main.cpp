@@ -54,10 +54,20 @@ int main(int argc, char **argv) {
   return EXIT_SUCCESS;
 }
 
-void *find_sym(char const *name, void *context) {
-  if (std::string(name) == std::string("printf")) {
-    return (void *)printf;
-  }
+void *find_sym(char const *name_, void *context) {
+  std::string name = name_;
+
+#define DEF_FUNC(FUNC) \
+  if (name == #FUNC) { return (void *)&FUNC; }
+
+  DEF_FUNC(rand);
+  DEF_FUNC(printf);
+  DEF_FUNC(scanf);
+  DEF_FUNC(srand);
+  DEF_FUNC(time);
+
+#undef DEF_FUNC
+
   return 0;
 }
 
