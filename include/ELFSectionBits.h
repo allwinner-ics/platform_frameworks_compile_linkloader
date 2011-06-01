@@ -115,17 +115,19 @@ template <size_t Bitwidth>
 inline unsigned char const *
 ELFSectionBits<Bitwidth>::memory_protect() const {
   int protect_type = PROT_READ;
-  if (this->section_header->getFlags() & SHF_WRITE) {
+
+  if (section_header->getFlags() & SHF_WRITE) {
     protect_type |= PROT_WRITE;
   }
-  if (this->section_header->getFlags() &SHF_EXECINSTR) {
+
+  if (section_header->getFlags() & SHF_EXECINSTR) {
     protect_type |= PROT_EXEC;
   }
+
   if (buf_size > 0) {
     int ret = mprotect((void *)buf, buf_size, protect_type);
     if (ret == -1) {
-      // FIXME: Throws excetion?
-      llvm::errs()<<"Error: Can't mprotect.\n";
+      llvm::errs() << "Error: Can't mprotect.\n";
       return 0;
     }
 
@@ -133,6 +135,7 @@ ELFSectionBits<Bitwidth>::memory_protect() const {
       FLUSH_CPU_CACHE(buf, buf + buf_size);
     }
   }
+
   return buf;
 }
 
