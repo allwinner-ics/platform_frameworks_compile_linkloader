@@ -1,12 +1,6 @@
 #ifndef ELF_SECTION_TABLE_CRTP_H
 #define ELF_SECTION_TABLE_CRTP_H
 
-/*
- * This class is a table prototype.
- */
-#include "ELFTypes.h"
-#include "ELFHeader.h"
-
 #include "utils/serialize.h"
 #include "utils/raw_ostream.h"
 
@@ -16,14 +10,10 @@
 
 #include <vector>
 
-template <size_t Bitwidth> class ELFObject;
 template <size_t Bitwidth> class ELFSection;
-template <size_t Bitwidth> class ELFSectionHeader;
 
 template <size_t Bitwidth, typename ConcreteTable, typename TableEntry>
 class ELFSectionTable_CRTP : public ELFSection<Bitwidth> {
-//  friend class ConcreteTable;
-
 protected:
   std::vector<TableEntry *> table;
 
@@ -76,20 +66,18 @@ read(Archiver &AR,
   llvm::OwningPtr<ConcreteTable> st(new ConcreteTable());
 
   // Assert that entry size will be the same as standard.
-  assert(sh->getEntrySize() ==
-         TypeTraits<TableEntry>::size);
+  assert(sh->getEntrySize() == TypeTraits<TableEntry>::size);
 
   // Read all symbol table entry
-
   size_t tsize = sh->getSize() / sh->getEntrySize();
   for (size_t i = 0; i < tsize; ++i) {
     // Seek to symbol table start address
-    AR.seek(sh->getOffset() + i*sh->getEntrySize(), true);
+    AR.seek(sh->getOffset() + i * sh->getEntrySize(), true);
     st->table.push_back(TableEntry::read(AR, owner, i));
   }
 
   if (!AR) {
-    // Unable to read the string table.
+    // Unable to read the table.
     return 0;
   }
 
