@@ -50,7 +50,7 @@ env = Environment(CC=build_toolkit['CC'],
                   CXX=build_toolkit['CXX'],
                   CFLAGS=build_config['CFLAGS'],
                   CXXFLAGS=build_config['CXXFLAGS'],
-                  CPPPATH=['utils'],
+                  CPPPATH=['.', 'include'],
                   ENV = {'PATH' : os.environ['PATH'],
                          'C_INCLUDE_PATH' : c_include_path,
                          'CPLUS_INCLUDE_PATH' : cplus_include_path})
@@ -63,10 +63,10 @@ env.ParseConfig('llvm-config --cxxflags --ldflags --libs support')
 
 
 env.Program('elfreader',
-            source=['ELFHeader.cpp',
-                    'ELFSectionHeader.cpp',
-                    'ELFSectionSymTabEntry.cpp',
-                    'ELFTypes.cpp',
-                    'main.cpp',
+            source=['lib/ELFHeader.cpp',
+                    'lib/ELFSectionHeader.cpp',
+                    'lib/ELFSectionSymTabEntry.cpp',
+                    'lib/ELFTypes.cpp',
                     'utils/helper.cpp',
-                    'utils/raw_ostream.cpp'])
+                    'utils/raw_ostream.cpp',
+                    'main.cpp'])
