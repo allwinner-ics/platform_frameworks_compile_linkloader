@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#include "../StubLayout.h"
+#include "StubLayout.h"
 
 void function1() {
   printf("hello ");

@@ -20,17 +20,18 @@ LOCAL_STATIC_LIBRARIES := \
   libLLVMSupport
 
 LOCAL_SRC_FILES := \
-  ELFHeader.cpp \
-  ELFSectionSymTabEntry.cpp \
-  ELFSectionHeader.cpp \
-  ELFTypes.cpp \
-  StubLayout.cpp \
+  lib/ELFHeader.cpp \
+  lib/ELFSectionSymTabEntry.cpp \
+  lib/ELFSectionHeader.cpp \
+  lib/ELFTypes.cpp \
+  lib/StubLayout.cpp \
   utils/raw_ostream.cpp \
-  utils/term.cpp \
   utils/helper.cpp \
   main.cpp
 
 LOCAL_C_INCLUDES := \
+  $(LOCAL_PATH) \
+  $(LOCAL_PATH)/include \
   bionic \
   external/elfutils/libelf \
   external/stlport/stlport \
@@ -44,6 +45,7 @@ include $(BUILD_EXECUTABLE)
 # stub-layout-unit-test
 #-----------------------------------------------------------------------------
 
+BUILD_STUB_LAYOUT_TEST := 1
 ifdef BUILD_STUB_LAYOUT_TEST
 include $(CLEAR_VARS)
 
@@ -55,13 +57,14 @@ LOCAL_SHARED_LIBRARIES := \
   libstlport
 
 LOCAL_SRC_FILES := \
-  StubLayout.cpp \
+  lib/StubLayout.cpp \
   utils/raw_ostream.cpp \
-  utils/term.cpp \
   utils/helper.cpp \
   tests/stub-test.cpp
 
 LOCAL_C_INCLUDES := \
+  $(LOCAL_PATH) \
+  $(LOCAL_PATH)/include \
   bionic \
   external/elfutils/libelf \
   external/stlport/stlport \
