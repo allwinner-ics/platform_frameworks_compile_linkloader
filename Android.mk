@@ -21,7 +21,7 @@ LOCAL_STATIC_LIBRARIES := \
 
 LOCAL_SRC_FILES := \
   lib/ELFHeader.cpp \
-  lib/ELFSectionSymTabEntry.cpp \
+  lib/ELFSymbol.cpp \
   lib/ELFSectionHeader.cpp \
   lib/ELFTypes.cpp \
   lib/StubLayout.cpp \
