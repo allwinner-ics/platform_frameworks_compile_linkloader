@@ -1,7 +1,7 @@
 COMMON_CFLAGS = ['-Wall', '-Werror']
-COMMON_CXXFLAGS = ['-Wall', '-Werror']
+COMMON_CXXFLAGS = ['-Wall', '-Werror', '-fno-exceptions']
 
-build_configurations = {
+configs = {
     'debug': {
         'CFLAGS': COMMON_CFLAGS + ['-g'],
         'CXXFLAGS': COMMON_CXXFLAGS + ['-g']
@@ -9,12 +9,11 @@ build_configurations = {
 
     'release': {
         'CFLAGS': COMMON_CFLAGS + ['-O2'],
-        'CXXFLAGS': COMMON_CXXFLAGS + ['-O2', '-fno-exceptions']
-        # FIXME: We should move -fno-exceptions to COMMON_CXXFLAGS.
+        'CXXFLAGS': COMMON_CXXFLAGS + ['-O2']
     },
 }
 
-toolkits = {
+toolsets = {
     'gcc': {
         'CC': 'gcc',
         'CXX': 'g++',
@@ -27,40 +26,31 @@ toolkits = {
 }
 
 mode = ARGUMENTS.get('mode', 'release')
-toolkit = ARGUMENTS.get('toolkit', 'gcc')
+toolset = ARGUMENTS.get('toolset', 'gcc')
 
-if not mode in build_configurations:
+if not mode in configs:
     print 'ERROR: Unknown building mode:', mode
     Exit(1)
 
-build_config = build_configurations[mode]
-build_toolkit = toolkits[toolkit]
+if not toolset in toolsets:
+    print 'ERROR: Unknown toolset:', toolset
+    Exit(1)
 
-print '===> BUILDING IN ' + mode.upper() + ' MODE ...'
+build_config = configs[mode]
+build_toolset = toolsets[toolset]
+
+print '===> BUILDING IN', mode.upper(), 'MODE ...'
 
 import os
 
-c_include_path = os.environ['C_INCLUDE_PATH'] \
-                      if 'C_INCLUDE_PATH' in os.environ else ''
-
-cplus_include_path = os.environ['CPLUS_INCLUDE_PATH'] \
-                      if 'CPLUS_INCLUDE_PATH' in os.environ else ''
-
-env = Environment(CC=build_toolkit['CC'],
-                  CXX=build_toolkit['CXX'],
+env = Environment(CC=build_toolset['CC'],
+                  CXX=build_toolset['CXX'],
                   CFLAGS=build_config['CFLAGS'],
                   CXXFLAGS=build_config['CXXFLAGS'],
                   CPPPATH=['.', 'include'],
-                  ENV = {'PATH' : os.environ['PATH'],
-                         'C_INCLUDE_PATH' : c_include_path,
-                         'CPLUS_INCLUDE_PATH' : cplus_include_path})
-
-env.AppendUnique(CPPDEFINES = ['__STDC_LIMIT_MACROS',
-                               '__STDC_CONSTANT_MACROS',
-                               'HAVE_STDINT_H'])
+                  ENV={'PATH': os.environ['PATH']})
 
 env.ParseConfig('llvm-config --cxxflags --ldflags --libs support')
-
 
 env.Program('elfreader',
             source=['lib/ELFHeader.cpp',
