@@ -14,9 +14,9 @@
 #include <stdint.h>
 #include <stdlib.h>
 
-template <size_t Bitwidth> class ELFObject;
-template <size_t Bitwidth> class ELFSymbol;
-template <size_t Bitwidth> class ELFSymbol_CRTP;
+template <unsigned Bitwidth> class ELFObject;
+template <unsigned Bitwidth> class ELFSymbol;
+template <unsigned Bitwidth> class ELFSymbol_CRTP;
 
 
 class ELFSymbolHelperMixin {
@@ -27,7 +27,7 @@ protected:
 };
 
 
-template <size_t Bitwidth>
+template <unsigned Bitwidth>
 class ELFSymbol_CRTP : private ELFSymbolHelperMixin {
 public:
   ELF_TYPE_INTRO_TO_TEMPLATE_SCOPE(Bitwidth);
@@ -140,7 +140,7 @@ private:
 #include "ELFSectionProgBits.h"
 #include "ELFSectionNoBits.h"
 
-template <size_t Bitwidth>
+template <unsigned Bitwidth>
 inline char const *ELFSymbol_CRTP<Bitwidth>::getName() const {
   ELFSectionHeaderTable<Bitwidth> const &shtab =
     *owner->getSectionHeaderTable();
@@ -151,7 +151,7 @@ inline char const *ELFSymbol_CRTP<Bitwidth>::getName() const {
   return strtab[getNameIndex()];
 }
 
-template <size_t Bitwidth>
+template <unsigned Bitwidth>
 template <typename Archiver>
 inline ELFSymbol<Bitwidth> *
 ELFSymbol_CRTP<Bitwidth>::read(Archiver &AR,
@@ -185,7 +185,7 @@ ELFSymbol_CRTP<Bitwidth>::read(Archiver &AR,
   return sh.take();
 }
 
-template <size_t Bitwidth>
+template <unsigned Bitwidth>
 inline void ELFSymbol_CRTP<Bitwidth>::
   print(bool shouldPrintHeader) const {
   using namespace llvm;
@@ -232,7 +232,7 @@ inline void ELFSymbol_CRTP<Bitwidth>::
 #endif
 }
 
-template <size_t Bitwidth>
+template <unsigned Bitwidth>
 void *ELFSymbol_CRTP<Bitwidth>::getAddress() const {
   if (my_addr != 0) {
     return my_addr;

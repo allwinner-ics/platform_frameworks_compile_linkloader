@@ -11,11 +11,11 @@
 
 class StubLayout;
 
-template <size_t Bitwidth> class ELFHeader;
-template <size_t Bitwidth> class ELFSection;
-template <size_t Bitwidth> class ELFSectionHeaderTable;
+template <unsigned Bitwidth> class ELFHeader;
+template <unsigned Bitwidth> class ELFSection;
+template <unsigned Bitwidth> class ELFSectionHeaderTable;
 
-template <size_t Bitwidth>
+template <unsigned Bitwidth>
 class ELFObject {
 private:
   llvm::OwningPtr<ELFHeader<Bitwidth> > header;
@@ -72,7 +72,7 @@ public:
 #include "StubLayout.h"
 
 #ifdef __arm__
-template <size_t Bitwidth>
+template <unsigned Bitwidth>
 inline StubLayout *ELFObject<Bitwidth>::getStubLayout() {
   if (!stubs) {
     stubs.reset(new StubLayout());
@@ -81,7 +81,7 @@ inline StubLayout *ELFObject<Bitwidth>::getStubLayout() {
 }
 #endif
 
-template <size_t Bitwidth>
+template <unsigned Bitwidth>
 template <typename Archiver>
 inline ELFObject<Bitwidth> *
 ELFObject<Bitwidth>::read(Archiver &AR) {
@@ -109,7 +109,7 @@ ELFObject<Bitwidth>::read(Archiver &AR) {
   return object.take();
 }
 
-template <size_t Bitwidth>
+template <unsigned Bitwidth>
 inline char const *ELFObject<Bitwidth>::getSectionName(size_t i) const {
   ELFSection<Bitwidth> const *sec =
     stab[header->getStringSectionIndex()];
@@ -123,26 +123,26 @@ inline char const *ELFObject<Bitwidth>::getSectionName(size_t i) const {
   return NULL;
 }
 
-template <size_t Bitwidth>
+template <unsigned Bitwidth>
 inline ELFSection<Bitwidth> const *
 ELFObject<Bitwidth>::getSectionByIndex(size_t i) const {
   return stab[i];
 }
 
-template <size_t Bitwidth>
+template <unsigned Bitwidth>
 inline ELFSection<Bitwidth> *
 ELFObject<Bitwidth>::getSectionByIndex(size_t i) {
   return stab[i];
 }
 
-template <size_t Bitwidth>
+template <unsigned Bitwidth>
 inline ELFSection<Bitwidth> const *
 ELFObject<Bitwidth>::getSectionByName(std::string const &str) const {
   size_t idx = getSectionHeaderTable()->getByName(str)->getIndex();
   return stab[idx];
 }
 
-template <size_t Bitwidth>
+template <unsigned Bitwidth>
 inline ELFSection<Bitwidth> *
 ELFObject<Bitwidth>::getSectionByName(std::string const &str) {
   ELFObject<Bitwidth> const *const_this = this;
@@ -152,7 +152,7 @@ ELFObject<Bitwidth>::getSectionByName(std::string const &str) {
 }
 
 
-template <size_t Bitwidth>
+template <unsigned Bitwidth>
 inline void ELFObject<Bitwidth>::
 relocate(void *(find_sym)(char const *name, void *context), void *context) {
   // FIXME: Can not implement here!
@@ -319,7 +319,7 @@ relocate(void *(find_sym)(char const *name, void *context), void *context) {
   }
 }
 
-template <size_t Bitwidth>
+template <unsigned Bitwidth>
 inline void ELFObject<Bitwidth>::print() const {
   header->print();
   shtab->print();

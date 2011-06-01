@@ -13,9 +13,9 @@
 
 #include <stdint.h>
 
-template <size_t Bitwidth> class ELFObject;
-template <size_t Bitwidth> class ELFSectionRel;
-template <size_t Bitwidth> class ELFSectionRel_CRTP;
+template <unsigned Bitwidth> class ELFObject;
+template <unsigned Bitwidth> class ELFSectionRel;
+template <unsigned Bitwidth> class ELFSectionRel_CRTP;
 
 
 class ELFSectionRelHelperMixin {
@@ -26,7 +26,7 @@ protected:
 };
 
 
-template <size_t Bitwidth>
+template <unsigned Bitwidth>
 class ELFSectionRel_CRTP : private ELFSectionRelHelperMixin {
 public:
   ELF_TYPE_INTRO_TO_TEMPLATE_SCOPE(Bitwidth);
@@ -88,7 +88,7 @@ private:
 
 //==================Inline Member Function Definition==========================
 
-template <size_t Bitwidth>
+template <unsigned Bitwidth>
 template <typename Archiver>
 inline ELFSectionRel<Bitwidth> *
 ELFSectionRel_CRTP<Bitwidth>::read(Archiver &AR,
@@ -121,7 +121,7 @@ ELFSectionRel_CRTP<Bitwidth>::read(Archiver &AR,
   return sh.take();
 }
 
-template <size_t Bitwidth>
+template <unsigned Bitwidth>
 inline void ELFSectionRel_CRTP<Bitwidth>::
   print(bool shouldPrintHeader) const {
   using namespace llvm;

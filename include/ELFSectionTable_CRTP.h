@@ -10,9 +10,9 @@
 
 #include <vector>
 
-template <size_t Bitwidth> class ELFSection;
+template <unsigned Bitwidth> class ELFSection;
 
-template <size_t Bitwidth, typename ConcreteTable, typename TableEntry>
+template <unsigned Bitwidth, typename ConcreteTable, typename TableEntry>
 class ELFSectionTable_CRTP : public ELFSection<Bitwidth> {
 protected:
   std::vector<TableEntry *> table;
@@ -55,7 +55,7 @@ public:
 #include "ELFSection.h"
 #include "ELFSectionHeader.h"
 
-template <size_t Bitwidth, typename ConcreteTable, typename TableEntry>
+template <unsigned Bitwidth, typename ConcreteTable, typename TableEntry>
 template <typename Archiver>
 inline ConcreteTable *
 ELFSectionTable_CRTP<Bitwidth, ConcreteTable, TableEntry>::
@@ -84,7 +84,7 @@ read(Archiver &AR,
   return st.take();
 }
 
-template <size_t Bitwidth, typename ConcreteTable, typename TableEntry>
+template <unsigned Bitwidth, typename ConcreteTable, typename TableEntry>
 inline void
 ELFSectionTable_CRTP<Bitwidth, ConcreteTable, TableEntry>::print() const {
   using namespace llvm;

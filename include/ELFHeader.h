@@ -13,7 +13,7 @@
 #include <string.h>
 
 
-template <size_t Bitwidth> class ELFHeader;
+template <unsigned Bitwidth> class ELFHeader;
 
 
 class ELFHeaderHelperMixin {
@@ -27,7 +27,7 @@ protected:
 };
 
 
-template <size_t Bitwidth>
+template <unsigned Bitwidth>
 class ELFHeader : private ELFHeaderHelperMixin {
 public:
   ELF_TYPE_INTRO_TO_TEMPLATE_SCOPE(Bitwidth);

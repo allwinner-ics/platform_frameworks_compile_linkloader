@@ -6,9 +6,9 @@
 
 #include <string>
 
-template <size_t Bitwidth> class ELFSectionRel;
+template <unsigned Bitwidth> class ELFSectionRel;
 
-template <size_t Bitwidth>
+template <unsigned Bitwidth>
 class ELFSectionRelTable :
   public ELFSectionTable_CRTP<Bitwidth,
                               ELFSectionRelTable<Bitwidth>,
@@ -47,7 +47,7 @@ public:
 
 //==================Inline Member Function Definition==========================
 
-template <size_t Bitwidth>
+template <unsigned Bitwidth>
 char const *ELFSectionRelTable<Bitwidth>::TABLE_NAME = "Relocation Table";
 
 #endif // ELF_SECTION_REL_TABLE_H

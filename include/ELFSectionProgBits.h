@@ -11,7 +11,7 @@
 #include "utils/raw_ostream.h"
 
 
-template <size_t Bitwidth>
+template <unsigned Bitwidth>
 class ELFSectionProgBits : public ELFSectionBits<Bitwidth> {
   friend class ELFSectionBits<Bitwidth>;
 

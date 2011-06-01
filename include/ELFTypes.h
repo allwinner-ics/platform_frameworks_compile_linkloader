@@ -43,12 +43,12 @@ namespace detail {
                                        ELF64Offset const &);
 }
 
-template <size_t Bitwidth> class ELFHeader;
-template <size_t Bitwidth> class ELFProgramHeader;
-template <size_t Bitwidth> class ELFSectionHeader;
-template <size_t Bitwidth> class ELFSymbol;
-template <size_t Bitwidth> class ELFSectionRel;
-template <size_t Bitwidth> class ELFSectionRela;
+template <unsigned Bitwidth> class ELFHeader;
+template <unsigned Bitwidth> class ELFProgramHeader;
+template <unsigned Bitwidth> class ELFSectionHeader;
+template <unsigned Bitwidth> class ELFSymbol;
+template <unsigned Bitwidth> class ELFSectionRel;
+template <unsigned Bitwidth> class ELFSectionRela;
 
 // Note: Following TypeTraits specialization MUST be compliant to the
 // System V Application Binary Interface, Chap 4, Data Representation.
@@ -82,7 +82,7 @@ TYPE_TRAITS_SPECIALIZE(ELFSectionRela<32>   , 12, 4)
 TYPE_TRAITS_SPECIALIZE(ELFSectionRela<64>   , 24, 8)
 
 
-template <size_t Bitwidth>
+template <unsigned Bitwidth>
 struct ELFTypes;
 
 template <>

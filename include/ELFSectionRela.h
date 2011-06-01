@@ -13,12 +13,12 @@
 
 #include <stdint.h>
 
-template <size_t Bitwidth> class ELFObject;
-template <size_t Bitwidth> class ELFSectionRela;
-template <size_t Bitwidth> class ELFSectionRela_CRTP;
+template <unsigned Bitwidth> class ELFObject;
+template <unsigned Bitwidth> class ELFSectionRela;
+template <unsigned Bitwidth> class ELFSectionRela_CRTP;
 
 
-template <size_t Bitwidth>
+template <unsigned Bitwidth>
 class ELFSectionRela : public ELFSectionRel<Bitwidth> {
 public:
   ELF_TYPE_INTRO_TO_TEMPLATE_SCOPE(Bitwidth);
@@ -62,7 +62,7 @@ private:
 
 //==================Inline Member Function Definition==========================
 
-template <size_t Bitwidth>
+template <unsigned Bitwidth>
 template <typename Archiver>
 inline ELFSectionRela<Bitwidth> *
 ELFSectionRela<Bitwidth>::read(Archiver &AR,
@@ -95,7 +95,7 @@ ELFSectionRela<Bitwidth>::read(Archiver &AR,
   return sh.take();
 }
 
-template <size_t Bitwidth>
+template <unsigned Bitwidth>
 inline void ELFSectionRela<Bitwidth>::
   print(bool shouldPrintHeader) const {
   using namespace llvm;

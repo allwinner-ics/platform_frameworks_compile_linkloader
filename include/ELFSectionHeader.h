@@ -11,9 +11,9 @@
 
 #include <stdint.h>
 
-template <size_t Bitwidth> class ELFObject;
-template <size_t Bitwidth> class ELFSectionHeader;
-template <size_t Bitwidth> class ELFSectionHeader_CRTP;
+template <unsigned Bitwidth> class ELFObject;
+template <unsigned Bitwidth> class ELFSectionHeader;
+template <unsigned Bitwidth> class ELFSectionHeader_CRTP;
 
 
 class ELFSectionHeaderHelperMixin {
@@ -22,7 +22,7 @@ protected:
 };
 
 
-template <size_t Bitwidth>
+template <unsigned Bitwidth>
 class ELFSectionHeader_CRTP : private ELFSectionHeaderHelperMixin {
 public:
   ELF_TYPE_INTRO_TO_TEMPLATE_SCOPE(Bitwidth);

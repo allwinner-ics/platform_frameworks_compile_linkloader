@@ -13,9 +13,9 @@
 
 #include <vector>
 
-template <size_t Bitwidth> class ELFSectionHeader;
+template <unsigned Bitwidth> class ELFSectionHeader;
 
-template <size_t Bitwidth>
+template <unsigned Bitwidth>
 class ELFSectionStrTab : public ELFSection<Bitwidth> {
 private:
   ELFSectionHeader<Bitwidth> const *section_header;

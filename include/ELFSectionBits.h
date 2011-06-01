@@ -22,9 +22,9 @@
 // define it as zero, so that it won't manipulate the flags.
 #endif
 
-template <size_t Bitwidth> class ELFSectionHeader;
+template <unsigned Bitwidth> class ELFSectionHeader;
 
-template <size_t Bitwidth>
+template <unsigned Bitwidth>
 class ELFSectionBits : public ELFSection<Bitwidth> {
 protected:
   ELFSectionHeader<Bitwidth> const *section_header;
@@ -70,7 +70,7 @@ public:
 //==================Inline Member Function Definition==========================
 
 
-template <size_t Bitwidth>
+template <unsigned Bitwidth>
 template <typename Archiver, typename ConcreteELFSectionBits>
 inline ConcreteELFSectionBits *
 ELFSectionBits<Bitwidth>::
@@ -111,7 +111,7 @@ read(Archiver &AR,
   return result.take();
 }
 
-template <size_t Bitwidth>
+template <unsigned Bitwidth>
 inline unsigned char const *
 ELFSectionBits<Bitwidth>::memory_protect() const {
   int protect_type = PROT_READ;

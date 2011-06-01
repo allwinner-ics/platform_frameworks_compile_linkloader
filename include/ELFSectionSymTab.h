@@ -6,9 +6,9 @@
 #include <vector>
 #include <string>
 
-template <size_t Bitwidth> class ELFSymbol;
+template <unsigned Bitwidth> class ELFSymbol;
 
-template <size_t Bitwidth>
+template <unsigned Bitwidth>
 class ELFSectionSymTab :
   public ELFSectionTable_CRTP<Bitwidth,
                               ELFSectionSymTab<Bitwidth>,
@@ -50,10 +50,10 @@ public:
 
 #include "ELFSymbol.h"
 
-template <size_t Bitwidth>
+template <unsigned Bitwidth>
 char const *ELFSectionSymTab<Bitwidth>::TABLE_NAME = "Symbol Table";
 
-template <size_t Bitwidth>
+template <unsigned Bitwidth>
 inline ELFSymbol<Bitwidth> const *
 ELFSectionSymTab<Bitwidth>::getByName(const std::string &str) const {
   // TODO: Use map

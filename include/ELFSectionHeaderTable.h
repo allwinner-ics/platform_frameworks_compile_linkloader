@@ -11,9 +11,9 @@
 
 #include <assert.h>
 
-template <size_t Bitwidth> class ELFObject;
+template <unsigned Bitwidth> class ELFObject;
 
-template <size_t Bitwidth>
+template <unsigned Bitwidth>
 class ELFSectionHeaderTable :
   public ELFSectionTable_CRTP<Bitwidth,
                               ELFSectionHeaderTable<Bitwidth>,
@@ -49,7 +49,7 @@ public:
 #include "ELFObject.h"
 #include "ELFHeader.h"
 
-template <size_t Bitwidth>
+template <unsigned Bitwidth>
 template <typename Archiver>
 inline ELFSectionHeaderTable<Bitwidth> *
 ELFSectionHeaderTable<Bitwidth>::read(Archiver &AR,
@@ -91,11 +91,11 @@ ELFSectionHeaderTable<Bitwidth>::read(Archiver &AR,
   return tab.take();
 }
 
-template <size_t Bitwidth>
+template <unsigned Bitwidth>
 char const *ELFSectionHeaderTable<Bitwidth>::
   TABLE_NAME = "ELF Section Header Table";
 
-template <size_t Bitwidth>
+template <unsigned Bitwidth>
 inline ELFSectionHeader<Bitwidth> const *
 ELFSectionHeaderTable<Bitwidth>::getByName(const std::string &str) const {
   // TODO: Use map
@@ -108,7 +108,7 @@ ELFSectionHeaderTable<Bitwidth>::getByName(const std::string &str) const {
   return this->table[0];
 }
 
-template <size_t Bitwidth>
+template <unsigned Bitwidth>
 inline ELFSectionHeader<Bitwidth> *
 ELFSectionHeaderTable<Bitwidth>::getByName(const std::string &str) {
   ELFSectionHeaderTable<Bitwidth> const *const_this = this;

@@ -6,10 +6,10 @@
 #include <llvm/ADT/OwningPtr.h>
 #include <llvm/Support/raw_ostream.h>
 
-template <size_t Bitwidth> class ELFObject;
-template <size_t Bitwidth> class ELFSectionHeader;
+template <unsigned Bitwidth> class ELFObject;
+template <unsigned Bitwidth> class ELFSectionHeader;
 
-template <size_t Bitwidth>
+template <unsigned Bitwidth>
 class ELFSection {
 protected:
   ELFSection() { }
@@ -33,7 +33,7 @@ public:
 #include "ELFSectionRelTable.h"
 #include "ELFSectionRelaTable.h"
 
-template <size_t Bitwidth>
+template <unsigned Bitwidth>
 template <typename Archiver>
 inline ELFSection<Bitwidth> *
 ELFSection<Bitwidth>::read(Archiver &AR,

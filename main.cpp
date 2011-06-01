@@ -80,7 +80,7 @@ void *find_sym(char const *name_, void *context) {
   return 0;
 }
 
-template <size_t Bitwidth, typename Archiver>
+template <unsigned Bitwidth, typename Archiver>
 void dump_and_run_object(Archiver &AR, int argc, char **argv) {
   llvm::OwningPtr<ELFObject<Bitwidth> > object(ELFObject<Bitwidth>::read(AR));
 
