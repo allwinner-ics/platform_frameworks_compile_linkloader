@@ -91,6 +91,7 @@ void dump_object(Archiver &AR) {
   }
 
   object->print();
+  out().flush();
 
   ELFSectionSymTab<Bitwidth> *symtab =
     static_cast<ELFSectionSymTab<Bitwidth> *>(
@@ -100,6 +101,7 @@ void dump_object(Archiver &AR) {
 
   void *main_addr = symtab->getByName("main")->getAddress();
   out() << "main address: " << main_addr << "\n";
+  out().flush();
   ((int (*)(int, char **))main_addr)(0,0);
 }
 
