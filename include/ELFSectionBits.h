@@ -11,9 +11,10 @@
 #include "utils/helper.h"
 #include "utils/serialize.h"
 
-#include <sys/mman.h>
 #include <llvm/ADT/OwningPtr.h>
 #include <llvm/Support/raw_ostream.h>
+
+#include <sys/mman.h>
 
 #ifndef MAP_32BIT
 #define MAP_32BIT 0

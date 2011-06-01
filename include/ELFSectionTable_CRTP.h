@@ -10,10 +10,11 @@
 #include "utils/serialize.h"
 #include "utils/raw_ostream.h"
 
-#include <vector>
 #include <llvm/ADT/OwningPtr.h>
-#include <llvm/Support/raw_ostream.h>
 #include <llvm/Support/Format.h>
+#include <llvm/Support/raw_ostream.h>
+
+#include <vector>
 
 template <size_t Bitwidth> class ELFObject;
 template <size_t Bitwidth> class ELFSection;

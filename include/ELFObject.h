@@ -1,14 +1,15 @@
 #ifndef ELF_OBJECT_H
 #define ELF_OBJECT_H
 
-#include "StubLayout.h"
-
 #include <llvm/ADT/OwningPtr.h>
 
 #include <vector>
-#include <elf.h>
-#include <cassert>
 #include <string>
+
+#include <assert.h>
+#include <elf.h>
+
+class StubLayout;
 
 template <size_t Bitwidth> class ELFHeader;
 template <size_t Bitwidth> class ELFSection;
@@ -47,12 +48,7 @@ public:
   ELFSection<Bitwidth> *getSectionByName(std::string const &str);
 
 #ifdef __arm__
-  StubLayout *getStubLayout() {
-    if (!stubs) {
-      stubs.reset(new StubLayout());
-    }
-    return stubs.get();
-  }
+  StubLayout *getStubLayout();
 #endif
 
   void relocate(void *(find_sym)(char const *name, void *context),
@@ -70,10 +66,20 @@ public:
 
 //==================Inline Member Function Definition==========================
 
-
 #include "ELFHeader.h"
 #include "ELFSection.h"
 #include "ELFSectionHeaderTable.h"
+#include "StubLayout.h"
+
+#ifdef __arm__
+template <size_t Bitwidth>
+inline StubLayout *ELFObject<Bitwidth>::getStubLayout() {
+  if (!stubs) {
+    stubs.reset(new StubLayout());
+  }
+  return stubs.get();
+}
+#endif
 
 template <size_t Bitwidth>
 template <typename Archiver>

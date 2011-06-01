@@ -4,15 +4,15 @@
 #include "ELFTypes.h"
 
 #include <llvm/ADT/OwningPtr.h>
-#include <elf.h>
 
 #include <string>
-#include <cassert>
-#include <cstdlib>
 #include <algorithm>
 
+#include <assert.h>
+#include <elf.h>
 #include <malloc.h>
 #include <stdint.h>
+#include <stdlib.h>
 
 template <size_t Bitwidth> class ELFObject;
 template <size_t Bitwidth> class ELFSectionSymTabEntry;
