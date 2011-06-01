@@ -3,8 +3,6 @@
 #include "utils/serialize.h"
 
 #include <llvm/ADT/OwningPtr.h>
-#include <iomanip>
-#include <iostream>
 
 #include <elf.h>
 #include <fcntl.h>
@@ -27,12 +25,13 @@ void close_mmap_file(int fd,
                      unsigned char const *image,
                      size_t size);
 
-void dump_file(unsigned char const *image, size_t size);
+void dump_and_run_file(unsigned char const *image, size_t size,
+                       int argc, char **argv);
 
 int main(int argc, char **argv) {
   // Check arguments
   if (argc < 2) {
-    llvm::errs() << "USAGE: " << argv[0] << " [ELFObjectFile]\n";
+    llvm::errs() << "USAGE: " << argv[0] << " [ELFObjectFile] [ARGS]\n";
     exit(EXIT_FAILURE);
   }
 
@@ -45,12 +44,11 @@ int main(int argc, char **argv) {
   size_t image_size = 0;
 
   if (!open_mmap_file(filename, fd, image, image_size)) {
-    llvm::errs() << "ERROR: Unable to open the file: " << filename << "\n";
     exit(EXIT_FAILURE);
   }
 
-  // Dump the file
-  dump_file(image, image_size);
+  // Dump and run the file
+  dump_and_run_file(image, image_size, argc - 1, argv + 1);
 
   // Close the file
   close_mmap_file(fd, image, image_size);
@@ -83,11 +81,11 @@ void *find_sym(char const *name_, void *context) {
 }
 
 template <size_t Bitwidth, typename Archiver>
-void dump_object(Archiver &AR) {
+void dump_and_run_object(Archiver &AR, int argc, char **argv) {
   llvm::OwningPtr<ELFObject<Bitwidth> > object(ELFObject<Bitwidth>::read(AR));
 
   if (!object) {
-    cerr << "ERROR: Unable to load object" << endl;
+    llvm::errs() << "ERROR: Unable to load object\n";
   }
 
   object->print();
@@ -102,31 +100,34 @@ void dump_object(Archiver &AR) {
   void *main_addr = symtab->getByName("main")->getAddress();
   out() << "main address: " << main_addr << "\n";
   out().flush();
-  ((int (*)(int, char **))main_addr)(0,0);
+
+  ((int (*)(int, char **))main_addr)(argc, argv);
 }
 
 template <typename Archiver>
-void dump_file_from_archive(bool is32bit, Archiver &AR) {
+void dump_and_run_file_from_archive(bool is32bit, Archiver &AR,
+                                    int argc, char **argv) {
   if (is32bit) {
-    dump_object<32>(AR);
+    dump_and_run_object<32>(AR, argc, argv);
   } else {
-    dump_object<64>(AR);
+    dump_and_run_object<64>(AR, argc, argv);
   }
 }
 
-void dump_file(unsigned char const *image, size_t size) {
+void dump_and_run_file(unsigned char const *image, size_t size,
+                       int argc, char **argv) {
   if (size < EI_NIDENT) {
-    cerr << "ERROR: ELF identification corrupted." << endl;
+    llvm::errs() << "ERROR: ELF identification corrupted.\n";
     return;
   }
 
   if (image[EI_DATA] != ELFDATA2LSB && image[EI_DATA] != ELFDATA2MSB) {
-    cerr << "ERROR: Unknown endianness." << endl;
+    llvm::errs() << "ERROR: Unknown endianness.\n";
     return;
   }
 
   if (image[EI_CLASS] != ELFCLASS32 && image[EI_CLASS] != ELFCLASS64) {
-    cerr << "ERROR: Unknown machine class." << endl;
+    llvm::errs() << "ERROR: Unknown machine class.\n";
     return;
   }
 
@@ -135,10 +136,10 @@ void dump_file(unsigned char const *image, size_t size) {
 
   if (isLittleEndian) {
     archive_reader_le AR(image, size);
-    dump_file_from_archive(is32bit, AR);
+    dump_and_run_file_from_archive(is32bit, AR, argc, argv);
   } else {
     archive_reader_be AR(image, size);
-    dump_file_from_archive(is32bit, AR);
+    dump_and_run_file_from_archive(is32bit, AR, argc, argv);
   }
 }
 
@@ -146,26 +147,33 @@ bool open_mmap_file(char const *filename,
                     int &fd,
                     unsigned char const *&image,
                     size_t &size) {
-  // Open the file in readonly mode
-  fd = open(filename, O_RDONLY);
-  if (fd < 0) {
+  // Query the file status
+  struct stat sb;
+  if (stat(filename, &sb) != 0) {
+    llvm::errs() << "ERROR: " << filename << " not found.\n";
     return false;
   }
 
-  // Query the file size
-  struct stat sb;
-  if (fstat(fd, &sb) != 0) {
-    close(fd);
+  if (!S_ISREG(sb.st_mode)) {
+    llvm::errs() << "ERROR: " << filename << " is not a regular file.\n";
     return false;
   }
 
   size = (size_t)sb.st_size;
 
+  // Open the file in readonly mode
+  fd = open(filename, O_RDONLY);
+  if (fd < 0) {
+    llvm::errs() << "ERROR: Unable to open " << filename << "\n";
+    return false;
+  }
+
   // Map the file image
   image = static_cast<unsigned char const *>(
     mmap(0, size, PROT_READ, MAP_PRIVATE, fd, 0));
 
-  if (image == NULL || image == MAP_FAILED) {
+  if (image == MAP_FAILED) {
+    llvm::errs() << "ERROR: Unable to map " << filename << " to memory.\n";
     close(fd);
     return false;
   }
