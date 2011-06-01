@@ -14,7 +14,6 @@
 
 
 template <size_t Bitwidth> class ELFHeader;
-template <size_t Bitwidth> class ELFHeader_CRTP;
 
 
 class ELFHeaderHelperMixin {
@@ -29,11 +28,9 @@ protected:
 
 
 template <size_t Bitwidth>
-class ELFHeader_CRTP : private ELFHeaderHelperMixin {
+class ELFHeader : private ELFHeaderHelperMixin {
 public:
   ELF_TYPE_INTRO_TO_TEMPLATE_SCOPE(Bitwidth);
-
-  typedef ELFHeader<Bitwidth> ConcreteELFHeader;
 
 protected:
   byte_t   e_ident[EI_NIDENT];
@@ -52,8 +49,7 @@ protected:
   half_t   e_shstrndx;
 
 protected:
-  ELFHeader_CRTP() { }
-  ~ELFHeader_CRTP() { }
+  ELFHeader() { }
 
 public:
   byte_t getClass() const {
@@ -145,14 +141,14 @@ public:
   }
 
   template <typename Archiver>
-  static ConcreteELFHeader *read(Archiver &AR) {
+  static ELFHeader *read(Archiver &AR) {
     if (!AR) {
       // Archiver is in bad state before calling read function.
       // Return NULL and do nothing.
       return 0;
     }
 
-    llvm::OwningPtr<ConcreteELFHeader> header(new ConcreteELFHeader());
+    llvm::OwningPtr<ELFHeader> header(new ELFHeader());
     if (!header->serialize(AR)) {
       // Unable to read the structure.  Return NULL.
       return 0;
@@ -205,6 +201,29 @@ public:
   }
 
 private:
+  template <typename Archiver>
+  bool serialize(Archiver &AR) {
+    AR.prologue(TypeTraits<ELFHeader<Bitwidth> >::size);
+
+    AR & e_ident;
+    AR & e_type;
+    AR & e_machine;
+    AR & e_version;
+    AR & e_entry;
+    AR & e_phoff;
+    AR & e_shoff;
+    AR & e_flags;
+    AR & e_ehsize;
+    AR & e_phentsize;
+    AR & e_phnum;
+    AR & e_shentsize;
+    AR & e_shnum;
+    AR & e_shstrndx;
+
+    AR.epilogue(TypeTraits<ELFHeader<Bitwidth> >::size);
+    return AR;
+  }
+
   bool isValidMagicWord() const {
     return (memcmp(e_ident, "\x7f" "ELF", 4) == 0);
   }
@@ -255,69 +274,6 @@ private:
     }
 
     return true;
-  }
-};
-
-
-template <>
-class ELFHeader<32> : public ELFHeader_CRTP<32> {
-  friend class ELFHeader_CRTP<32>;
-
-private:
-  ELFHeader() { }
-
-  template <typename Archiver>
-  bool serialize(Archiver &AR) {
-    AR.prologue(TypeTraits<ELFHeader>::size);
-
-    AR & e_ident;
-    AR & e_type;
-    AR & e_machine;
-    AR & e_version;
-    AR & e_entry;
-    AR & e_phoff;
-    AR & e_shoff;
-    AR & e_flags;
-    AR & e_ehsize;
-    AR & e_phentsize;
-    AR & e_phnum;
-    AR & e_shentsize;
-    AR & e_shnum;
-    AR & e_shstrndx;
-
-    AR.epilogue(TypeTraits<ELFHeader>::size);
-    return AR;
-  }
-};
-
-template <>
-class ELFHeader<64> : public ELFHeader_CRTP<64> {
-  friend class ELFHeader_CRTP<64>;
-
-private:
-  ELFHeader() { }
-
-  template <typename Archiver>
-  bool serialize(Archiver &AR) {
-    AR.prologue(TypeTraits<ELFHeader>::size);
-
-    AR & e_ident;
-    AR & e_type;
-    AR & e_machine;
-    AR & e_version;
-    AR & e_entry;
-    AR & e_phoff;
-    AR & e_shoff;
-    AR & e_flags;
-    AR & e_ehsize;
-    AR & e_phentsize;
-    AR & e_phnum;
-    AR & e_shentsize;
-    AR & e_shnum;
-    AR & e_shstrndx;
-
-    AR.epilogue(TypeTraits<ELFHeader>::size);
-    return AR;
   }
 };
 
