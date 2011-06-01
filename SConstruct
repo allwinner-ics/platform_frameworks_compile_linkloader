@@ -59,7 +59,7 @@ env.AppendUnique(CPPDEFINES = ['__STDC_LIMIT_MACROS',
                                '__STDC_CONSTANT_MACROS',
                                'HAVE_STDINT_H'])
 
-env.ParseConfig('llvm-config --ldflags --libs support')
+env.ParseConfig('llvm-config --cxxflags --ldflags --libs support')
 
 
 env.Program('elfreader',
