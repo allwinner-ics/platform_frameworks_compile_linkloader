@@ -46,7 +46,7 @@ namespace detail {
 template <size_t Bitwidth> class ELFHeader;
 template <size_t Bitwidth> class ELFProgramHeader;
 template <size_t Bitwidth> class ELFSectionHeader;
-template <size_t Bitwidth> class ELFSectionSymTabEntry;
+template <size_t Bitwidth> class ELFSymbol;
 template <size_t Bitwidth> class ELFSectionRel;
 template <size_t Bitwidth> class ELFSectionRela;
 
@@ -72,8 +72,8 @@ TYPE_TRAITS_SPECIALIZE(ELFProgramHeader<64> , 56, 8)
 TYPE_TRAITS_SPECIALIZE(ELFSectionHeader<32> , 40, 4)
 TYPE_TRAITS_SPECIALIZE(ELFSectionHeader<64> , 64, 8)
 
-TYPE_TRAITS_SPECIALIZE(ELFSectionSymTabEntry<32> , 16, 4)
-TYPE_TRAITS_SPECIALIZE(ELFSectionSymTabEntry<64> , 24, 8)
+TYPE_TRAITS_SPECIALIZE(ELFSymbol<32>        , 16, 4)
+TYPE_TRAITS_SPECIALIZE(ELFSymbol<64>        , 24, 8)
 
 TYPE_TRAITS_SPECIALIZE(ELFSectionRel<32>    , 8, 4)
 TYPE_TRAITS_SPECIALIZE(ELFSectionRel<64>    , 16, 8)

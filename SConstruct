@@ -55,7 +55,7 @@ env.ParseConfig('llvm-config --cxxflags --ldflags --libs support')
 env.Program('elfreader',
             source=['lib/ELFHeader.cpp',
                     'lib/ELFSectionHeader.cpp',
-                    'lib/ELFSectionSymTabEntry.cpp',
+                    'lib/ELFSymbol.cpp',
                     'lib/ELFTypes.cpp',
                     'utils/helper.cpp',
                     'utils/raw_ostream.cpp',

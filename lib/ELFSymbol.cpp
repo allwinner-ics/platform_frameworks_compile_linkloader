@@ -1,9 +1,9 @@
-#include "ELFSectionSymTabEntry.h"
+#include "ELFSymbol.h"
 
 #include <elf.h>
 
 char const *
-ELFSectionSymTabEntryHelperMixin::getTypeStr(uint8_t type) {
+ELFSymbolHelperMixin::getTypeStr(uint8_t type) {
   switch (type) {
     default: return "(UNKNOWN)";
 
@@ -27,7 +27,7 @@ ELFSectionSymTabEntryHelperMixin::getTypeStr(uint8_t type) {
 }
 
 char const *
-ELFSectionSymTabEntryHelperMixin::getBindingAttributeStr(uint8_t type) {
+ELFSymbolHelperMixin::getBindingAttributeStr(uint8_t type) {
   switch (type) {
     default: return "(UNKNOWN)";
 
@@ -46,7 +46,7 @@ ELFSectionSymTabEntryHelperMixin::getBindingAttributeStr(uint8_t type) {
   }
 }
 char const *
-ELFSectionSymTabEntryHelperMixin::getVisibilityStr(uint8_t type) {
+ELFSymbolHelperMixin::getVisibilityStr(uint8_t type) {
   switch (type) {
     default: return "(UNKNOWN)";
 

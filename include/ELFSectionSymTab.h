@@ -6,20 +6,20 @@
 #include <vector>
 #include <string>
 
-template <size_t Bitwidth> class ELFSectionSymTabEntry;
+template <size_t Bitwidth> class ELFSymbol;
 
 template <size_t Bitwidth>
 class ELFSectionSymTab :
   public ELFSectionTable_CRTP<Bitwidth,
                               ELFSectionSymTab<Bitwidth>,
-                              ELFSectionSymTabEntry<Bitwidth> > {
+                              ELFSymbol<Bitwidth> > {
   friend class ELFSectionTable_CRTP<Bitwidth,
                                     ELFSectionSymTab<Bitwidth>,
-                                    ELFSectionSymTabEntry<Bitwidth> >;
+                                    ELFSymbol<Bitwidth> >;
 private:
   static char const *TABLE_NAME;
 public:
-  typedef ELFSectionSymTabEntry<Bitwidth> SymTabEntry;
+  typedef ELFSymbol<Bitwidth> SymTabEntry;
 
 private:
   //std::vector<SymTabEntry> *> symbol_table;
@@ -48,13 +48,13 @@ public:
 
 //==================Inline Member Function Definition==========================
 
-#include "ELFSectionSymTabEntry.h"
+#include "ELFSymbol.h"
 
 template <size_t Bitwidth>
 char const *ELFSectionSymTab<Bitwidth>::TABLE_NAME = "Symbol Table";
 
 template <size_t Bitwidth>
-inline ELFSectionSymTabEntry<Bitwidth> const *
+inline ELFSymbol<Bitwidth> const *
 ELFSectionSymTab<Bitwidth>::getByName(const std::string &str) const {
   // TODO: Use map
   for (size_t i = 0; i < this->table.size(); ++i) {

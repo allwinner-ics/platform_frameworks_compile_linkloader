@@ -15,11 +15,11 @@
 #include <stdlib.h>
 
 template <size_t Bitwidth> class ELFObject;
-template <size_t Bitwidth> class ELFSectionSymTabEntry;
-template <size_t Bitwidth> class ELFSectionSymTabEntry_CRTP;
+template <size_t Bitwidth> class ELFSymbol;
+template <size_t Bitwidth> class ELFSymbol_CRTP;
 
 
-class ELFSectionSymTabEntryHelperMixin {
+class ELFSymbolHelperMixin {
 protected:
   static char const *getTypeStr(uint8_t);
   static char const *getBindingAttributeStr(uint8_t);
@@ -28,11 +28,11 @@ protected:
 
 
 template <size_t Bitwidth>
-class ELFSectionSymTabEntry_CRTP : private ELFSectionSymTabEntryHelperMixin {
+class ELFSymbol_CRTP : private ELFSymbolHelperMixin {
 public:
   ELF_TYPE_INTRO_TO_TEMPLATE_SCOPE(Bitwidth);
 
-  typedef ELFSectionSymTabEntry<Bitwidth> ConcreteELFSectionSymTabEntry;
+  typedef ELFSymbol<Bitwidth> ConcreteELFSymbol;
 
 protected:
   ELFObject<Bitwidth> const *owner;
@@ -49,8 +49,8 @@ protected:
   mutable void *my_addr;
 
 protected:
-  ELFSectionSymTabEntry_CRTP() { my_addr = 0; }
-  ~ELFSectionSymTabEntry_CRTP() {
+  ELFSymbol_CRTP() { my_addr = 0; }
+  ~ELFSymbol_CRTP() {
     if (my_addr != 0 &&
         getType() == STT_OBJECT &&
         getSectionIndex() == SHN_COMMON) {
@@ -114,18 +114,18 @@ public:
   }
 
   template <typename Archiver>
-  static ConcreteELFSectionSymTabEntry *
+  static ConcreteELFSymbol *
   read(Archiver &AR, ELFObject<Bitwidth> const *owner, size_t index = 0);
 
   void print(bool shouldPrintHeader = false) const;
 
 private:
-  ConcreteELFSectionSymTabEntry *concrete() {
-    return static_cast<ConcreteELFSectionSymTabEntry *>(this);
+  ConcreteELFSymbol *concrete() {
+    return static_cast<ConcreteELFSymbol *>(this);
   }
 
-  ConcreteELFSectionSymTabEntry const *concrete() const {
-    return static_cast<ConcreteELFSectionSymTabEntry const *>(this);
+  ConcreteELFSymbol const *concrete() const {
+    return static_cast<ConcreteELFSymbol const *>(this);
   }
 };
 
@@ -141,7 +141,7 @@ private:
 #include "ELFSectionNoBits.h"
 
 template <size_t Bitwidth>
-inline char const *ELFSectionSymTabEntry_CRTP<Bitwidth>::getName() const {
+inline char const *ELFSymbol_CRTP<Bitwidth>::getName() const {
   ELFSectionHeaderTable<Bitwidth> const &shtab =
     *owner->getSectionHeaderTable();
   size_t const index = shtab.getByName(std::string(".strtab"))->getIndex();
@@ -153,8 +153,8 @@ inline char const *ELFSectionSymTabEntry_CRTP<Bitwidth>::getName() const {
 
 template <size_t Bitwidth>
 template <typename Archiver>
-inline ELFSectionSymTabEntry<Bitwidth> *
-ELFSectionSymTabEntry_CRTP<Bitwidth>::read(Archiver &AR,
+inline ELFSymbol<Bitwidth> *
+ELFSymbol_CRTP<Bitwidth>::read(Archiver &AR,
                                            ELFObject<Bitwidth> const *owner,
                                            size_t index) {
   if (!AR) {
@@ -163,8 +163,8 @@ ELFSectionSymTabEntry_CRTP<Bitwidth>::read(Archiver &AR,
     return 0;
   }
 
-  llvm::OwningPtr<ConcreteELFSectionSymTabEntry> sh(
-    new ConcreteELFSectionSymTabEntry());
+  llvm::OwningPtr<ConcreteELFSymbol> sh(
+    new ConcreteELFSymbol());
 
   if (!sh->serialize(AR)) {
     // Unable to read the structure.  Return NULL.
@@ -186,7 +186,7 @@ ELFSectionSymTabEntry_CRTP<Bitwidth>::read(Archiver &AR,
 }
 
 template <size_t Bitwidth>
-inline void ELFSectionSymTabEntry_CRTP<Bitwidth>::
+inline void ELFSymbol_CRTP<Bitwidth>::
   print(bool shouldPrintHeader) const {
   using namespace llvm;
 
@@ -233,7 +233,7 @@ inline void ELFSectionSymTabEntry_CRTP<Bitwidth>::
 }
 
 template <size_t Bitwidth>
-void *ELFSectionSymTabEntry_CRTP<Bitwidth>::getAddress() const {
+void *ELFSymbol_CRTP<Bitwidth>::getAddress() const {
   if (my_addr != 0) {
     return my_addr;
   }
@@ -365,16 +365,16 @@ void *ELFSectionSymTabEntry_CRTP<Bitwidth>::getAddress() const {
 
 
 template <>
-class ELFSectionSymTabEntry<32> : public ELFSectionSymTabEntry_CRTP<32> {
-  friend class ELFSectionSymTabEntry_CRTP<32>;
+class ELFSymbol<32> : public ELFSymbol_CRTP<32> {
+  friend class ELFSymbol_CRTP<32>;
 
 private:
-  ELFSectionSymTabEntry() {
+  ELFSymbol() {
   }
 
   template <typename Archiver>
   bool serialize(Archiver &AR) {
-    AR.prologue(TypeTraits<ELFSectionSymTabEntry>::size);
+    AR.prologue(TypeTraits<ELFSymbol>::size);
 
     AR & st_name;
     AR & st_value;
@@ -383,7 +383,7 @@ private:
     AR & st_other;
     AR & st_shndx;
 
-    AR.epilogue(TypeTraits<ELFSectionSymTabEntry>::size);
+    AR.epilogue(TypeTraits<ELFSymbol>::size);
     return AR;
   }
 
@@ -391,16 +391,16 @@ public:
 };
 
 template <>
-class ELFSectionSymTabEntry<64> : public ELFSectionSymTabEntry_CRTP<64> {
-  friend class ELFSectionSymTabEntry_CRTP<64>;
+class ELFSymbol<64> : public ELFSymbol_CRTP<64> {
+  friend class ELFSymbol_CRTP<64>;
 
 private:
-  ELFSectionSymTabEntry() {
+  ELFSymbol() {
   }
 
   template <typename Archiver>
   bool serialize(Archiver &AR) {
-    AR.prologue(TypeTraits<ELFSectionSymTabEntry>::size);
+    AR.prologue(TypeTraits<ELFSymbol>::size);
 
     AR & st_name;
     AR & st_info;
@@ -409,7 +409,7 @@ private:
     AR & st_value;
     AR & st_size;
 
-    AR.epilogue(TypeTraits<ELFSectionSymTabEntry>::size);
+    AR.epilogue(TypeTraits<ELFSymbol>::size);
     return AR;
   }
 
