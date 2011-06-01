@@ -45,7 +45,6 @@ include $(BUILD_EXECUTABLE)
 # stub-layout-unit-test
 #-----------------------------------------------------------------------------
 
-BUILD_STUB_LAYOUT_TEST := 1
 ifdef BUILD_STUB_LAYOUT_TEST
 include $(CLEAR_VARS)
 
