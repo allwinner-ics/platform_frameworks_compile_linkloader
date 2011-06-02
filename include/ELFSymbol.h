@@ -44,7 +44,7 @@ protected:
   byte_t st_other;
   half_t st_shndx;
   addr_t st_value;
-  xword_t st_size;
+  symsize_t st_size;
 
   mutable void *my_addr;
 
@@ -98,7 +98,7 @@ public:
     return st_value;
   }
 
-  xword_t getSize() const {
+  symsize_t getSize() const {
     return st_size;
   }
 

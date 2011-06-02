@@ -24,13 +24,13 @@ public:
   ELF_TYPE_INTRO_TO_TEMPLATE_SCOPE(Bitwidth);
 
 protected:
-  sxword_t r_addend;
+  addend_t r_addend;
 
 private:
   ELFSectionRela() { }
 
 public:
-  sxword_t getAddend() const {
+  addend_t getAddend() const {
     return r_addend;
   }
 

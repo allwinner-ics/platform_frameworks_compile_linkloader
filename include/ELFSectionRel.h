@@ -39,7 +39,6 @@ protected:
   size_t index;
 
   addr_t r_offset;
-  xword_t r_info;
 
 protected:
   ELFSectionRel_CRTP() { }
@@ -66,17 +65,6 @@ public:
   void print(bool shouldPrintHeader = false) const;
 
 private:
-  template <typename Archiver>
-  bool serialize(Archiver &AR) {
-    AR.prologue(TypeTraits<ConcreteELFSectionRel>::size);
-
-    AR & r_offset;
-    AR & r_info;
-
-    AR.epilogue(TypeTraits<ConcreteELFSectionRel>::size);
-    return AR;
-  }
-
   ConcreteELFSectionRel *concrete() {
     return static_cast<ConcreteELFSectionRel *>(this);
   }
@@ -122,8 +110,7 @@ ELFSectionRel_CRTP<Bitwidth>::read(Archiver &AR,
 }
 
 template <unsigned Bitwidth>
-inline void ELFSectionRel_CRTP<Bitwidth>::
-  print(bool shouldPrintHeader) const {
+inline void ELFSectionRel_CRTP<Bitwidth>::print(bool shouldPrintHeader) const {
   using namespace llvm;
   if (shouldPrintHeader) {
     out() << '\n' << fillformat('=', 79) << '\n';
@@ -155,6 +142,9 @@ template <>
 class ELFSectionRel<32> : public ELFSectionRel_CRTP<32> {
   friend class ELFSectionRel_CRTP<32>;
 
+protected:
+  word_t r_info;
+
 // Note: Protected for Rela
 protected:
   ELFSectionRel() {
@@ -162,23 +152,37 @@ protected:
 
 public:
 //#define ELF32_R_SYM(i)  ((i)>>8)
-  xword_t getSymTabIndex() const {
+  word_t getSymTabIndex() const {
     return ELF32_R_SYM(this->r_info);
   }
 //#undef ELF32_R_SYM
 
 //#define ELF32_R_TYPE(i)   ((unsigned char)(i))
-  xword_t getType() const {
+  word_t getType() const {
     return ELF32_R_TYPE(this->r_info);
   }
 //#undef ELF32_R_TYPE
 
-public:
+private:
+  template <typename Archiver>
+  bool serialize(Archiver &AR) {
+    AR.prologue(TypeTraits<ELFSectionRel>::size);
+
+    AR & r_offset;
+    AR & r_info;
+
+    AR.epilogue(TypeTraits<ELFSectionRel>::size);
+    return AR;
+  }
+
 };
 
 template <>
 class ELFSectionRel<64> : public ELFSectionRel_CRTP<64> {
   friend class ELFSectionRel_CRTP<64>;
+
+protected:
+  xword_t r_info;
 
 // Note: Protected for Rela
 protected:
@@ -198,7 +202,17 @@ public:
   }
 //#undef ELF64_R_TYPE
 
-public:
+private:
+  template <typename Archiver>
+  bool serialize(Archiver &AR) {
+    AR.prologue(TypeTraits<ELFSectionRel>::size);
+
+    AR & r_offset;
+    AR & r_info;
+
+    AR.epilogue(TypeTraits<ELFSectionRel>::size);
+    return AR;
+  }
 };
 
 

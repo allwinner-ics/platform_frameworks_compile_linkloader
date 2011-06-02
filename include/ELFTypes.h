@@ -95,18 +95,14 @@ struct ELFTypes<32> {
   typedef detail::ELFWord       word;
   typedef detail::ELFSword      sword;
 
-  //// Note: Don't use these types.  They are not in the specification of
-  //// ELF 32.  However, we need these typedefs to define the type introduce
-  //// macro.
-  //typedef void xword;
-  //typedef void sxword;
+  typedef detail::ELFSword      addend;
+  typedef detail::ELFWord       symsize;
 
-  // Note: By experience(Chapter 4 - Object Files and Chapter 5 - Program
-  // Loading and Dynamic Linking), if it use xword and sxsword in ELF 64, it
-  // use word and sword in ELF 32. Also, it is not specified in ELF 32, We may
-  // use these to simplify our code?
-  typedef detail::ELFWord       xword;
-  typedef detail::ELFSword      sxword;
+  // Note: Don't use these types.  They are not in the specification of
+  // ELF 32.  However, we need these typedefs to define the type introduce
+  // macro.
+  typedef void xword;
+  typedef void sxword;
 };
 
 template <>
@@ -120,6 +116,9 @@ struct ELFTypes<64> {
   typedef detail::ELFSword      sword;
   typedef detail::ELFXword      xword;
   typedef detail::ELFSxword     sxword;
+
+  typedef detail::ELFSxword     addend;
+  typedef detail::ELFXword      symsize;
 };
 
 #define ELF_TYPE_INTRO_TO_TEMPLATE_SCOPE(BITWIDTH) \
@@ -130,7 +129,9 @@ struct ELFTypes<64> {
   typedef typename ELFTypes<BITWIDTH>::word    word_t; \
   typedef typename ELFTypes<BITWIDTH>::sword   sword_t; \
   typedef typename ELFTypes<BITWIDTH>::xword   xword_t; \
-  typedef typename ELFTypes<BITWIDTH>::sxword  sxword_t;
+  typedef typename ELFTypes<BITWIDTH>::sxword  sxword_t; \
+  typedef typename ELFTypes<BITWIDTH>::addend  addend_t; \
+  typedef typename ELFTypes<BITWIDTH>::symsize symsize_t;
 
 #define ELF_TYPE_INTRO_TO_SCOPE(BITWIDTH) \
   typedef ELFTypes<BITWIDTH>::address addr_t; \
@@ -140,7 +141,9 @@ struct ELFTypes<64> {
   typedef ELFTypes<BITWIDTH>::word    word_t; \
   typedef ELFTypes<BITWIDTH>::sword   sword_t; \
   typedef ELFTypes<BITWIDTH>::xword   xword_t; \
-  typedef ELFTypes<BITWIDTH>::sxword  sxword_t;
+  typedef ELFTypes<BITWIDTH>::sxword  sxword_t; \
+  typedef ELFTypes<BITWIDTH>::addend  addend_t; \
+  typedef ELFTypes<BITWIDTH>::symsize symsize_t;
 
 
 #endif // ELF_TYPES_H
