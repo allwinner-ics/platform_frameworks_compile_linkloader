@@ -1,5 +1,5 @@
-#ifndef ELF_SECTION_SYMTAB_ENTRY_H
-#define ELF_SECTION_SYMTAB_ENTRY_H
+#ifndef ELF_SYMBOL_H
+#define ELF_SYMBOL_H
 
 #include "ELFTypes.h"
 
@@ -417,4 +417,4 @@ public:
 };
 
 
-#endif // ELF_SECTION_SYMTAB_ENTRY_H
+#endif // ELF_SYMBOL_H

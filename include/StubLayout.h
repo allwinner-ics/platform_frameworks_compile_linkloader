@@ -1,4 +1,4 @@
-#if !defined(STUB_LAYOUT_H)
+#ifndef STUB_LAYOUT_H
 #define STUB_LAYOUT_H
 
 #include <stdlib.h>
