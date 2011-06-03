@@ -309,6 +309,61 @@ relocate(void *(find_sym)(char const *name, void *context), void *context) {
         }
       }
       break;
+
+    case EM_386:
+      {
+        assert(Bitwidth == 32 && "Only support X86.");
+
+        ELFSectionSymTab<Bitwidth> *symtab =
+          static_cast<ELFSectionSymTab<Bitwidth> *>(
+            getSectionByName(".symtab"));
+
+        char const *name[] = {".text"};
+        size_t const size = sizeof(name) / sizeof(char const *);
+
+        for (size_t i = 0; i < size; ++i) {
+          ELFSectionRelTable<Bitwidth> *reltab =
+            static_cast<ELFSectionRelTable<Bitwidth> *>(
+              getSectionByName((std::string(".rel") + name[i]).c_str()));
+
+          ELFSectionProgBits<Bitwidth> *text =
+            static_cast<ELFSectionProgBits<Bitwidth> *>(
+              getSectionByName(name[i]));
+
+          for (size_t i = 0; i < reltab->size(); ++i) {
+            // FIXME: Can not implement here, use Fixup!
+            ELFSectionRel<Bitwidth> *rel = (*reltab)[i];
+            ELFSymbol<Bitwidth> *sym = (*symtab)[rel->getSymTabIndex()];
+
+            //typedef uint64_t Inst_t;
+            typedef int32_t Inst_t;
+            Inst_t *inst = (Inst_t *)&(*text)[rel->getOffset()];
+            Inst_t P = (Inst_t)inst;
+            Inst_t A = (Inst_t)*inst;
+            Inst_t S = (Inst_t)sym->getAddress();
+
+            if (S == 0) {
+              S = (Inst_t)find_sym(sym->getName(), context);
+              sym->setAddress((void *)S);
+            }
+
+            switch ((uint32_t)rel->getType()) {
+            default:
+              assert(0 && "Not implemented relocation type.");
+              break;
+
+            case R_386_PC32:
+              *inst = (S+A-P);
+              break;
+
+            case R_386_32:
+              *inst = (S+A);
+              break;
+            }
+          }
+        }
+        break;
+      }
   }
   for (size_t i = 0; i < stab.size(); ++i) {
     ELFSectionHeader<Bitwidth> *sh = (*shtab)[i];
