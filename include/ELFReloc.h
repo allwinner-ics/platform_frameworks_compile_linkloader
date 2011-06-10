@@ -1,5 +1,5 @@
-#ifndef ELF_SECTION_REL_H
-#define ELF_SECTION_REL_H
+#ifndef ELF_RELOC_H
+#define ELF_RELOC_H
 
 #include "ELFTypes.h"
 
@@ -13,17 +13,16 @@
 
 #include <stdint.h>
 
-template <unsigned Bitwidth> class ELFObject;
-template <unsigned Bitwidth> class ELFRel;
-template <unsigned Bitwidth> class ELFRel_CRTP;
+template <unsigned Bitwidth> class ELFReloc;
+template <unsigned Bitwidth> class ELFReloc_CRTP;
 
 
 template <unsigned Bitwidth>
-class ELFRel_CRTP {
+class ELFReloc_CRTP {
 public:
   ELF_TYPE_INTRO_TO_TEMPLATE_SCOPE(Bitwidth);
 
-  typedef ELFRel<Bitwidth> ConcreteELFRel;
+  typedef ELFReloc<Bitwidth> ConcreteELFReloc;
 
 protected:
   size_t index;
@@ -33,8 +32,8 @@ protected:
   addend_t  r_addend;
 
 protected:
-  ELFRel_CRTP() : index(0), r_offset(0), r_addend(0) { }
-  ~ELFRel_CRTP() { }
+  ELFReloc_CRTP() : index(0), r_offset(0), r_addend(0) { }
+  ~ELFReloc_CRTP() { }
 
 public:
   size_t getIndex() const {
@@ -55,20 +54,20 @@ public:
   }
 
   template <typename Archiver>
-  static ConcreteELFRel *readRel(Archiver &AR, size_t index);
+  static ConcreteELFReloc *readRel(Archiver &AR, size_t index);
 
   template <typename Archiver>
-  static ConcreteELFRel *readRela(Archiver &AR, size_t index);
+  static ConcreteELFReloc *readRela(Archiver &AR, size_t index);
 
   void print(bool shouldPrintHeader = false) const;
 
 private:
-  ConcreteELFRel *concrete() {
-    return static_cast<ConcreteELFRel *>(this);
+  ConcreteELFReloc *concrete() {
+    return static_cast<ConcreteELFReloc *>(this);
   }
 
-  ConcreteELFRel const *concrete() const {
-    return static_cast<ConcreteELFRel const *>(this);
+  ConcreteELFReloc const *concrete() const {
+    return static_cast<ConcreteELFReloc const *>(this);
   }
 
   template <typename Archiver>
@@ -102,15 +101,15 @@ private:
 
 template <unsigned Bitwidth>
 template <typename Archiver>
-inline ELFRel<Bitwidth> *
-ELFRel_CRTP<Bitwidth>::readRela(Archiver &AR, size_t index) {
+inline ELFReloc<Bitwidth> *
+ELFReloc_CRTP<Bitwidth>::readRela(Archiver &AR, size_t index) {
   if (!AR) {
     // Archiver is in bad state before calling read function.
     // Return NULL and do nothing.
     return 0;
   }
 
-  llvm::OwningPtr<ConcreteELFRel> sh(new ConcreteELFRel());
+  llvm::OwningPtr<ConcreteELFReloc> sh(new ConcreteELFReloc());
 
   if (!sh->serializeRela(AR)) {
     // Unable to read the structure.  Return NULL.
@@ -130,15 +129,15 @@ ELFRel_CRTP<Bitwidth>::readRela(Archiver &AR, size_t index) {
 
 template <unsigned Bitwidth>
 template <typename Archiver>
-inline ELFRel<Bitwidth> *
-ELFRel_CRTP<Bitwidth>::readRel(Archiver &AR, size_t index) {
+inline ELFReloc<Bitwidth> *
+ELFReloc_CRTP<Bitwidth>::readRel(Archiver &AR, size_t index) {
   if (!AR) {
     // Archiver is in bad state before calling read function.
     // Return NULL and do nothing.
     return 0;
   }
 
-  llvm::OwningPtr<ConcreteELFRel> sh(new ConcreteELFRel());
+  llvm::OwningPtr<ConcreteELFReloc> sh(new ConcreteELFReloc());
 
   sh->r_addend = 0;
   if (!sh->serializeRel(AR)) {
@@ -157,7 +156,7 @@ ELFRel_CRTP<Bitwidth>::readRel(Archiver &AR, size_t index) {
 }
 
 template <unsigned Bitwidth>
-inline void ELFRel_CRTP<Bitwidth>::print(bool shouldPrintHeader) const {
+inline void ELFReloc_CRTP<Bitwidth>::print(bool shouldPrintHeader) const {
   using namespace llvm;
   if (shouldPrintHeader) {
     out() << '\n' << fillformat('=', 79) << '\n';
@@ -187,11 +186,11 @@ inline void ELFRel_CRTP<Bitwidth>::print(bool shouldPrintHeader) const {
 
 
 template <>
-class ELFRel<32> : public ELFRel_CRTP<32> {
-  friend class ELFRel_CRTP<32>;
+class ELFReloc<32> : public ELFReloc_CRTP<32> {
+  friend class ELFReloc_CRTP<32>;
 
 private:
-  ELFRel() {
+  ELFReloc() {
   }
 
 public:
@@ -206,11 +205,11 @@ public:
 };
 
 template <>
-class ELFRel<64> : public ELFRel_CRTP<64> {
-  friend class ELFRel_CRTP<64>;
+class ELFReloc<64> : public ELFReloc_CRTP<64> {
+  friend class ELFReloc_CRTP<64>;
 
 private:
-  ELFRel() {
+  ELFReloc() {
   }
 
 public:
@@ -224,4 +223,4 @@ public:
 };
 
 
-#endif // ELF_SECTION_REL_H
+#endif // ELF_RELOC_H

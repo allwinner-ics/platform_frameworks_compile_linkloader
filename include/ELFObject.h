@@ -78,7 +78,7 @@ private:
 //==================Inline Member Function Definition==========================
 
 #include "ELFHeader.h"
-#include "ELFRel.h"
+#include "ELFReloc.h"
 #include "ELFSection.h"
 #include "ELFSectionHeaderTable.h"
 #include "StubLayout.h"
@@ -181,7 +181,7 @@ relocateARM(void *(*find_sym)(char const *name, void *context),
 
   for (size_t i = 0; i < reltab->size(); ++i) {
     // FIXME: Can not implement here, use Fixup!
-    ELFRel<Bitwidth> *rel = (*reltab)[i];
+    ELFReloc<Bitwidth> *rel = (*reltab)[i];
     ELFSymbol<Bitwidth> *sym = (*symtab)[rel->getSymTabIndex()];
 
     // FIXME: May be not uint32_t *.
@@ -288,7 +288,7 @@ relocateX86_64(void *(*find_sym)(char const *name, void *context),
 
     for (size_t i = 0; i < relatab->size(); ++i) {
       // FIXME: Can not implement here, use Fixup!
-      ELFRel<Bitwidth> *rela = (*relatab)[i];
+      ELFReloc<Bitwidth> *rela = (*relatab)[i];
       ELFSymbol<Bitwidth> *sym = (*symtab)[rela->getSymTabIndex()];
 
       //typedef uint64_t Inst_t;
@@ -345,7 +345,7 @@ relocateX86_32(void *(*find_sym)(char const *name, void *context),
 
     for (size_t i = 0; i < reltab->size(); ++i) {
       // FIXME: Can not implement here, use Fixup!
-      ELFRel<Bitwidth> *rel = (*reltab)[i];
+      ELFReloc<Bitwidth> *rel = (*reltab)[i];
       ELFSymbol<Bitwidth> *sym = (*symtab)[rel->getSymTabIndex()];
 
       //typedef uint64_t Inst_t;

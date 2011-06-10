@@ -6,12 +6,12 @@
 
 #include "ELFSection.h"
 
-template <unsigned Bitwidth> class ELFRel;
+template <unsigned Bitwidth> class ELFReloc;
 
 template <unsigned Bitwidth>
 class ELFSectionRelTable : public ELFSection<Bitwidth> {
 private:
-  std::vector<ELFRel<Bitwidth> *> rel_table;
+  std::vector<ELFReloc<Bitwidth> *> rel_table;
 
 private:
   ELFSectionRelTable() { }
@@ -30,17 +30,17 @@ public:
     return rel_table.size();
   }
 
-  ELFRel<Bitwidth> const *operator[](size_t index) const {
+  ELFReloc<Bitwidth> const *operator[](size_t index) const {
     return rel_table[index];
   }
 
-  ELFRel<Bitwidth> *operator[](size_t index) {
+  ELFReloc<Bitwidth> *operator[](size_t index) {
     return rel_table[index];
   }
 };
 
 
-#include "ELFRel.h"
+#include "ELFReloc.h"
 
 template <unsigned Bitwidth>
 ELFSectionRelTable<Bitwidth>::~ELFSectionRelTable() {
@@ -66,7 +66,7 @@ void ELFSectionRelTable<Bitwidth>::print() const {
   out() << fillformat('=', 79) << '\n';
 }
 
-#include "ELFRel.h"
+#include "ELFReloc.h"
 
 template <unsigned Bitwidth>
 template <typename Archiver>
@@ -88,13 +88,13 @@ ELFSectionRelTable<Bitwidth>::read(Archiver &AR,
   if (sh->getType() == SHT_REL) {
     assert(sh->getEntrySize() == TypeTraits<ELFRel<Bitwidth> >::size);
     for (size_t i = 0; i < size; ++i) {
-      rt->rel_table.push_back(ELFRel<Bitwidth>::readRel(AR, i));
+      rt->rel_table.push_back(ELFReloc<Bitwidth>::readRel(AR, i));
     }
 
   } else {
     assert(sh->getEntrySize() == TypeTraits<ELFRela<Bitwidth> >::size);
     for (size_t i = 0; i < size; ++i) {
-      rt->rel_table.push_back(ELFRel<Bitwidth>::readRela(AR, i));
+      rt->rel_table.push_back(ELFReloc<Bitwidth>::readRela(AR, i));
     }
   }
 
