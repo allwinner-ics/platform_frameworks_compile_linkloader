@@ -95,6 +95,7 @@ struct ELFTypes<32> {
   typedef detail::ELFWord       word;
   typedef detail::ELFSword      sword;
 
+  typedef detail::ELFWord       relinfo;
   typedef detail::ELFSword      addend;
   typedef detail::ELFWord       symsize;
 
@@ -117,6 +118,7 @@ struct ELFTypes<64> {
   typedef detail::ELFXword      xword;
   typedef detail::ELFSxword     sxword;
 
+  typedef detail::ELFXword      relinfo;
   typedef detail::ELFSxword     addend;
   typedef detail::ELFXword      symsize;
 };
@@ -130,6 +132,7 @@ struct ELFTypes<64> {
   typedef typename ELFTypes<BITWIDTH>::sword   sword_t; \
   typedef typename ELFTypes<BITWIDTH>::xword   xword_t; \
   typedef typename ELFTypes<BITWIDTH>::sxword  sxword_t; \
+  typedef typename ELFTypes<BITWIDTH>::relinfo relinfo_t; \
   typedef typename ELFTypes<BITWIDTH>::addend  addend_t; \
   typedef typename ELFTypes<BITWIDTH>::symsize symsize_t;
 
@@ -142,6 +145,7 @@ struct ELFTypes<64> {
   typedef ELFTypes<BITWIDTH>::sword   sword_t; \
   typedef ELFTypes<BITWIDTH>::xword   xword_t; \
   typedef ELFTypes<BITWIDTH>::sxword  sxword_t; \
+  typedef ELFTypes<BITWIDTH>::relinfo relinfo_t; \
   typedef ELFTypes<BITWIDTH>::addend  addend_t; \
   typedef ELFTypes<BITWIDTH>::symsize symsize_t;
 

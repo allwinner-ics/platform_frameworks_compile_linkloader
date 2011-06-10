@@ -78,6 +78,7 @@ private:
 //==================Inline Member Function Definition==========================
 
 #include "ELFHeader.h"
+#include "ELFRel.h"
 #include "ELFSection.h"
 #include "ELFSectionHeaderTable.h"
 #include "StubLayout.h"
@@ -279,15 +280,15 @@ relocateX86_64(void *(*find_sym)(char const *name, void *context),
   size_t size = sizeof(name) / sizeof(char const *);
 
   for (size_t i = 0; i < size; ++i) {
-    ELFSectionRelaTable<Bitwidth> *relatab =
-      static_cast<ELFSectionRelaTable<Bitwidth> *>(
+    ELFSectionRelTable<Bitwidth> *relatab =
+      static_cast<ELFSectionRelTable<Bitwidth> *>(
           getSectionByName((std::string(".rela") + name[i]).c_str()));
     ELFSectionProgBits<Bitwidth> *text =
       static_cast<ELFSectionProgBits<Bitwidth> *>(getSectionByName(name[i]));
 
     for (size_t i = 0; i < relatab->size(); ++i) {
       // FIXME: Can not implement here, use Fixup!
-      ELFRela<Bitwidth> *rela = (*relatab)[i];
+      ELFRel<Bitwidth> *rela = (*relatab)[i];
       ELFSymbol<Bitwidth> *sym = (*symtab)[rela->getSymTabIndex()];
 
       //typedef uint64_t Inst_t;

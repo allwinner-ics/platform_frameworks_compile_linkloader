@@ -27,10 +27,13 @@ public:
 
 protected:
   size_t index;
-  addr_t r_offset;
+
+  addr_t    r_offset;
+  relinfo_t r_info;
+  addend_t  r_addend;
 
 protected:
-  ELFRel_CRTP() { }
+  ELFRel_CRTP() : index(0), r_offset(0), r_addend(0) { }
   ~ELFRel_CRTP() { }
 
 public:
@@ -39,7 +42,11 @@ public:
   }
 
   addr_t getOffset() const {
-    return this->r_offset;
+    return r_offset;
+  }
+
+  addend_t getAddend() const {
+    return r_addend;
   }
 
   bool isValid() const {
@@ -48,9 +55,10 @@ public:
   }
 
   template <typename Archiver>
-  static ConcreteELFRel *read(Archiver &AR,
-                              ELFObject<Bitwidth> *owner,
-                              size_t index = 0);
+  static ConcreteELFRel *readRel(Archiver &AR, size_t index);
+
+  template <typename Archiver>
+  static ConcreteELFRel *readRela(Archiver &AR, size_t index);
 
   void print(bool shouldPrintHeader = false) const;
 
@@ -62,6 +70,32 @@ private:
   ConcreteELFRel const *concrete() const {
     return static_cast<ConcreteELFRel const *>(this);
   }
+
+  template <typename Archiver>
+  bool serializeRel(Archiver &AR) {
+    assert(r_addend == 0 && "r_addend should be zero before serialization.");
+
+    AR.prologue(TypeTraits<ELFRel<Bitwidth> >::size);
+
+    AR & r_offset;
+    AR & r_info;
+
+    AR.epilogue(TypeTraits<ELFRel<Bitwidth> >::size);
+    return AR;
+  }
+
+  template <typename Archiver>
+  bool serializeRela(Archiver &AR) {
+    AR.prologue(TypeTraits<ELFRela<Bitwidth> >::size);
+
+    AR & r_offset;
+    AR & r_info;
+    AR & r_addend;
+
+    AR.epilogue(TypeTraits<ELFRela<Bitwidth> >::size);
+    return AR;
+  }
+
 };
 
 //==================Inline Member Function Definition==========================
@@ -69,9 +103,7 @@ private:
 template <unsigned Bitwidth>
 template <typename Archiver>
 inline ELFRel<Bitwidth> *
-ELFRel_CRTP<Bitwidth>::read(Archiver &AR,
-                            ELFObject<Bitwidth> *owner,
-                            size_t index) {
+ELFRel_CRTP<Bitwidth>::readRela(Archiver &AR, size_t index) {
   if (!AR) {
     // Archiver is in bad state before calling read function.
     // Return NULL and do nothing.
@@ -80,8 +112,36 @@ ELFRel_CRTP<Bitwidth>::read(Archiver &AR,
 
   llvm::OwningPtr<ConcreteELFRel> sh(new ConcreteELFRel());
 
-  if (!sh->serialize(AR)) {
+  if (!sh->serializeRela(AR)) {
     // Unable to read the structure.  Return NULL.
+    return 0;
+  }
+
+  if (!sh->isValid()) {
+    // Rel read from archiver is not valid.  Return NULL.
+    return 0;
+  }
+
+  // Set the section header index
+  sh->index = index;
+
+  return sh.take();
+}
+
+template <unsigned Bitwidth>
+template <typename Archiver>
+inline ELFRel<Bitwidth> *
+ELFRel_CRTP<Bitwidth>::readRel(Archiver &AR, size_t index) {
+  if (!AR) {
+    // Archiver is in bad state before calling read function.
+    // Return NULL and do nothing.
+    return 0;
+  }
+
+  llvm::OwningPtr<ConcreteELFRel> sh(new ConcreteELFRel());
+
+  sh->r_addend = 0;
+  if (!sh->serializeRel(AR)) {
     return 0;
   }
 
@@ -119,6 +179,7 @@ inline void ELFRel_CRTP<Bitwidth>::print(bool shouldPrintHeader) const {
   PRINT_LINT("Offset",       concrete()->getOffset()       );
   PRINT_LINT("SymTab Index", concrete()->getSymTabIndex()  );
   PRINT_LINT("Type",         concrete()->getType()         );
+  PRINT_LINT("Addend",       concrete()->getAddend()       );
 #undef PRINT_LINT
 }
 
@@ -129,11 +190,7 @@ template <>
 class ELFRel<32> : public ELFRel_CRTP<32> {
   friend class ELFRel_CRTP<32>;
 
-protected:
-  word_t r_info;
-
-// Note: Protected for Rela
-protected:
+private:
   ELFRel() {
   }
 
@@ -146,29 +203,13 @@ public:
     return ELF32_R_TYPE(this->r_info);
   }
 
-private:
-  template <typename Archiver>
-  bool serialize(Archiver &AR) {
-    AR.prologue(TypeTraits<ELFRel>::size);
-
-    AR & r_offset;
-    AR & r_info;
-
-    AR.epilogue(TypeTraits<ELFRel>::size);
-    return AR;
-  }
-
 };
 
 template <>
 class ELFRel<64> : public ELFRel_CRTP<64> {
   friend class ELFRel_CRTP<64>;
 
-protected:
-  xword_t r_info;
-
-// Note: Protected for Rela
-protected:
+private:
   ELFRel() {
   }
 
@@ -179,18 +220,6 @@ public:
 
   xword_t getType() const {
     return ELF64_R_TYPE(this->r_info);
-  }
-
-private:
-  template <typename Archiver>
-  bool serialize(Archiver &AR) {
-    AR.prologue(TypeTraits<ELFRel>::size);
-
-    AR & r_offset;
-    AR & r_info;
-
-    AR.epilogue(TypeTraits<ELFRel>::size);
-    return AR;
   }
 };
 
