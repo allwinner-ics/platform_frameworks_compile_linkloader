@@ -52,7 +52,7 @@ env = Environment(CC=build_toolset['CC'],
 
 env.ParseConfig('llvm-config --cxxflags --ldflags --libs support')
 
-env.Program('elfreader',
+env.Program('rsloader',
             source=['lib/ELFHeader.cpp',
                     'lib/ELFSectionHeader.cpp',
                     'lib/ELFSymbol.cpp',
