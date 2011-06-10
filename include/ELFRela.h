@@ -40,8 +40,9 @@ public:
   }
 
   template <typename Archiver>
-  static ELFRela *
-  read(Archiver &AR, ELFObject<Bitwidth> const *owner, size_t index = 0);
+  static ELFRela *read(Archiver &AR,
+                       ELFObject<Bitwidth> *owner,
+                       size_t index = 0);
 
   void print(bool shouldPrintHeader = false) const;
 
@@ -66,8 +67,8 @@ template <unsigned Bitwidth>
 template <typename Archiver>
 inline ELFRela<Bitwidth> *
 ELFRela<Bitwidth>::read(Archiver &AR,
-                               ELFObject<Bitwidth> const *owner,
-                               size_t index) {
+                        ELFObject<Bitwidth> *owner,
+                        size_t index) {
   if (!AR) {
     // Archiver is in bad state before calling read function.
     // Return NULL and do nothing.
@@ -88,9 +89,6 @@ ELFRela<Bitwidth>::read(Archiver &AR,
 
   // Set the section header index
   sh->index = index;
-
-  // Set the owner elf object
-  sh->owner = owner;
 
   return sh.take();
 }

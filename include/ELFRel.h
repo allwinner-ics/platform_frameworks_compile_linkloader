@@ -18,26 +18,15 @@ template <unsigned Bitwidth> class ELFRel;
 template <unsigned Bitwidth> class ELFRel_CRTP;
 
 
-class ELFRelHelperMixin {
-protected:
-//  static char const *getTypeStr(uint8_t);
-//  static char const *getBindingAttributeStr(uint8_t);
-//  static char const *getVisibilityStr(uint8_t);
-};
-
-
 template <unsigned Bitwidth>
-class ELFRel_CRTP : private ELFRelHelperMixin {
+class ELFRel_CRTP {
 public:
   ELF_TYPE_INTRO_TO_TEMPLATE_SCOPE(Bitwidth);
 
   typedef ELFRel<Bitwidth> ConcreteELFRel;
 
 protected:
-  ELFObject<Bitwidth> const *owner;
-
   size_t index;
-
   addr_t r_offset;
 
 protected:
@@ -59,8 +48,9 @@ public:
   }
 
   template <typename Archiver>
-  static ConcreteELFRel *
-  read(Archiver &AR, ELFObject<Bitwidth> const *owner, size_t index = 0);
+  static ConcreteELFRel *read(Archiver &AR,
+                              ELFObject<Bitwidth> *owner,
+                              size_t index = 0);
 
   void print(bool shouldPrintHeader = false) const;
 
@@ -80,8 +70,8 @@ template <unsigned Bitwidth>
 template <typename Archiver>
 inline ELFRel<Bitwidth> *
 ELFRel_CRTP<Bitwidth>::read(Archiver &AR,
-                                   ELFObject<Bitwidth> const *owner,
-                                   size_t index) {
+                            ELFObject<Bitwidth> *owner,
+                            size_t index) {
   if (!AR) {
     // Archiver is in bad state before calling read function.
     // Return NULL and do nothing.
@@ -102,9 +92,6 @@ ELFRel_CRTP<Bitwidth>::read(Archiver &AR,
 
   // Set the section header index
   sh->index = index;
-
-  // Set the owner elf object
-  sh->owner = owner;
 
   return sh.take();
 }
