@@ -138,17 +138,13 @@ protected:
   }
 
 public:
-//#define ELF32_R_SYM(i)  ((i)>>8)
   word_t getSymTabIndex() const {
     return ELF32_R_SYM(this->r_info);
   }
-//#undef ELF32_R_SYM
 
-//#define ELF32_R_TYPE(i)   ((unsigned char)(i))
   word_t getType() const {
     return ELF32_R_TYPE(this->r_info);
   }
-//#undef ELF32_R_TYPE
 
 private:
   template <typename Archiver>
@@ -177,17 +173,13 @@ protected:
   }
 
 public:
-//#define ELF64_R_SYM(i)    ((i)>>32)
   xword_t getSymTabIndex() const {
     return ELF64_R_SYM(this->r_info);
   }
-//#undef ELF64_R_SYM
 
-//#define ELF64_R_TYPE(i)   ((i)&0xffffffffL)
   xword_t getType() const {
     return ELF64_R_TYPE(this->r_info);
   }
-//#undef ELF64_R_TYPE
 
 private:
   template <typename Archiver>
