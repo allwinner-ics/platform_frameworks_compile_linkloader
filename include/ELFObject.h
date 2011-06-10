@@ -351,12 +351,12 @@ relocateX86_32(void *(*find_sym)(char const *name, void *context),
       //typedef uint64_t Inst_t;
       typedef int32_t Inst_t;
       Inst_t *inst = (Inst_t *)&(*text)[rel->getOffset()];
-      Inst_t P = (Inst_t)inst;
-      Inst_t A = (Inst_t)*inst;
-      Inst_t S = (Inst_t)sym->getAddress();
+      Inst_t P = (Inst_t)(uintptr_t)inst;
+      Inst_t A = (Inst_t)(uintptr_t)*inst;
+      Inst_t S = (Inst_t)(uintptr_t)sym->getAddress();
 
       if (S == 0) {
-        S = (Inst_t)find_sym(sym->getName(), context);
+        S = (Inst_t)(uintptr_t)find_sym(sym->getName(), context);
         sym->setAddress((void *)S);
       }
 
