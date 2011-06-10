@@ -43,7 +43,7 @@ public:
   }
 
   bool isValid() const {
-    // FIXME: Should check the correctness of the section header.
+    // FIXME: Should check the correctness of the relocation entite.
     return true;
   }
 
