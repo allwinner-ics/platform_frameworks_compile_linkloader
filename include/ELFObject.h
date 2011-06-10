@@ -177,7 +177,7 @@ relocate(void *(find_sym)(char const *name, void *context), void *context) {
               getSectionByName(".symtab"));
         for (size_t i = 0; i < reltab->size(); ++i) {
           // FIXME: Can not implement here, use Fixup!
-          ELFSectionRel<Bitwidth> *rel = (*reltab)[i];
+          ELFRel<Bitwidth> *rel = (*reltab)[i];
           ELFSymbol<Bitwidth> *sym = (*symtab)[rel->getSymTabIndex()];
           // FIXME: May be not uint32_t *.
           typedef int32_t Inst_t;
@@ -279,7 +279,7 @@ relocate(void *(find_sym)(char const *name, void *context), void *context) {
                 getSectionByName(name[i]));
           for (size_t i = 0; i < relatab->size(); ++i) {
             // FIXME: Can not implement here, use Fixup!
-            ELFSectionRela<Bitwidth> *rela = (*relatab)[i];
+            ELFRela<Bitwidth> *rela = (*relatab)[i];
             ELFSymbol<Bitwidth> *sym = (*symtab)[rela->getSymTabIndex()];
             //typedef uint64_t Inst_t;
             typedef int32_t Inst_t;
@@ -332,7 +332,7 @@ relocate(void *(find_sym)(char const *name, void *context), void *context) {
 
           for (size_t i = 0; i < reltab->size(); ++i) {
             // FIXME: Can not implement here, use Fixup!
-            ELFSectionRel<Bitwidth> *rel = (*reltab)[i];
+            ELFRel<Bitwidth> *rel = (*reltab)[i];
             ELFSymbol<Bitwidth> *sym = (*symtab)[rel->getSymTabIndex()];
 
             //typedef uint64_t Inst_t;

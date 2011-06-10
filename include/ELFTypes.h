@@ -47,8 +47,8 @@ template <unsigned Bitwidth> class ELFHeader;
 template <unsigned Bitwidth> class ELFProgramHeader;
 template <unsigned Bitwidth> class ELFSectionHeader;
 template <unsigned Bitwidth> class ELFSymbol;
-template <unsigned Bitwidth> class ELFSectionRel;
-template <unsigned Bitwidth> class ELFSectionRela;
+template <unsigned Bitwidth> class ELFRel;
+template <unsigned Bitwidth> class ELFRela;
 
 // Note: Following TypeTraits specialization MUST be compliant to the
 // System V Application Binary Interface, Chap 4, Data Representation.
@@ -75,11 +75,11 @@ TYPE_TRAITS_SPECIALIZE(ELFSectionHeader<64> , 64, 8)
 TYPE_TRAITS_SPECIALIZE(ELFSymbol<32>        , 16, 4)
 TYPE_TRAITS_SPECIALIZE(ELFSymbol<64>        , 24, 8)
 
-TYPE_TRAITS_SPECIALIZE(ELFSectionRel<32>    , 8, 4)
-TYPE_TRAITS_SPECIALIZE(ELFSectionRel<64>    , 16, 8)
+TYPE_TRAITS_SPECIALIZE(ELFRel<32>           , 8, 4)
+TYPE_TRAITS_SPECIALIZE(ELFRel<64>           , 16, 8)
 
-TYPE_TRAITS_SPECIALIZE(ELFSectionRela<32>   , 12, 4)
-TYPE_TRAITS_SPECIALIZE(ELFSectionRela<64>   , 24, 8)
+TYPE_TRAITS_SPECIALIZE(ELFRela<32>          , 12, 4)
+TYPE_TRAITS_SPECIALIZE(ELFRela<64>          , 24, 8)
 
 
 template <unsigned Bitwidth>

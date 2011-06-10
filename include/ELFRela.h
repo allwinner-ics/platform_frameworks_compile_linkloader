@@ -14,12 +14,12 @@
 #include <stdint.h>
 
 template <unsigned Bitwidth> class ELFObject;
-template <unsigned Bitwidth> class ELFSectionRela;
-template <unsigned Bitwidth> class ELFSectionRela_CRTP;
+template <unsigned Bitwidth> class ELFRela;
+template <unsigned Bitwidth> class ELFRela_CRTP;
 
 
 template <unsigned Bitwidth>
-class ELFSectionRela : public ELFSectionRel<Bitwidth> {
+class ELFRela : public ELFRel<Bitwidth> {
 public:
   ELF_TYPE_INTRO_TO_TEMPLATE_SCOPE(Bitwidth);
 
@@ -27,7 +27,7 @@ protected:
   addend_t r_addend;
 
 private:
-  ELFSectionRela() { }
+  ELFRela() { }
 
 public:
   addend_t getAddend() const {
@@ -40,7 +40,7 @@ public:
   }
 
   template <typename Archiver>
-  static ELFSectionRela *
+  static ELFRela *
   read(Archiver &AR, ELFObject<Bitwidth> const *owner, size_t index = 0);
 
   void print(bool shouldPrintHeader = false) const;
@@ -48,13 +48,13 @@ public:
 private:
   template <typename Archiver>
   bool serialize(Archiver &AR) {
-    AR.prologue(TypeTraits<ELFSectionRela>::size);
+    AR.prologue(TypeTraits<ELFRela>::size);
 
     AR & this->r_offset;
     AR & this->r_info;
     AR & this->r_addend;
 
-    AR.epilogue(TypeTraits<ELFSectionRela>::size);
+    AR.epilogue(TypeTraits<ELFRela>::size);
     return AR;
   }
 
@@ -64,8 +64,8 @@ private:
 
 template <unsigned Bitwidth>
 template <typename Archiver>
-inline ELFSectionRela<Bitwidth> *
-ELFSectionRela<Bitwidth>::read(Archiver &AR,
+inline ELFRela<Bitwidth> *
+ELFRela<Bitwidth>::read(Archiver &AR,
                                ELFObject<Bitwidth> const *owner,
                                size_t index) {
   if (!AR) {
@@ -74,7 +74,7 @@ ELFSectionRela<Bitwidth>::read(Archiver &AR,
     return 0;
   }
 
-  llvm::OwningPtr<ELFSectionRela> sh(new ELFSectionRela());
+  llvm::OwningPtr<ELFRela> sh(new ELFRela());
 
   if (!sh->serialize(AR)) {
     // Unable to read the structure.  Return NULL.
@@ -96,7 +96,7 @@ ELFSectionRela<Bitwidth>::read(Archiver &AR,
 }
 
 template <unsigned Bitwidth>
-inline void ELFSectionRela<Bitwidth>::
+inline void ELFRela<Bitwidth>::
   print(bool shouldPrintHeader) const {
   using namespace llvm;
   if (shouldPrintHeader) {

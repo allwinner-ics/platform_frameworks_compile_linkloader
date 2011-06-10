@@ -14,11 +14,11 @@
 #include <stdint.h>
 
 template <unsigned Bitwidth> class ELFObject;
-template <unsigned Bitwidth> class ELFSectionRel;
-template <unsigned Bitwidth> class ELFSectionRel_CRTP;
+template <unsigned Bitwidth> class ELFRel;
+template <unsigned Bitwidth> class ELFRel_CRTP;
 
 
-class ELFSectionRelHelperMixin {
+class ELFRelHelperMixin {
 protected:
 //  static char const *getTypeStr(uint8_t);
 //  static char const *getBindingAttributeStr(uint8_t);
@@ -27,11 +27,11 @@ protected:
 
 
 template <unsigned Bitwidth>
-class ELFSectionRel_CRTP : private ELFSectionRelHelperMixin {
+class ELFRel_CRTP : private ELFRelHelperMixin {
 public:
   ELF_TYPE_INTRO_TO_TEMPLATE_SCOPE(Bitwidth);
 
-  typedef ELFSectionRel<Bitwidth> ConcreteELFSectionRel;
+  typedef ELFRel<Bitwidth> ConcreteELFRel;
 
 protected:
   ELFObject<Bitwidth> const *owner;
@@ -41,8 +41,8 @@ protected:
   addr_t r_offset;
 
 protected:
-  ELFSectionRel_CRTP() { }
-  ~ELFSectionRel_CRTP() { }
+  ELFRel_CRTP() { }
+  ~ELFRel_CRTP() { }
 
 public:
   size_t getIndex() const {
@@ -59,18 +59,18 @@ public:
   }
 
   template <typename Archiver>
-  static ConcreteELFSectionRel *
+  static ConcreteELFRel *
   read(Archiver &AR, ELFObject<Bitwidth> const *owner, size_t index = 0);
 
   void print(bool shouldPrintHeader = false) const;
 
 private:
-  ConcreteELFSectionRel *concrete() {
-    return static_cast<ConcreteELFSectionRel *>(this);
+  ConcreteELFRel *concrete() {
+    return static_cast<ConcreteELFRel *>(this);
   }
 
-  ConcreteELFSectionRel const *concrete() const {
-    return static_cast<ConcreteELFSectionRel const *>(this);
+  ConcreteELFRel const *concrete() const {
+    return static_cast<ConcreteELFRel const *>(this);
   }
 };
 
@@ -78,8 +78,8 @@ private:
 
 template <unsigned Bitwidth>
 template <typename Archiver>
-inline ELFSectionRel<Bitwidth> *
-ELFSectionRel_CRTP<Bitwidth>::read(Archiver &AR,
+inline ELFRel<Bitwidth> *
+ELFRel_CRTP<Bitwidth>::read(Archiver &AR,
                                    ELFObject<Bitwidth> const *owner,
                                    size_t index) {
   if (!AR) {
@@ -88,7 +88,7 @@ ELFSectionRel_CRTP<Bitwidth>::read(Archiver &AR,
     return 0;
   }
 
-  llvm::OwningPtr<ConcreteELFSectionRel> sh(new ConcreteELFSectionRel());
+  llvm::OwningPtr<ConcreteELFRel> sh(new ConcreteELFRel());
 
   if (!sh->serialize(AR)) {
     // Unable to read the structure.  Return NULL.
@@ -110,7 +110,7 @@ ELFSectionRel_CRTP<Bitwidth>::read(Archiver &AR,
 }
 
 template <unsigned Bitwidth>
-inline void ELFSectionRel_CRTP<Bitwidth>::print(bool shouldPrintHeader) const {
+inline void ELFRel_CRTP<Bitwidth>::print(bool shouldPrintHeader) const {
   using namespace llvm;
   if (shouldPrintHeader) {
     out() << '\n' << fillformat('=', 79) << '\n';
@@ -139,15 +139,15 @@ inline void ELFSectionRel_CRTP<Bitwidth>::print(bool shouldPrintHeader) const {
 
 
 template <>
-class ELFSectionRel<32> : public ELFSectionRel_CRTP<32> {
-  friend class ELFSectionRel_CRTP<32>;
+class ELFRel<32> : public ELFRel_CRTP<32> {
+  friend class ELFRel_CRTP<32>;
 
 protected:
   word_t r_info;
 
 // Note: Protected for Rela
 protected:
-  ELFSectionRel() {
+  ELFRel() {
   }
 
 public:
@@ -166,27 +166,27 @@ public:
 private:
   template <typename Archiver>
   bool serialize(Archiver &AR) {
-    AR.prologue(TypeTraits<ELFSectionRel>::size);
+    AR.prologue(TypeTraits<ELFRel>::size);
 
     AR & r_offset;
     AR & r_info;
 
-    AR.epilogue(TypeTraits<ELFSectionRel>::size);
+    AR.epilogue(TypeTraits<ELFRel>::size);
     return AR;
   }
 
 };
 
 template <>
-class ELFSectionRel<64> : public ELFSectionRel_CRTP<64> {
-  friend class ELFSectionRel_CRTP<64>;
+class ELFRel<64> : public ELFRel_CRTP<64> {
+  friend class ELFRel_CRTP<64>;
 
 protected:
   xword_t r_info;
 
 // Note: Protected for Rela
 protected:
-  ELFSectionRel() {
+  ELFRel() {
   }
 
 public:
@@ -205,12 +205,12 @@ public:
 private:
   template <typename Archiver>
   bool serialize(Archiver &AR) {
-    AR.prologue(TypeTraits<ELFSectionRel>::size);
+    AR.prologue(TypeTraits<ELFRel>::size);
 
     AR & r_offset;
     AR & r_info;
 
-    AR.epilogue(TypeTraits<ELFSectionRel>::size);
+    AR.epilogue(TypeTraits<ELFRel>::size);
     return AR;
   }
 };

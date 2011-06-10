@@ -2,25 +2,25 @@
 #define ELF_SECTION_REL_TABLE_H
 
 #include "ELFSectionTable_CRTP.h"
-#include "ELFSectionRel.h"
+#include "ELFRel.h"
 
 #include <string>
 
-template <unsigned Bitwidth> class ELFSectionRel;
+template <unsigned Bitwidth> class ELFRel;
 
 template <unsigned Bitwidth>
 class ELFSectionRelTable :
   public ELFSectionTable_CRTP<Bitwidth,
                               ELFSectionRelTable<Bitwidth>,
-                              ELFSectionRel<Bitwidth> > {
+                              ELFRel<Bitwidth> > {
   friend class ELFSectionTable_CRTP<Bitwidth,
                                     ELFSectionRelTable<Bitwidth>,
-                                    ELFSectionRel<Bitwidth> >;
+                                    ELFRel<Bitwidth> >;
 private:
   static char const *TABLE_NAME;
 
 public:
-  typedef ELFSectionRel<Bitwidth> Rel;
+  typedef ELFRel<Bitwidth> Rel;
 
 private:
   //std::vector<Rel *> rel_table;
