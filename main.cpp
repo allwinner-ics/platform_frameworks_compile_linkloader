@@ -146,6 +146,7 @@ void dump_and_run_object(Archiver &AR, int argc, char **argv) {
   out().flush();
 
   ((int (*)(int, char **))main_addr)(argc, argv);
+  fflush(stdout);
 }
 
 template <typename Archiver>
