@@ -136,7 +136,7 @@ private:
   template <typename T>
   void seekToNextAddress() {
     size_t align = TypeTraits<T>::align;
-    size_t delta = reinterpret_cast<uintptr_t>(cursor) % align;
+    size_t delta = static_cast<size_t>(cursor - buf_begin) % align;
 
     if (delta > 0) {
       seek(align - delta);
