@@ -2,7 +2,6 @@
 #define ELF_SECTION_HEADER_TABLE_H
 
 #include "ELFSectionHeader.h"
-#include "ELFSectionTable_CRTP.h"
 
 #include <llvm/ADT/OwningPtr.h>
 
