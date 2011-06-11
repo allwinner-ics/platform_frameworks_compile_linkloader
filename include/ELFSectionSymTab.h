@@ -1,69 +1,115 @@
 #ifndef ELF_SECTION_SYMTAB_H
 #define ELF_SECTION_SYMTAB_H
 
-#include "ELFSectionTable_CRTP.h"
-
 #include <vector>
 #include <string>
 
 template <unsigned Bitwidth> class ELFSymbol;
 
 template <unsigned Bitwidth>
-class ELFSectionSymTab :
-  public ELFSectionTable_CRTP<Bitwidth,
-                              ELFSectionSymTab<Bitwidth>,
-                              ELFSymbol<Bitwidth> > {
-  friend class ELFSectionTable_CRTP<Bitwidth,
-                                    ELFSectionSymTab<Bitwidth>,
-                                    ELFSymbol<Bitwidth> >;
+class ELFSectionSymTab : public ELFSection<Bitwidth> {
 private:
-  static char const *TABLE_NAME;
-public:
-  typedef ELFSymbol<Bitwidth> SymTabEntry;
-
-private:
-  //std::vector<SymTabEntry> *> symbol_table;
+  std::vector<ELFSymbol<Bitwidth> *> table;
 
 private:
   ELFSectionSymTab() { }
 
 public:
-  // Note: Inherit from Table CRTP.
+  ~ELFSectionSymTab();
 
-  //template <typename Archiver>
-  //static ELFSectionSymTab *
-  //read(Archiver &AR,
-  //     ELFObject<Bitwidth> *owner,
-  //     ELFSectionHeader<Bitwidth> const *sh);
+  template <typename Archiver>
+  static ELFSectionSymTab *
+  read(Archiver &AR,
+       ELFObject<Bitwidth> *owner,
+       ELFSectionHeader<Bitwidth> const *sh);
 
-  //virtual void print() const;
+  virtual void print() const;
 
-  //size_t size() const;
+  size_t size() const {
+    return table.size();
+  }
 
-  //SymTabEntry const *operator[](size_t index) const;
+  ELFSymbol<Bitwidth> const *operator[](size_t index) const {
+    return table[index];
+  }
 
-  SymTabEntry const *getByName(const std::string &str) const;
+  ELFSymbol<Bitwidth> *operator[](size_t index) {
+    return table[index];
+  }
+
+  ELFSymbol<Bitwidth> const *getByName(std::string const &name) const {
+    for (size_t i = 0; i < table.size(); ++i) {
+      if (table[i]->getName() == name){
+        return table[i];
+      }
+    }
+    return NULL;
+  }
+
+  ELFSymbol<Bitwidth> *getByName(std::string const &name) {
+    return const_cast<ELFSymbol<Bitwidth> *>(
+           const_cast<ELFSectionSymTab<Bitwidth> const *>(this)->getByName(name));
+  }
+
 };
 
 
 //==================Inline Member Function Definition==========================
 
+#include "ELFSectionHeader.h"
 #include "ELFSymbol.h"
 
 template <unsigned Bitwidth>
-char const *ELFSectionSymTab<Bitwidth>::TABLE_NAME = "Symbol Table";
+ELFSectionSymTab<Bitwidth>::~ELFSectionSymTab() {
+  for (size_t i = 0; i < table.size(); ++i) {
+    delete table[i];
+  }
+}
 
 template <unsigned Bitwidth>
-inline ELFSymbol<Bitwidth> const *
-ELFSectionSymTab<Bitwidth>::getByName(const std::string &str) const {
-  // TODO: Use map
-  for (size_t i = 0; i < this->table.size(); ++i) {
-    if (str == std::string(this->table[i]->getName())) {
-      return this->table[i];
-    }
+template <typename Archiver>
+ELFSectionSymTab<Bitwidth> *
+ELFSectionSymTab<Bitwidth>::read(Archiver &AR,
+                                 ELFObject<Bitwidth> *owner,
+                                 ELFSectionHeader<Bitwidth> const *sh) {
+
+  llvm::OwningPtr<ELFSectionSymTab<Bitwidth> > st(
+    new ELFSectionSymTab<Bitwidth>());
+
+  // Assert that entry size will be the same as standard.
+  assert(sh->getEntrySize() == TypeTraits<ELFSymbol<Bitwidth> >::size);
+
+  // Seek to the start of symbol table
+  AR.seek(sh->getOffset(), true);
+
+  // Read all symbol table entry
+  size_t size = sh->getSize() / sh->getEntrySize();
+  for (size_t i = 0; i < size; ++i) {
+    st->table.push_back(ELFSymbol<Bitwidth>::read(AR, owner, i));
   }
-  // Return STN_UNDEF entry.
-  return this->table[0];
+
+  if (!AR) {
+    // Unable to read the table.
+    return 0;
+  }
+
+  return st.take();
+}
+
+template <unsigned Bitwidth>
+void ELFSectionSymTab<Bitwidth>::print() const {
+  using namespace llvm;
+
+  out() << '\n' << fillformat('=', 79) << '\n';
+  out().changeColor(raw_ostream::WHITE, true);
+  out() << "Symbol Table" << '\n';
+  out().resetColor();
+
+  for (size_t i = 0; i < table.size(); ++i) {
+    table[i]->print();
+  }
+
+  out() << fillformat('=', 79) << '\n';
 }
 
 #endif // ELF_SECTION_SYMTAB_H
