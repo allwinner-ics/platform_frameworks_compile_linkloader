@@ -44,11 +44,21 @@ namespace detail {
 }
 
 template <unsigned Bitwidth> class ELFHeader;
+template <unsigned Bitwidth> class ELFObject;
 template <unsigned Bitwidth> class ELFProgramHeader;
+template <unsigned Bitwidth> class ELFReloc;
+template <unsigned Bitwidth> class ELFRelocRel; // For TypeTraits
+template <unsigned Bitwidth> class ELFRelocRela; // For TypeTraits
+template <unsigned Bitwidth> class ELFSection;
+template <unsigned Bitwidth> class ELFSectionBits;
 template <unsigned Bitwidth> class ELFSectionHeader;
+template <unsigned Bitwidth> class ELFSectionHeaderTable;
+template <unsigned Bitwidth> class ELFSectionNoBits;
+template <unsigned Bitwidth> class ELFSectionProgBits;
+template <unsigned Bitwidth> class ELFSectionRelTable;
+template <unsigned Bitwidth> class ELFSectionStrTab;
+template <unsigned Bitwidth> class ELFSectionSymTab;
 template <unsigned Bitwidth> class ELFSymbol;
-template <unsigned Bitwidth> class ELFRelocRel;
-template <unsigned Bitwidth> class ELFRelocRela;
 
 // Note: Following TypeTraits specialization MUST be compliant to the
 // System V Application Binary Interface, Chap 4, Data Representation.
@@ -123,7 +133,23 @@ struct ELFTypes<64> {
   typedef detail::ELFXword      symsize;
 };
 
+#define ELF_CLASS_TYPE_INTRO_TO_SCOPE(BITWIDTH) \
+  typedef ELFHeader<BITWIDTH> ELFHeaderTy; \
+  typedef ELFObject<BITWIDTH> ELFObjectTy; \
+  typedef ELFReloc<BITWIDTH> ELFRelocTy; \
+  typedef ELFSection<BITWIDTH> ELFSectionTy; \
+  typedef ELFSectionBits<BITWIDTH> ELFSectionBitsTy; \
+  typedef ELFSectionHeader<BITWIDTH> ELFSectionHeaderTy; \
+  typedef ELFSectionHeaderTable<BITWIDTH> ELFSectionHeaderTableTy; \
+  typedef ELFSectionNoBits<BITWIDTH> ELFSectionNoBitsTy; \
+  typedef ELFSectionProgBits<BITWIDTH> ELFSectionProgBitsTy; \
+  typedef ELFSectionRelTable<BITWIDTH> ELFSectionRelTableTy; \
+  typedef ELFSectionStrTab<BITWIDTH> ELFSectionStrTabTy; \
+  typedef ELFSectionSymTab<BITWIDTH> ELFSectionSymTabTy; \
+  typedef ELFSymbol<BITWIDTH> ELFSymbolTy;
+
 #define ELF_TYPE_INTRO_TO_TEMPLATE_SCOPE(BITWIDTH) \
+  ELF_CLASS_TYPE_INTRO_TO_SCOPE(BITWIDTH) \
   typedef typename ELFTypes<BITWIDTH>::address addr_t; \
   typedef typename ELFTypes<BITWIDTH>::offset  offset_t; \
   typedef typename ELFTypes<BITWIDTH>::byte    byte_t; \
@@ -137,6 +163,7 @@ struct ELFTypes<64> {
   typedef typename ELFTypes<BITWIDTH>::symsize symsize_t;
 
 #define ELF_TYPE_INTRO_TO_SCOPE(BITWIDTH) \
+  ELF_CLASS_TYPE_INTRO_TO_SCOPE(BITWIDTH) \
   typedef ELFTypes<BITWIDTH>::address addr_t; \
   typedef ELFTypes<BITWIDTH>::offset  offset_t; \
   typedef ELFTypes<BITWIDTH>::byte    byte_t; \
