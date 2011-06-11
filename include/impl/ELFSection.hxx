@@ -20,7 +20,7 @@ ELFSection<Bitwidth>::read(Archiver &AR,
                            ELFSectionHeaderTy const *sh) {
   using namespace std;
 
-  switch ((uint32_t)sh->getType()) {
+  switch (sh->getType()) {
     default:
       // Uknown type of ELF section.  Return NULL.
       llvm::errs() << "WARNING: Unknown section type.\n";

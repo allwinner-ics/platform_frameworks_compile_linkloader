@@ -95,34 +95,17 @@ public:
     seek(size);
   }
 
-#define SERIALIZE_ARCHIVE_READER_READ_AND_SWAP_BYTE_ORDER(T)                  \
-  void operator&(T &v) {                                                      \
-    using namespace detail;                                                   \
-                                                                              \
-    seekToNextAddress<T>();                                                   \
-    readBytes(&v, sizeof(T));                                                 \
-    seek(sizeof(T));                                                          \
-                                                                              \
-    if (isArchiveLittleEndian != is_host_little_endian()) {                   \
-      swap_byte_order(reinterpret_cast<unsigned char (&)[sizeof(T)]>(v));     \
-    }                                                                         \
+  template <typename T>
+  void operator&(T &v) {
+    seekAlignment<T>();
+    readBytes(&v, TypeTraits<T>::size);
+    seek(TypeTraits<T>::size);
+
+    if (isArchiveLittleEndian != detail::is_host_little_endian()) {
+      detail::swap_byte_order(
+        reinterpret_cast<unsigned char (&)[TypeTraits<T>::size]>(v));
+    }
   }
-
-  SERIALIZE_ARCHIVE_READER_READ_AND_SWAP_BYTE_ORDER(bool)
-  SERIALIZE_ARCHIVE_READER_READ_AND_SWAP_BYTE_ORDER(int8_t)
-  SERIALIZE_ARCHIVE_READER_READ_AND_SWAP_BYTE_ORDER(int16_t)
-  SERIALIZE_ARCHIVE_READER_READ_AND_SWAP_BYTE_ORDER(int32_t)
-  SERIALIZE_ARCHIVE_READER_READ_AND_SWAP_BYTE_ORDER(int64_t)
-  SERIALIZE_ARCHIVE_READER_READ_AND_SWAP_BYTE_ORDER(uint8_t)
-  SERIALIZE_ARCHIVE_READER_READ_AND_SWAP_BYTE_ORDER(uint16_t)
-  SERIALIZE_ARCHIVE_READER_READ_AND_SWAP_BYTE_ORDER(uint32_t)
-  SERIALIZE_ARCHIVE_READER_READ_AND_SWAP_BYTE_ORDER(uint64_t)
-  SERIALIZE_ARCHIVE_READER_READ_AND_SWAP_BYTE_ORDER(float)
-  SERIALIZE_ARCHIVE_READER_READ_AND_SWAP_BYTE_ORDER(double)
-  SERIALIZE_ARCHIVE_READER_READ_AND_SWAP_BYTE_ORDER(void *)
-  SERIALIZE_ARCHIVE_READER_READ_AND_SWAP_BYTE_ORDER(void const *)
-
-#undef SERIALIZE_ARCHIVE_READER_READ_AND_SWAP_BYTE_ORDER
 
   operator void const *() const {
     return good ? this : 0;
@@ -134,7 +117,7 @@ public:
 
 private:
   template <typename T>
-  void seekToNextAddress() {
+  void seekAlignment() {
     size_t align = TypeTraits<T>::align;
     size_t delta = static_cast<size_t>(cursor - buf_begin) % align;
 

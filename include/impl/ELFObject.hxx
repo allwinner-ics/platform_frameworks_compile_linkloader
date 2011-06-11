@@ -117,7 +117,7 @@ relocateARM(void *(*find_sym)(char const *name, void *context),
     Inst_t A = 0;
     Inst_t S = (Inst_t)(int64_t)sym->getAddress();
 
-    switch ((uint32_t)rel->getType()) {
+    switch (rel->getType()) {
     default:
       assert(0 && "Not implemented relocation type.");
       break;
@@ -229,7 +229,7 @@ relocateX86_64(void *(*find_sym)(char const *name, void *context),
         sym->setAddress((void *)S);
       }
 
-      switch ((uint32_t)rela->getType()) {
+      switch (rela->getType()) {
         default:
           assert(0 && "Not implemented relocation type.");
           break;
@@ -284,7 +284,7 @@ relocateX86_32(void *(*find_sym)(char const *name, void *context),
         sym->setAddress((void *)S);
       }
 
-      switch ((uint32_t)rel->getType()) {
+      switch (rel->getType()) {
       default:
         assert(0 && "Not implemented relocation type.");
         break;
@@ -304,7 +304,7 @@ relocateX86_32(void *(*find_sym)(char const *name, void *context),
 template <unsigned Bitwidth>
 inline void ELFObject<Bitwidth>::
 relocate(void *(*find_sym)(char const *name, void *context), void *context) {
-  switch ((uint32_t)getHeader()->getMachine()) {
+  switch (getHeader()->getMachine()) {
     case EM_ARM:    relocateARM(find_sym, context); break;
     case EM_386:    relocateX86_32(find_sym, context); break;
     case EM_X86_64: relocateX86_64(find_sym, context); break;

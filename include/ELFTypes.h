@@ -60,7 +60,6 @@ namespace detail {
     TYPE &operator=(IMPL val) { value = val; return *this; }                \
                                                                             \
     operator IMPL() const { return value; }                                 \
-    operator IMPL &() { return value; }                                     \
   };
 
   ELF_TYPE_WRAPPER(ELFHalf      , uint16_t)
