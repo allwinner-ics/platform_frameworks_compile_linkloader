@@ -12,6 +12,7 @@
 #include <sys/types.h>
 #include <map>
 #include <stdio.h>
+#include <stdarg.h>
 
 using namespace serialization;
 using namespace std;
@@ -56,26 +57,70 @@ int main(int argc, char **argv) {
   return EXIT_SUCCESS;
 }
 
-void *find_sym(char const *name_, void *context) {
-  std::string name = name_;
-  std::map<std::string, void *> fptr;
+// FIXME: I don't like these stub as well.  However, before we implement
+// x86 64bit far jump stub, we have to ensure find_sym only returns
+// near address.
 
-#define DEF_FUNC(FUNC) \
-  fptr.insert(make_pair(#FUNC, (void *)&FUNC));
+int stub_printf(char const *fmt, ...) {
+  va_list ap;
+  va_start(ap, fmt);
+  int result = vprintf(fmt, ap);
+  va_end(ap);
+  return result;
+}
 
-  DEF_FUNC(rand);
-  DEF_FUNC(printf);
-  DEF_FUNC(scanf);
-  DEF_FUNC(srand);
-  DEF_FUNC(time);
+int stub_scanf(char const *fmt, ...) {
+  va_list ap;
+  va_start(ap, fmt);
+  int result = vscanf(fmt, ap);
+  va_end(ap);
+  return result;
+}
 
-#undef DEF_FUNC
+void stub_srand(unsigned int seed) {
+  srand(seed);
+}
 
-  fptr.insert(make_pair("__isoc99_scanf", (void*)scanf));
+int stub_rand() {
+  return rand();
+}
 
-  if (fptr.count(name) > 0) {
-    return fptr[name];
+time_t stub_time(time_t *output) {
+  return time(output);
+}
+
+void *find_sym(char const *name, void *context) {
+  struct func_entry_t {
+    char const *name;
+    size_t name_len;
+    void *addr;
+  };
+
+  static func_entry_t const tab[] = {
+#define DEF(NAME, ADDR) \
+    { NAME, sizeof(NAME) - 1, (void *)(ADDR) },
+
+    DEF("printf", stub_printf)
+    DEF("scanf", stub_scanf)
+    DEF("__isoc99_scanf", stub_scanf)
+    DEF("rand", stub_rand)
+    DEF("time", stub_time)
+    DEF("srand", stub_srand)
+#undef DEF
+  };
+
+  static size_t const tab_size = sizeof(tab) / sizeof(func_entry_t);
+
+  // Note: Since our table is small, we are using trivial O(n) searching
+  // function.  For bigger table, it will be better to use binary
+  // search or hash function.
+  size_t name_len = strlen(name);
+  for (size_t i = 0; i < tab_size; ++i) {
+    if (name_len == tab[i].name_len && strcmp(name, tab[i].name) == 0) {
+      return tab[i].addr;
+    }
   }
+
   assert(0 && "Can't find symbol.");
   return 0;
 }
