@@ -66,8 +66,6 @@ void ELFSectionRelTable<Bitwidth>::print() const {
   out() << fillformat('=', 79) << '\n';
 }
 
-#include "ELFReloc.h"
-
 template <unsigned Bitwidth>
 template <typename Archiver>
 ELFSectionRelTable<Bitwidth> *
@@ -86,13 +84,13 @@ ELFSectionRelTable<Bitwidth>::read(Archiver &AR,
 
   // Read every relocation entries
   if (sh->getType() == SHT_REL) {
-    assert(sh->getEntrySize() == TypeTraits<ELFRel<Bitwidth> >::size);
+    assert(sh->getEntrySize() == TypeTraits<ELFRelocRel<Bitwidth> >::size);
     for (size_t i = 0; i < size; ++i) {
       rt->rel_table.push_back(ELFReloc<Bitwidth>::readRel(AR, i));
     }
 
   } else {
-    assert(sh->getEntrySize() == TypeTraits<ELFRela<Bitwidth> >::size);
+    assert(sh->getEntrySize() == TypeTraits<ELFRelocRela<Bitwidth> >::size);
     for (size_t i = 0; i < size; ++i) {
       rt->rel_table.push_back(ELFReloc<Bitwidth>::readRela(AR, i));
     }

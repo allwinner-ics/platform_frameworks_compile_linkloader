@@ -74,24 +74,24 @@ private:
   bool serializeRel(Archiver &AR) {
     assert(r_addend == 0 && "r_addend should be zero before serialization.");
 
-    AR.prologue(TypeTraits<ELFRel<Bitwidth> >::size);
+    AR.prologue(TypeTraits<ELFRelocRel<Bitwidth> >::size);
 
     AR & r_offset;
     AR & r_info;
 
-    AR.epilogue(TypeTraits<ELFRel<Bitwidth> >::size);
+    AR.epilogue(TypeTraits<ELFRelocRel<Bitwidth> >::size);
     return AR;
   }
 
   template <typename Archiver>
   bool serializeRela(Archiver &AR) {
-    AR.prologue(TypeTraits<ELFRela<Bitwidth> >::size);
+    AR.prologue(TypeTraits<ELFRelocRela<Bitwidth> >::size);
 
     AR & r_offset;
     AR & r_info;
     AR & r_addend;
 
-    AR.epilogue(TypeTraits<ELFRela<Bitwidth> >::size);
+    AR.epilogue(TypeTraits<ELFRelocRela<Bitwidth> >::size);
     return AR;
   }
 
