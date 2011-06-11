@@ -14,18 +14,9 @@
 template <unsigned Bitwidth> class ELFObject;
 
 template <unsigned Bitwidth>
-class ELFSectionHeaderTable :
-  public ELFSectionTable_CRTP<Bitwidth,
-                              ELFSectionHeaderTable<Bitwidth>,
-                              ELFSectionHeader<Bitwidth> > {
-  friend class ELFSectionTable_CRTP<Bitwidth,
-                                    ELFSectionHeaderTable<Bitwidth>,
-                                    ELFSectionHeader<Bitwidth> >;
+class ELFSectionHeaderTable {
 private:
-  static char const *TABLE_NAME;
-
-private:
-  //std::vector<ELFSectionHeader<Bitwidth> *> table;
+  std::vector<ELFSectionHeader<Bitwidth> *> table;
 
 private:
   ELFSectionHeaderTable() {
@@ -36,13 +27,18 @@ public:
   static ELFSectionHeaderTable<Bitwidth> *
   read(Archiver &AR, ELFObject<Bitwidth> *owner);
 
-  //ELFSectionHeader<Bitwidth> const *operator[](size_t i) const;
-  //ELFSectionHeader<Bitwidth> *operator[](size_t i);
+  ELFSectionHeader<Bitwidth> const *operator[](size_t i) const {
+    return table[i];
+  }
+
+  ELFSectionHeader<Bitwidth> *operator[](size_t i) {
+    return table[i];
+  }
 
   ELFSectionHeader<Bitwidth> const *getByName(const std::string &str) const;
   ELFSectionHeader<Bitwidth> *getByName(const std::string &str);
 
-  //virtual void print() const;
+  void print() const;
 };
 
 
@@ -92,20 +88,32 @@ ELFSectionHeaderTable<Bitwidth>::read(Archiver &AR,
 }
 
 template <unsigned Bitwidth>
-char const *ELFSectionHeaderTable<Bitwidth>::
-  TABLE_NAME = "ELF Section Header Table";
+inline void ELFSectionHeaderTable<Bitwidth>::print() const {
+  using namespace llvm;
+
+  out() << '\n' << fillformat('=', 79) << '\n';
+  out().changeColor(raw_ostream::WHITE, true);
+  out() << "ELF Section Header Table" << '\n';
+  out().resetColor();
+
+  for (size_t i = 0; i < table.size(); ++i) {
+    (*this)[i]->print();
+  }
+
+  out() << fillformat('=', 79) << '\n';
+}
 
 template <unsigned Bitwidth>
 inline ELFSectionHeader<Bitwidth> const *
 ELFSectionHeaderTable<Bitwidth>::getByName(const std::string &str) const {
   // TODO: Use map
-  for (size_t i = 0; i < this->table.size(); ++i) {
-    if (str == std::string(this->table[i]->getName())) {
-      return this->table[i];
+  for (size_t i = 0; i < table.size(); ++i) {
+    if (str == std::string(table[i]->getName())) {
+      return table[i];
     }
   }
   // Return SHN_UNDEF section header;
-  return this->table[0];
+  return table[0];
 }
 
 template <unsigned Bitwidth>
@@ -116,4 +124,5 @@ ELFSectionHeaderTable<Bitwidth>::getByName(const std::string &str) {
   // Const cast for the same API's const and non-const versions.
   return const_cast<ELFSectionHeader<Bitwidth> *>(shptr);
 }
+
 #endif // ELF_SECTION_HEADER_TABLE_H
