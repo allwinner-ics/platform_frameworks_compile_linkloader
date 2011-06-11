@@ -11,8 +11,6 @@
 #include <stdint.h>
 #include <stddef.h>
 
-namespace serialization {
-
 namespace detail {
   inline bool is_host_little_endian() {
     unsigned long one = 0x1UL;
@@ -157,6 +155,4 @@ private:
 typedef archive_reader<true>  archive_reader_le;
 typedef archive_reader<false> archive_reader_be;
 
-}
-
-#endif
+#endif // SERIALIZE_H

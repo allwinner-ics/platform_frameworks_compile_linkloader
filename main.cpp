@@ -14,7 +14,6 @@
 #include <stdio.h>
 #include <stdarg.h>
 
-using namespace serialization;
 using namespace std;
 
 bool open_mmap_file(char const *filename,
