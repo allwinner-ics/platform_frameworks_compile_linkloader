@@ -237,6 +237,6 @@ private:
   }
 };
 
-#include "ELFHeader.hxx"
+#include "impl/ELFHeader.hxx"
 
 #endif // ELF_HEADER_H

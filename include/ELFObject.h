@@ -72,6 +72,6 @@ private:
 
 };
 
-#include "ELFObject.hxx"
+#include "impl/ELFObject.hxx"
 
 #endif // ELF_OBJECT_H
