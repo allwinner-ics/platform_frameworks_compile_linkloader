@@ -22,7 +22,7 @@ ELFSectionStrTab<Bitwidth>::read(Archiver &AR,
 
   AR.seek(sh->getOffset(), true);
   AR.prologue(sh->getSize());
-  AR.read_bytes(&*st->buf.begin(), sh->getSize());
+  AR.readBytes(&*st->buf.begin(), sh->getSize());
   AR.epilogue(sh->getSize());
 
   if (!AR) {

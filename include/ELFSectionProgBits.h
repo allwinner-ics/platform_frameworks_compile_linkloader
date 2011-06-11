@@ -24,7 +24,7 @@ private:
   bool serialize(Archiver &AR) {
     AR.seek(this->section_header->getOffset(), true);
     AR.prologue(this->section_header->getSize());
-    AR.read_bytes(this->buf, this->section_header->getSize());
+    AR.readBytes(this->buf, this->section_header->getSize());
     AR.epilogue(this->section_header->getSize());
     return static_cast<bool>(AR);
   }

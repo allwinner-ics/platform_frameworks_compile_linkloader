@@ -179,10 +179,10 @@ void dump_and_run_file(unsigned char const *image, size_t size,
   bool is32bit = (image[EI_CLASS] == ELFCLASS32);
 
   if (isLittleEndian) {
-    archive_reader_le AR(image, size);
+    ArchiveReaderLE AR(image, size);
     dump_and_run_file_from_archive(is32bit, AR, argc, argv);
   } else {
-    archive_reader_be AR(image, size);
+    ArchiveReaderBE AR(image, size);
     dump_and_run_file_from_archive(is32bit, AR, argc, argv);
   }
 }
