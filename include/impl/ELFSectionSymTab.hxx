@@ -15,14 +15,13 @@ template <unsigned Bitwidth>
 template <typename Archiver>
 ELFSectionSymTab<Bitwidth> *
 ELFSectionSymTab<Bitwidth>::read(Archiver &AR,
-                                 ELFObject<Bitwidth> *owner,
-                                 ELFSectionHeader<Bitwidth> const *sh) {
+                                 ELFObjectTy *owner,
+                                 ELFSectionHeaderTy const *sh) {
 
-  llvm::OwningPtr<ELFSectionSymTab<Bitwidth> > st(
-    new ELFSectionSymTab<Bitwidth>());
+  llvm::OwningPtr<ELFSectionSymTabTy> st(new ELFSectionSymTabTy());
 
   // Assert that entry size will be the same as standard.
-  assert(sh->getEntrySize() == TypeTraits<ELFSymbol<Bitwidth> >::size);
+  assert(sh->getEntrySize() == TypeTraits<ELFSymbolTy>::size);
 
   // Seek to the start of symbol table
   AR.seek(sh->getOffset(), true);
@@ -30,7 +29,7 @@ ELFSectionSymTab<Bitwidth>::read(Archiver &AR,
   // Read all symbol table entry
   size_t size = sh->getSize() / sh->getEntrySize();
   for (size_t i = 0; i < size; ++i) {
-    st->table.push_back(ELFSymbol<Bitwidth>::read(AR, owner, i));
+    st->table.push_back(ELFSymbolTy::read(AR, owner, i));
   }
 
   if (!AR) {

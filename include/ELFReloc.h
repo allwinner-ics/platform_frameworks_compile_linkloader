@@ -7,14 +7,10 @@
 #include <string>
 #include <stdint.h>
 
-template <unsigned Bitwidth> class ELFReloc;
-
 template <unsigned Bitwidth>
 class ELFReloc_CRTP {
 public:
   ELF_TYPE_INTRO_TO_TEMPLATE_SCOPE(Bitwidth);
-
-  typedef ELFReloc<Bitwidth> ConcreteELFReloc;
 
 protected:
   size_t index;
@@ -46,44 +42,44 @@ public:
   }
 
   template <typename Archiver>
-  static ConcreteELFReloc *readRel(Archiver &AR, size_t index);
+  static ELFRelocTy *readRel(Archiver &AR, size_t index);
 
   template <typename Archiver>
-  static ConcreteELFReloc *readRela(Archiver &AR, size_t index);
+  static ELFRelocTy *readRela(Archiver &AR, size_t index);
 
   void print(bool shouldPrintHeader = false) const;
 
 private:
-  ConcreteELFReloc *concrete() {
-    return static_cast<ConcreteELFReloc *>(this);
+  ELFRelocTy *concrete() {
+    return static_cast<ELFRelocTy *>(this);
   }
 
-  ConcreteELFReloc const *concrete() const {
-    return static_cast<ConcreteELFReloc const *>(this);
+  ELFRelocTy const *concrete() const {
+    return static_cast<ELFRelocTy const *>(this);
   }
 
   template <typename Archiver>
   bool serializeRel(Archiver &AR) {
     assert(r_addend == 0 && "r_addend should be zero before serialization.");
 
-    AR.prologue(TypeTraits<ELFRelocRel<Bitwidth> >::size);
+    AR.prologue(TypeTraits<ELFRelocRelTy>::size);
 
     AR & r_offset;
     AR & r_info;
 
-    AR.epilogue(TypeTraits<ELFRelocRel<Bitwidth> >::size);
+    AR.epilogue(TypeTraits<ELFRelocRelTy>::size);
     return AR;
   }
 
   template <typename Archiver>
   bool serializeRela(Archiver &AR) {
-    AR.prologue(TypeTraits<ELFRelocRela<Bitwidth> >::size);
+    AR.prologue(TypeTraits<ELFRelocRelaTy>::size);
 
     AR & r_offset;
     AR & r_info;
     AR & r_addend;
 
-    AR.epilogue(TypeTraits<ELFRelocRela<Bitwidth> >::size);
+    AR.epilogue(TypeTraits<ELFRelocRelaTy>::size);
     return AR;
   }
 

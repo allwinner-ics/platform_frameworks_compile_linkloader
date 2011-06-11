@@ -1,11 +1,10 @@
 #ifndef ELF_SECTION_BITS_H
 #define ELF_SECTION_BITS_H
 
+#include "ELFTypes.h"
 #include "ELFSection.h"
 
 #include <llvm/ADT/OwningPtr.h>
-
-template <unsigned Bitwidth> class ELFSectionHeader;
 
 template <unsigned Bitwidth>
 class ELFSectionBits : public ELFSection<Bitwidth> {

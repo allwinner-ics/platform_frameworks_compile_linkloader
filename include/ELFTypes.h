@@ -6,6 +6,48 @@
 #include <stdint.h>
 #include <llvm/Support/raw_ostream.h>
 
+
+// ELF structure forward declarations
+template <unsigned Bitwidth> class ELFHeader;
+template <unsigned Bitwidth> class ELFObject;
+template <unsigned Bitwidth> class ELFProgramHeader;
+template <unsigned Bitwidth> class ELFReloc;
+template <unsigned Bitwidth> class ELFRelocRel; // For TypeTraits
+template <unsigned Bitwidth> class ELFRelocRela; // For TypeTraits
+template <unsigned Bitwidth> class ELFSection;
+template <unsigned Bitwidth> class ELFSectionBits;
+template <unsigned Bitwidth> class ELFSectionHeader;
+template <unsigned Bitwidth> class ELFSectionHeaderTable;
+template <unsigned Bitwidth> class ELFSectionNoBits;
+template <unsigned Bitwidth> class ELFSectionProgBits;
+template <unsigned Bitwidth> class ELFSectionRelTable;
+template <unsigned Bitwidth> class ELFSectionStrTab;
+template <unsigned Bitwidth> class ELFSectionSymTab;
+template <unsigned Bitwidth> class ELFSymbol;
+
+// Note: Following TypeTraits specialization MUST be compliant to the
+// System V Application Binary Interface, Chap 4, Data Representation.
+
+TYPE_TRAITS_SPECIALIZE(ELFHeader<32>        , 52, 4)
+TYPE_TRAITS_SPECIALIZE(ELFHeader<64>        , 64, 8)
+
+TYPE_TRAITS_SPECIALIZE(ELFProgramHeader<32> , 32, 4)
+TYPE_TRAITS_SPECIALIZE(ELFProgramHeader<64> , 56, 8)
+
+TYPE_TRAITS_SPECIALIZE(ELFSectionHeader<32> , 40, 4)
+TYPE_TRAITS_SPECIALIZE(ELFSectionHeader<64> , 64, 8)
+
+TYPE_TRAITS_SPECIALIZE(ELFSymbol<32>        , 16, 4)
+TYPE_TRAITS_SPECIALIZE(ELFSymbol<64>        , 24, 8)
+
+TYPE_TRAITS_SPECIALIZE(ELFRelocRel<32>      , 8, 4)
+TYPE_TRAITS_SPECIALIZE(ELFRelocRel<64>      , 16, 8)
+
+TYPE_TRAITS_SPECIALIZE(ELFRelocRela<32>     , 12, 4)
+TYPE_TRAITS_SPECIALIZE(ELFRelocRela<64>     , 24, 8)
+
+
+// ELF primitive type wrappers
 namespace detail {
 #define ELF_TYPE_WRAPPER(TYPE, IMPL)                                        \
   struct TYPE {                                                             \
@@ -43,23 +85,6 @@ namespace detail {
                                        ELF64Offset const &);
 }
 
-template <unsigned Bitwidth> class ELFHeader;
-template <unsigned Bitwidth> class ELFObject;
-template <unsigned Bitwidth> class ELFProgramHeader;
-template <unsigned Bitwidth> class ELFReloc;
-template <unsigned Bitwidth> class ELFRelocRel; // For TypeTraits
-template <unsigned Bitwidth> class ELFRelocRela; // For TypeTraits
-template <unsigned Bitwidth> class ELFSection;
-template <unsigned Bitwidth> class ELFSectionBits;
-template <unsigned Bitwidth> class ELFSectionHeader;
-template <unsigned Bitwidth> class ELFSectionHeaderTable;
-template <unsigned Bitwidth> class ELFSectionNoBits;
-template <unsigned Bitwidth> class ELFSectionProgBits;
-template <unsigned Bitwidth> class ELFSectionRelTable;
-template <unsigned Bitwidth> class ELFSectionStrTab;
-template <unsigned Bitwidth> class ELFSectionSymTab;
-template <unsigned Bitwidth> class ELFSymbol;
-
 // Note: Following TypeTraits specialization MUST be compliant to the
 // System V Application Binary Interface, Chap 4, Data Representation.
 
@@ -73,30 +98,11 @@ TYPE_TRAITS_SPECIALIZE(detail::ELF32Offset  , 4, 4)
 TYPE_TRAITS_SPECIALIZE(detail::ELF64Address , 8, 8)
 TYPE_TRAITS_SPECIALIZE(detail::ELF64Offset  , 8, 8)
 
-TYPE_TRAITS_SPECIALIZE(ELFHeader<32>        , 52, 4)
-TYPE_TRAITS_SPECIALIZE(ELFHeader<64>        , 64, 8)
-
-TYPE_TRAITS_SPECIALIZE(ELFProgramHeader<32> , 32, 4)
-TYPE_TRAITS_SPECIALIZE(ELFProgramHeader<64> , 56, 8)
-
-TYPE_TRAITS_SPECIALIZE(ELFSectionHeader<32> , 40, 4)
-TYPE_TRAITS_SPECIALIZE(ELFSectionHeader<64> , 64, 8)
-
-TYPE_TRAITS_SPECIALIZE(ELFSymbol<32>        , 16, 4)
-TYPE_TRAITS_SPECIALIZE(ELFSymbol<64>        , 24, 8)
-
-TYPE_TRAITS_SPECIALIZE(ELFRelocRel<32>      , 8, 4)
-TYPE_TRAITS_SPECIALIZE(ELFRelocRel<64>      , 16, 8)
-
-TYPE_TRAITS_SPECIALIZE(ELFRelocRela<32>     , 12, 4)
-TYPE_TRAITS_SPECIALIZE(ELFRelocRela<64>     , 24, 8)
-
-
 template <unsigned Bitwidth>
-struct ELFTypes;
+struct ELFPrimitiveTypes;
 
 template <>
-struct ELFTypes<32> {
+struct ELFPrimitiveTypes<32> {
   typedef detail::ELF32Address  address;
   typedef detail::ELF32Offset   offset;
 
@@ -117,7 +123,7 @@ struct ELFTypes<32> {
 };
 
 template <>
-struct ELFTypes<64> {
+struct ELFPrimitiveTypes<64> {
   typedef detail::ELF64Address  address;
   typedef detail::ELF64Offset   offset;
 
@@ -133,48 +139,62 @@ struct ELFTypes<64> {
   typedef detail::ELFXword      symsize;
 };
 
-#define ELF_CLASS_TYPE_INTRO_TO_SCOPE(BITWIDTH) \
-  typedef ELFHeader<BITWIDTH> ELFHeaderTy; \
-  typedef ELFObject<BITWIDTH> ELFObjectTy; \
-  typedef ELFReloc<BITWIDTH> ELFRelocTy; \
-  typedef ELFSection<BITWIDTH> ELFSectionTy; \
-  typedef ELFSectionBits<BITWIDTH> ELFSectionBitsTy; \
-  typedef ELFSectionHeader<BITWIDTH> ELFSectionHeaderTy; \
-  typedef ELFSectionHeaderTable<BITWIDTH> ELFSectionHeaderTableTy; \
-  typedef ELFSectionNoBits<BITWIDTH> ELFSectionNoBitsTy; \
-  typedef ELFSectionProgBits<BITWIDTH> ELFSectionProgBitsTy; \
-  typedef ELFSectionRelTable<BITWIDTH> ELFSectionRelTableTy; \
-  typedef ELFSectionStrTab<BITWIDTH> ELFSectionStrTabTy; \
-  typedef ELFSectionSymTab<BITWIDTH> ELFSectionSymTabTy; \
-  typedef ELFSymbol<BITWIDTH> ELFSymbolTy;
 
-#define ELF_TYPE_INTRO_TO_TEMPLATE_SCOPE(BITWIDTH) \
-  ELF_CLASS_TYPE_INTRO_TO_SCOPE(BITWIDTH) \
-  typedef typename ELFTypes<BITWIDTH>::address addr_t; \
-  typedef typename ELFTypes<BITWIDTH>::offset  offset_t; \
-  typedef typename ELFTypes<BITWIDTH>::byte    byte_t; \
-  typedef typename ELFTypes<BITWIDTH>::half    half_t; \
-  typedef typename ELFTypes<BITWIDTH>::word    word_t; \
-  typedef typename ELFTypes<BITWIDTH>::sword   sword_t; \
-  typedef typename ELFTypes<BITWIDTH>::xword   xword_t; \
-  typedef typename ELFTypes<BITWIDTH>::sxword  sxword_t; \
-  typedef typename ELFTypes<BITWIDTH>::relinfo relinfo_t; \
-  typedef typename ELFTypes<BITWIDTH>::addend  addend_t; \
-  typedef typename ELFTypes<BITWIDTH>::symsize symsize_t;
+// Macros to introduce these ELF types to a specific scope
 
-#define ELF_TYPE_INTRO_TO_SCOPE(BITWIDTH) \
-  ELF_CLASS_TYPE_INTRO_TO_SCOPE(BITWIDTH) \
-  typedef ELFTypes<BITWIDTH>::address addr_t; \
-  typedef ELFTypes<BITWIDTH>::offset  offset_t; \
-  typedef ELFTypes<BITWIDTH>::byte    byte_t; \
-  typedef ELFTypes<BITWIDTH>::half    half_t; \
-  typedef ELFTypes<BITWIDTH>::word    word_t; \
-  typedef ELFTypes<BITWIDTH>::sword   sword_t; \
-  typedef ELFTypes<BITWIDTH>::xword   xword_t; \
-  typedef ELFTypes<BITWIDTH>::sxword  sxword_t; \
-  typedef ELFTypes<BITWIDTH>::relinfo relinfo_t; \
-  typedef ELFTypes<BITWIDTH>::addend  addend_t; \
-  typedef ELFTypes<BITWIDTH>::symsize symsize_t;
+#define ELF_STRUCT_TYPE_INTRO_TO_SCOPE(BITWIDTH)                            \
+  typedef ELFHeader<BITWIDTH>             ELFHeaderTy;                      \
+  typedef ELFObject<BITWIDTH>             ELFObjectTy;                      \
+  typedef ELFProgramHeader<BITWIDTH>      ELFProgramHeaderTy;               \
+  typedef ELFReloc<BITWIDTH>              ELFRelocTy;                       \
+  typedef ELFRelocRel<BITWIDTH>           ELFRelocRelTy;                    \
+  typedef ELFRelocRela<BITWIDTH>          ELFRelocRelaTy;                   \
+  typedef ELFSection<BITWIDTH>            ELFSectionTy;                     \
+  typedef ELFSectionBits<BITWIDTH>        ELFSectionBitsTy;                 \
+  typedef ELFSectionHeader<BITWIDTH>      ELFSectionHeaderTy;               \
+  typedef ELFSectionHeaderTable<BITWIDTH> ELFSectionHeaderTableTy;          \
+  typedef ELFSectionNoBits<BITWIDTH>      ELFSectionNoBitsTy;               \
+  typedef ELFSectionProgBits<BITWIDTH>    ELFSectionProgBitsTy;             \
+  typedef ELFSectionRelTable<BITWIDTH>    ELFSectionRelTableTy;             \
+  typedef ELFSectionStrTab<BITWIDTH>      ELFSectionStrTabTy;               \
+  typedef ELFSectionSymTab<BITWIDTH>      ELFSectionSymTabTy;               \
+  typedef ELFSymbol<BITWIDTH>             ELFSymbolTy;
+
+
+#define ELF_TYPE_INTRO_TO_TEMPLATE_SCOPE(BITWIDTH)                          \
+  /* ELF structures */                                                      \
+  ELF_STRUCT_TYPE_INTRO_TO_SCOPE(BITWIDTH)                                  \
+                                                                            \
+  /* ELF primitives */                                                      \
+  typedef typename ELFPrimitiveTypes<BITWIDTH>::address addr_t;             \
+  typedef typename ELFPrimitiveTypes<BITWIDTH>::offset  offset_t;           \
+  typedef typename ELFPrimitiveTypes<BITWIDTH>::byte    byte_t;             \
+  typedef typename ELFPrimitiveTypes<BITWIDTH>::half    half_t;             \
+  typedef typename ELFPrimitiveTypes<BITWIDTH>::word    word_t;             \
+  typedef typename ELFPrimitiveTypes<BITWIDTH>::sword   sword_t;            \
+  typedef typename ELFPrimitiveTypes<BITWIDTH>::xword   xword_t;            \
+  typedef typename ELFPrimitiveTypes<BITWIDTH>::sxword  sxword_t;           \
+  typedef typename ELFPrimitiveTypes<BITWIDTH>::relinfo relinfo_t;          \
+  typedef typename ELFPrimitiveTypes<BITWIDTH>::addend  addend_t;           \
+  typedef typename ELFPrimitiveTypes<BITWIDTH>::symsize symsize_t;
+
+
+#define ELF_TYPE_INTRO_TO_SCOPE(BITWIDTH)                                   \
+  /* ELF structures */                                                      \
+  ELF_STRUCT_TYPE_INTRO_TO_SCOPE(BITWIDTH)                                  \
+                                                                            \
+  /* ELF primitives */                                                      \
+  typedef ELFPrimitiveTypes<BITWIDTH>::address  addr_t;                     \
+  typedef ELFPrimitiveTypes<BITWIDTH>::offset   offset_t;                   \
+  typedef ELFPrimitiveTypes<BITWIDTH>::byte     byte_t;                     \
+  typedef ELFPrimitiveTypes<BITWIDTH>::half     half_t;                     \
+  typedef ELFPrimitiveTypes<BITWIDTH>::word     word_t;                     \
+  typedef ELFPrimitiveTypes<BITWIDTH>::sword    sword_t;                    \
+  typedef ELFPrimitiveTypes<BITWIDTH>::xword    xword_t;                    \
+  typedef ELFPrimitiveTypes<BITWIDTH>::sxword   sxword_t;                   \
+  typedef ELFPrimitiveTypes<BITWIDTH>::relinfo  relinfo_t;                  \
+  typedef ELFPrimitiveTypes<BITWIDTH>::addend   addend_t;                   \
+  typedef ELFPrimitiveTypes<BITWIDTH>::symsize  symsize_t;
 
 
 #endif // ELF_TYPES_H

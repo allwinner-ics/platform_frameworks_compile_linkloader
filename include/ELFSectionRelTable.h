@@ -1,17 +1,19 @@
 #ifndef ELF_SECTION_REL_TABLE_H
 #define ELF_SECTION_REL_TABLE_H
 
+#include "ELFTypes.h"
+#include "ELFSection.h"
+
 #include <string>
 #include <vector>
 
-#include "ELFSection.h"
-
-template <unsigned Bitwidth> class ELFReloc;
-
 template <unsigned Bitwidth>
 class ELFSectionRelTable : public ELFSection<Bitwidth> {
+public:
+  ELF_TYPE_INTRO_TO_TEMPLATE_SCOPE(Bitwidth);
+
 private:
-  std::vector<ELFReloc<Bitwidth> *> table;
+  std::vector<ELFRelocTy *> table;
 
 private:
   ELFSectionRelTable() { }
@@ -22,19 +24,17 @@ public:
   virtual void print() const;
 
   template <typename Archiver>
-  static ELFSectionRelTable *
-  read(Archiver &AR,
-       ELFSectionHeader<Bitwidth> const *sh);
+  static ELFSectionRelTable *read(Archiver &AR, ELFSectionHeaderTy const *sh);
 
   size_t size() const {
     return table.size();
   }
 
-  ELFReloc<Bitwidth> const *operator[](size_t index) const {
+  ELFRelocTy const *operator[](size_t index) const {
     return table[index];
   }
 
-  ELFReloc<Bitwidth> *operator[](size_t index) {
+  ELFRelocTy *operator[](size_t index) {
     return table[index];
   }
 };

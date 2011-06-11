@@ -12,12 +12,11 @@
 
 template <unsigned Bitwidth>
 inline char const *ELFSymbol_CRTP<Bitwidth>::getName() const {
-  ELFSectionHeaderTable<Bitwidth> const &shtab =
-    *owner->getSectionHeaderTable();
+  ELFSectionHeaderTableTy const &shtab = *owner->getSectionHeaderTable();
   size_t const index = shtab.getByName(std::string(".strtab"))->getIndex();
-  ELFSection<Bitwidth> const *section = owner->getSectionByIndex(index);
-  ELFSectionStrTab<Bitwidth> const &strtab =
-    *static_cast<ELFSectionStrTab<Bitwidth> const *>(section);
+  ELFSectionTy const *section = owner->getSectionByIndex(index);
+  ELFSectionStrTabTy const &strtab =
+    *static_cast<ELFSectionStrTabTy const *>(section);
   return strtab[getNameIndex()];
 }
 
@@ -25,16 +24,15 @@ template <unsigned Bitwidth>
 template <typename Archiver>
 inline ELFSymbol<Bitwidth> *
 ELFSymbol_CRTP<Bitwidth>::read(Archiver &AR,
-                                           ELFObject<Bitwidth> const *owner,
-                                           size_t index) {
+                               ELFObjectTy const *owner,
+                               size_t index) {
   if (!AR) {
     // Archiver is in bad state before calling read function.
     // Return NULL and do nothing.
     return 0;
   }
 
-  llvm::OwningPtr<ConcreteELFSymbol> sh(
-    new ConcreteELFSymbol());
+  llvm::OwningPtr<ELFSymbolTy> sh(new ELFSymbolTy());
 
   if (!sh->serialize(AR)) {
     // Unable to read the structure.  Return NULL.
@@ -56,8 +54,7 @@ ELFSymbol_CRTP<Bitwidth>::read(Archiver &AR,
 }
 
 template <unsigned Bitwidth>
-inline void ELFSymbol_CRTP<Bitwidth>::
-  print(bool shouldPrintHeader) const {
+inline void ELFSymbol_CRTP<Bitwidth>::print(bool shouldPrintHeader) const {
   using namespace llvm;
 
   if (shouldPrintHeader) {
@@ -117,17 +114,17 @@ void *ELFSymbol_CRTP<Bitwidth>::getAddress() const {
         default:
           {
 #ifndef NDEBUG
-            ELFSectionHeaderTable<Bitwidth> const *header =
+            ELFSectionHeaderTableTy const *header =
               owner->getSectionHeaderTable();
             assert(((*header)[idx]->getType() == SHT_PROGBITS ||
                     (*header)[idx]->getType() == SHT_NOBITS) &&
                    "STT_OBJECT with not BITS section.");
 #endif
-            ELFSection<Bitwidth> const *sec = owner->getSectionByIndex(idx);
+            ELFSectionTy const *sec = owner->getSectionByIndex(idx);
             assert(sec != 0 && "STT_OBJECT with null section.");
 
-            ELFSectionBits<Bitwidth> const &st =
-              static_cast<ELFSectionBits<Bitwidth> const &>(*sec);
+            ELFSectionBitsTy const &st =
+              static_cast<ELFSectionBitsTy const &>(*sec);
             my_addr = const_cast<unsigned char *>(&st[0] + (off_t)getValue());
           }
           break;
@@ -162,16 +159,16 @@ void *ELFSymbol_CRTP<Bitwidth>::getAddress() const {
         default:
           {
 #ifndef NDEBUG
-            ELFSectionHeaderTable<Bitwidth> const *header =
+            ELFSectionHeaderTableTy const *header =
               owner->getSectionHeaderTable();
             assert((*header)[idx]->getType() == SHT_PROGBITS &&
                    "STT_FUNC with not PROGBITS section.");
 #endif
-            ELFSection<Bitwidth> const *sec = owner->getSectionByIndex(idx);
+            ELFSectionTy const *sec = owner->getSectionByIndex(idx);
             assert(sec != 0 && "STT_FUNC with null section.");
 
-            ELFSectionProgBits<Bitwidth> const &st =
-              static_cast<ELFSectionProgBits<Bitwidth> const &>(*sec);
+            ELFSectionProgBitsTy const &st =
+              static_cast<ELFSectionProgBitsTy const &>(*sec);
             my_addr = const_cast<unsigned char *>(&st[0] + (off_t)getValue());
           }
           break;
@@ -191,17 +188,17 @@ void *ELFSymbol_CRTP<Bitwidth>::getAddress() const {
         default:
           {
 #ifndef NDEBUG
-            ELFSectionHeaderTable<Bitwidth> const *header =
+            ELFSectionHeaderTableTy const *header =
               owner->getSectionHeaderTable();
             assert(((*header)[idx]->getType() == SHT_PROGBITS ||
                     (*header)[idx]->getType() == SHT_NOBITS) &&
                    "STT_SECTION with not BITS section.");
 #endif
-            ELFSection<Bitwidth> const *sec = owner->getSectionByIndex(idx);
+            ELFSectionTy const *sec = owner->getSectionByIndex(idx);
             assert(sec != 0 && "STT_SECTION with null section.");
 
-            ELFSectionBits<Bitwidth> const &st =
-              static_cast<ELFSectionBits<Bitwidth> const &>(*sec);
+            ELFSectionBitsTy const &st =
+              static_cast<ELFSectionBitsTy const &>(*sec);
             my_addr = const_cast<unsigned char *>(&st[0] + (off_t)getValue());
           }
           break;

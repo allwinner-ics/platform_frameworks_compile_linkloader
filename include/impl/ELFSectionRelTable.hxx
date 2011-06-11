@@ -31,7 +31,7 @@ template <unsigned Bitwidth>
 template <typename Archiver>
 ELFSectionRelTable<Bitwidth> *
 ELFSectionRelTable<Bitwidth>::read(Archiver &AR,
-                                   ELFSectionHeader<Bitwidth> const *sh) {
+                                   ELFSectionHeaderTy const *sh) {
 
   assert(sh->getType() == SHT_REL || sh->getType() == SHT_RELA);
 
@@ -45,15 +45,15 @@ ELFSectionRelTable<Bitwidth>::read(Archiver &AR,
 
   // Read every relocation entries
   if (sh->getType() == SHT_REL) {
-    assert(sh->getEntrySize() == TypeTraits<ELFRelocRel<Bitwidth> >::size);
+    assert(sh->getEntrySize() == TypeTraits<ELFRelocRelTy>::size);
     for (size_t i = 0; i < size; ++i) {
-      rt->table.push_back(ELFReloc<Bitwidth>::readRel(AR, i));
+      rt->table.push_back(ELFRelocTy::readRel(AR, i));
     }
 
   } else {
-    assert(sh->getEntrySize() == TypeTraits<ELFRelocRela<Bitwidth> >::size);
+    assert(sh->getEntrySize() == TypeTraits<ELFRelocRelaTy>::size);
     for (size_t i = 0; i < size; ++i) {
-      rt->table.push_back(ELFReloc<Bitwidth>::readRela(AR, i));
+      rt->table.push_back(ELFRelocTy::readRela(AR, i));
     }
   }
 

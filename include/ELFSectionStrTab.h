@@ -1,16 +1,18 @@
 #ifndef ELF_SECTION_STRTAB_H
 #define ELF_SECTION_STRTAB_H
 
+#include "ELFTypes.h"
 #include "ELFSection.h"
 
 #include <vector>
 
-template <unsigned Bitwidth> class ELFSectionHeader;
-
 template <unsigned Bitwidth>
 class ELFSectionStrTab : public ELFSection<Bitwidth> {
+public:
+  ELF_TYPE_INTRO_TO_TEMPLATE_SCOPE(Bitwidth);
+
 private:
-  ELFSectionHeader<Bitwidth> const *section_header;
+  ELFSectionHeaderTy const *section_header;
   std::vector<char> buf;
 
 private:
@@ -18,8 +20,7 @@ private:
 
 public:
   template <typename Archiver>
-  static ELFSectionStrTab *
-  read(Archiver &AR, ELFSectionHeader<Bitwidth> const *sh);
+  static ELFSectionStrTab *read(Archiver &AR, ELFSectionHeaderTy const *sh);
 
   virtual void print() const;
 

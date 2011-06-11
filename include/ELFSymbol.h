@@ -14,11 +14,6 @@
 #include <stdint.h>
 #include <stdlib.h>
 
-template <unsigned Bitwidth> class ELFObject;
-template <unsigned Bitwidth> class ELFSymbol;
-template <unsigned Bitwidth> class ELFSymbol_CRTP;
-
-
 class ELFSymbolHelperMixin {
 protected:
   static char const *getTypeStr(uint8_t);
@@ -26,13 +21,10 @@ protected:
   static char const *getVisibilityStr(uint8_t);
 };
 
-
 template <unsigned Bitwidth>
 class ELFSymbol_CRTP : private ELFSymbolHelperMixin {
 public:
   ELF_TYPE_INTRO_TO_TEMPLATE_SCOPE(Bitwidth);
-
-  typedef ELFSymbol<Bitwidth> ConcreteELFSymbol;
 
 protected:
   ELFObject<Bitwidth> const *owner;
@@ -50,6 +42,7 @@ protected:
 
 protected:
   ELFSymbol_CRTP() { my_addr = 0; }
+
   ~ELFSymbol_CRTP() {
     if (my_addr != 0 &&
         getType() == STT_OBJECT &&
@@ -114,18 +107,18 @@ public:
   }
 
   template <typename Archiver>
-  static ConcreteELFSymbol *
+  static ELFSymbolTy *
   read(Archiver &AR, ELFObject<Bitwidth> const *owner, size_t index = 0);
 
   void print(bool shouldPrintHeader = false) const;
 
 private:
-  ConcreteELFSymbol *concrete() {
-    return static_cast<ConcreteELFSymbol *>(this);
+  ELFSymbolTy *concrete() {
+    return static_cast<ELFSymbolTy *>(this);
   }
 
-  ConcreteELFSymbol const *concrete() const {
-    return static_cast<ConcreteELFSymbol const *>(this);
+  ELFSymbolTy const *concrete() const {
+    return static_cast<ELFSymbolTy const *>(this);
   }
 };
 

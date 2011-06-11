@@ -16,8 +16,8 @@ template <unsigned Bitwidth>
 template <typename Archiver>
 inline ELFSection<Bitwidth> *
 ELFSection<Bitwidth>::read(Archiver &AR,
-                           ELFObject<Bitwidth> *owner,
-                           ELFSectionHeader<Bitwidth> const *sh) {
+                           ELFObjectTy *owner,
+                           ELFSectionHeaderTy const *sh) {
   using namespace std;
 
   switch ((uint32_t)sh->getType()) {
@@ -27,25 +27,25 @@ ELFSection<Bitwidth>::read(Archiver &AR,
       return 0;
 
     case SHT_STRTAB:
-      return ELFSectionStrTab<Bitwidth>::read(AR, sh);
+      return ELFSectionStrTabTy::read(AR, sh);
 
     case SHT_SYMTAB:
-      return ELFSectionSymTab<Bitwidth>::read(AR, owner, sh);
+      return ELFSectionSymTabTy::read(AR, owner, sh);
 
     case SHT_PROGBITS:
     {
 #ifdef __arm__
       owner->getStubLayout();
 #endif
-      return ELFSectionProgBits<Bitwidth>::read(AR, sh);
+      return ELFSectionProgBitsTy::read(AR, sh);
     }
 
     case SHT_NOBITS:
-      return ELFSectionNoBits<Bitwidth>::read(AR, sh);
+      return ELFSectionNoBitsTy::read(AR, sh);
 
     case SHT_REL:
     case SHT_RELA:
-      return ELFSectionRelTable<Bitwidth>::read(AR, sh);
+      return ELFSectionRelTableTy::read(AR, sh);
 
     case SHT_NULL:
       // TODO: Not Yet Implemented

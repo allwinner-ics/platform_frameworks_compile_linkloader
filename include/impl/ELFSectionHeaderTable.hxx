@@ -17,8 +17,7 @@ ELFSectionHeaderTable<Bitwidth>::~ELFSectionHeaderTable() {
 template <unsigned Bitwidth>
 template <typename Archiver>
 inline ELFSectionHeaderTable<Bitwidth> *
-ELFSectionHeaderTable<Bitwidth>::read(Archiver &AR,
-                                      ELFObject<Bitwidth> *owner) {
+ELFSectionHeaderTable<Bitwidth>::read(Archiver &AR, ELFObjectTy *owner) {
   if (!AR) {
     // Archiver is in bad state before calling read function.
     // Return NULL and do nothing.
@@ -29,20 +28,20 @@ ELFSectionHeaderTable<Bitwidth>::read(Archiver &AR,
   llvm::OwningPtr<ELFSectionHeaderTable> tab(new ELFSectionHeaderTable());
 
   // Get ELF header
-  ELFHeader<Bitwidth> const *header = owner->getHeader();
+  ELFHeaderTy const *header = owner->getHeader();
 
   assert(header->getSectionHeaderEntrySize() >=
-         TypeTraits<ELFSectionHeader<Bitwidth> >::size);
+         TypeTraits<ELFSectionHeaderTy>::size);
 
-  size_t pending = TypeTraits<ELFSectionHeader<Bitwidth> >::size -
+  size_t pending = TypeTraits<ELFSectionHeaderTy>::size -
                    header->getSectionHeaderEntrySize();
 
   // Seek to the address of section header
   AR.seek(header->getSectionHeaderTableOffset(), true);
 
   for (size_t i = 0; i < header->getSectionHeaderNum(); ++i) {
-    llvm::OwningPtr<ELFSectionHeader<Bitwidth> > sh(
-      ELFSectionHeader<Bitwidth>::read(AR, owner, i));
+    llvm::OwningPtr<ELFSectionHeaderTy> sh(
+      ELFSectionHeaderTy::read(AR, owner, i));
 
     if (!sh) {
       // Something wrong while reading the section header.
@@ -88,10 +87,10 @@ ELFSectionHeaderTable<Bitwidth>::getByName(const std::string &str) const {
 template <unsigned Bitwidth>
 inline ELFSectionHeader<Bitwidth> *
 ELFSectionHeaderTable<Bitwidth>::getByName(const std::string &str) {
-  ELFSectionHeaderTable<Bitwidth> const *const_this = this;
-  ELFSectionHeader<Bitwidth> const *shptr = const_this->getByName(str);
+  ELFSectionHeaderTableTy const *const_this = this;
+  ELFSectionHeaderTy const *shptr = const_this->getByName(str);
   // Const cast for the same API's const and non-const versions.
-  return const_cast<ELFSectionHeader<Bitwidth> *>(shptr);
+  return const_cast<ELFSectionHeaderTy *>(shptr);
 }
 
 #endif // ELF_SECTION_HEADER_TABLE_HXX

@@ -6,26 +6,18 @@
 #include <llvm/ADT/OwningPtr.h>
 #include <stdint.h>
 
-template <unsigned Bitwidth> class ELFObject;
-template <unsigned Bitwidth> class ELFSectionHeader;
-template <unsigned Bitwidth> class ELFSectionHeader_CRTP;
-
-
 class ELFSectionHeaderHelperMixin {
 protected:
   static char const *getSectionTypeStr(uint32_t type);
 };
-
 
 template <unsigned Bitwidth>
 class ELFSectionHeader_CRTP : private ELFSectionHeaderHelperMixin {
 public:
   ELF_TYPE_INTRO_TO_TEMPLATE_SCOPE(Bitwidth);
 
-  typedef ELFSectionHeader<Bitwidth> ConcreteELFSectionHeader;
-
 protected:
-  ELFObject<Bitwidth> const *owner;
+  ELFObjectTy const *owner;
 
   size_t index;
 
@@ -77,20 +69,18 @@ public:
   }
 
   template <typename Archiver>
-  static ConcreteELFSectionHeader *
-  read(Archiver &AR,
-       ELFObject<Bitwidth> const *owner,
-       size_t index = 0);
+  static ELFSectionHeaderTy *
+  read(Archiver &AR, ELFObjectTy const *owner, size_t index = 0);
 
   void print(bool shouldPrintHeader = false) const;
 
 private:
-  ConcreteELFSectionHeader *concrete() {
-    return static_cast<ConcreteELFSectionHeader *>(this);
+  ELFSectionHeaderTy *concrete() {
+    return static_cast<ELFSectionHeaderTy *>(this);
   }
 
-  ConcreteELFSectionHeader const *concrete() const {
-    return static_cast<ConcreteELFSectionHeader const *>(this);
+  ELFSectionHeaderTy const *concrete() const {
+    return static_cast<ELFSectionHeaderTy const *>(this);
   }
 };
 

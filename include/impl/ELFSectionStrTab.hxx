@@ -12,7 +12,7 @@ template <unsigned Bitwidth>
 template <typename Archiver>
 ELFSectionStrTab<Bitwidth> *
 ELFSectionStrTab<Bitwidth>::read(Archiver &AR,
-                                 ELFSectionHeader<Bitwidth> const *sh) {
+                                 ELFSectionHeaderTy const *sh) {
 
   llvm::OwningPtr<ELFSectionStrTab> st(new ELFSectionStrTab());
   st->buf.resize(sh->getSize());

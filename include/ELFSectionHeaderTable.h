@@ -1,17 +1,20 @@
 #ifndef ELF_SECTION_HEADER_TABLE_H
 #define ELF_SECTION_HEADER_TABLE_H
 
+#include "ELFTypes.h"
+
 #include <llvm/ADT/OwningPtr.h>
 
 #include <vector>
 #include <string>
 
-template <unsigned Bitwidth> class ELFObject;
-
 template <unsigned Bitwidth>
 class ELFSectionHeaderTable {
+public:
+  ELF_TYPE_INTRO_TO_TEMPLATE_SCOPE(Bitwidth);
+
 private:
-  std::vector<ELFSectionHeader<Bitwidth> *> table;
+  std::vector<ELFSectionHeaderTy *> table;
 
 private:
   ELFSectionHeaderTable() {
@@ -21,19 +24,18 @@ public:
   ~ELFSectionHeaderTable();
 
   template <typename Archiver>
-  static ELFSectionHeaderTable<Bitwidth> *
-  read(Archiver &AR, ELFObject<Bitwidth> *owner);
+  static ELFSectionHeaderTableTy *read(Archiver &AR, ELFObjectTy *owner);
 
-  ELFSectionHeader<Bitwidth> const *operator[](size_t i) const {
+  ELFSectionHeaderTy const *operator[](size_t i) const {
     return table[i];
   }
 
-  ELFSectionHeader<Bitwidth> *operator[](size_t i) {
+  ELFSectionHeaderTy *operator[](size_t i) {
     return table[i];
   }
 
-  ELFSectionHeader<Bitwidth> const *getByName(const std::string &str) const;
-  ELFSectionHeader<Bitwidth> *getByName(const std::string &str);
+  ELFSectionHeaderTy const *getByName(const std::string &str) const;
+  ELFSectionHeaderTy *getByName(const std::string &str);
 
   void print() const;
 };

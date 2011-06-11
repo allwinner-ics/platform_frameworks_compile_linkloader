@@ -10,8 +10,6 @@
 
 template <unsigned Bitwidth>
 inline void ELFSectionNoBits<Bitwidth>::print() const {
-  ELF_TYPE_INTRO_TO_TEMPLATE_SCOPE(Bitwidth);
-
   using namespace llvm;
 
   out() << '\n' << fillformat('=', 79) << '\n';

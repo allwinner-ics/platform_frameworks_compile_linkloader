@@ -25,10 +25,9 @@ ELFSectionBits<Bitwidth>::~ELFSectionBits() {
 template <unsigned Bitwidth>
 template <typename Archiver, typename ConcreteELFSectionBits>
 inline ConcreteELFSectionBits *
-ELFSectionBits<Bitwidth>::
-read(Archiver &AR,
-     ELFSectionHeader<Bitwidth> const *sh,
-     ConcreteELFSectionBits *concrete) {
+ELFSectionBits<Bitwidth>::read(Archiver &AR,
+                               ELFSectionHeader<Bitwidth> const *sh,
+                               ConcreteELFSectionBits *concrete) {
   llvm::OwningPtr<ConcreteELFSectionBits> result(concrete);
   // TODO: Align.
   result->buf_size = sh->getSize();

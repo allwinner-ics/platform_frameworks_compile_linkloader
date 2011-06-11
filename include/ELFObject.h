@@ -1,6 +1,8 @@
 #ifndef ELF_OBJECT_H
 #define ELF_OBJECT_H
 
+#include "ELFTypes.h"
+
 #include <llvm/ADT/OwningPtr.h>
 
 #include <string>
@@ -8,16 +10,15 @@
 
 class StubLayout;
 
-template <unsigned Bitwidth> class ELFHeader;
-template <unsigned Bitwidth> class ELFSection;
-template <unsigned Bitwidth> class ELFSectionHeaderTable;
-
 template <unsigned Bitwidth>
 class ELFObject {
+public:
+  ELF_TYPE_INTRO_TO_TEMPLATE_SCOPE(Bitwidth);
+
 private:
-  llvm::OwningPtr<ELFHeader<Bitwidth> > header;
-  llvm::OwningPtr<ELFSectionHeaderTable<Bitwidth> > shtab;
-  std::vector<ELFSection<Bitwidth> *> stab;
+  llvm::OwningPtr<ELFHeaderTy> header;
+  llvm::OwningPtr<ELFSectionHeaderTableTy> shtab;
+  std::vector<ELFSectionTy *> stab;
 
 #ifdef __arm__
   llvm::OwningPtr<StubLayout> stubs;
@@ -30,19 +31,19 @@ public:
   template <typename Archiver>
   static ELFObject *read(Archiver &AR);
 
-  ELFHeader<Bitwidth> const *getHeader() const {
+  ELFHeaderTy const *getHeader() const {
     return header.get();
   }
 
-  ELFSectionHeaderTable<Bitwidth> const *getSectionHeaderTable() const {
+  ELFSectionHeaderTableTy const *getSectionHeaderTable() const {
     return shtab.get();
   }
 
   char const *getSectionName(size_t i) const;
-  ELFSection<Bitwidth> const *getSectionByIndex(size_t i) const;
-  ELFSection<Bitwidth> *getSectionByIndex(size_t i);
-  ELFSection<Bitwidth> const *getSectionByName(std::string const &str) const;
-  ELFSection<Bitwidth> *getSectionByName(std::string const &str);
+  ELFSectionTy const *getSectionByIndex(size_t i) const;
+  ELFSectionTy *getSectionByIndex(size_t i);
+  ELFSectionTy const *getSectionByName(std::string const &str) const;
+  ELFSectionTy *getSectionByName(std::string const &str);
 
 #ifdef __arm__
   StubLayout *getStubLayout();

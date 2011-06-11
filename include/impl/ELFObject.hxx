@@ -24,24 +24,24 @@ template <unsigned Bitwidth>
 template <typename Archiver>
 inline ELFObject<Bitwidth> *
 ELFObject<Bitwidth>::read(Archiver &AR) {
-  llvm::OwningPtr<ELFObject<Bitwidth> > object(new ELFObject<Bitwidth>());
+  llvm::OwningPtr<ELFObjectTy> object(new ELFObjectTy());
 
   // Read header
-  object->header.reset(ELFHeader<Bitwidth>::read(AR));
+  object->header.reset(ELFHeaderTy::read(AR));
   if (!object->header) {
     return 0;
   }
 
   // Read section table
-  object->shtab.reset(ELFSectionHeaderTable<Bitwidth>::read(AR, object.get()));
+  object->shtab.reset(ELFSectionHeaderTableTy::read(AR, object.get()));
   if (!object->shtab) {
     return 0;
   }
 
   // Read each section
   for (size_t i = 0; i < object->header->getSectionHeaderNum(); ++i) {
-    llvm::OwningPtr<ELFSection<Bitwidth> > sec(
-      ELFSection<Bitwidth>::read(AR, object.get(), (*object->shtab)[i]));
+    llvm::OwningPtr<ELFSectionTy> sec(
+      ELFSectionTy::read(AR, object.get(), (*object->shtab)[i]));
     object->stab.push_back(sec.take());
   }
 
@@ -50,12 +50,11 @@ ELFObject<Bitwidth>::read(Archiver &AR) {
 
 template <unsigned Bitwidth>
 inline char const *ELFObject<Bitwidth>::getSectionName(size_t i) const {
-  ELFSection<Bitwidth> const *sec =
-    stab[header->getStringSectionIndex()];
+  ELFSectionTy const *sec = stab[header->getStringSectionIndex()];
 
   if (sec) {
-    ELFSectionStrTab<Bitwidth> const &st =
-      static_cast<ELFSectionStrTab<Bitwidth> const &>(*sec);
+    ELFSectionStrTabTy const &st =
+      static_cast<ELFSectionStrTabTy const &>(*sec);
     return st[i];
   }
 
@@ -84,10 +83,10 @@ ELFObject<Bitwidth>::getSectionByName(std::string const &str) const {
 template <unsigned Bitwidth>
 inline ELFSection<Bitwidth> *
 ELFObject<Bitwidth>::getSectionByName(std::string const &str) {
-  ELFObject<Bitwidth> const *const_this = this;
-  ELFSection<Bitwidth> const *sptr = const_this->getSectionByName(str);
+  ELFObjectTy const *const_this = this;
+  ELFSectionTy const *sptr = const_this->getSectionByName(str);
   // Const cast for the same API's const and non-const versions.
-  return const_cast<ELFSection<Bitwidth> *>(sptr);
+  return const_cast<ELFSectionTy *>(sptr);
 }
 
 
@@ -99,17 +98,17 @@ relocateARM(void *(*find_sym)(char const *name, void *context),
   assert(Bitwidth == 32 && "ARM only have 32 bits.");
 
   // FIXME: Can not only relocate .rel.text!
-  ELFSectionRelTable<Bitwidth> *reltab =
-    static_cast<ELFSectionRelTable<Bitwidth> *>(getSectionByName(".rel.text"));
-  ELFSectionProgBits<Bitwidth> *text =
-    static_cast<ELFSectionProgBits<Bitwidth> *>(getSectionByName(".text"));
-  ELFSectionSymTab<Bitwidth> *symtab =
-    static_cast<ELFSectionSymTab<Bitwidth> *>(getSectionByName(".symtab"));
+  ELFSectionRelTableTy *reltab =
+    static_cast<ELFSectionRelTableTy *>(getSectionByName(".rel.text"));
+  ELFSectionProgBitsTy *text =
+    static_cast<ELFSectionProgBitsTy *>(getSectionByName(".text"));
+  ELFSectionSymTabTy *symtab =
+    static_cast<ELFSectionSymTabTy *>(getSectionByName(".symtab"));
 
   for (size_t i = 0; i < reltab->size(); ++i) {
     // FIXME: Can not implement here, use Fixup!
-    ELFReloc<Bitwidth> *rel = (*reltab)[i];
-    ELFSymbol<Bitwidth> *sym = (*symtab)[rel->getSymTabIndex()];
+    ELFRelocTy *rel = (*reltab)[i];
+    ELFSymbolTy *sym = (*symtab)[rel->getSymTabIndex()];
 
     // FIXME: May be not uint32_t *.
     typedef int32_t Inst_t;
@@ -200,23 +199,23 @@ relocateX86_64(void *(*find_sym)(char const *name, void *context),
                void *context) {
   assert(Bitwidth == 64 && "Only support X86_64.");
 
-  ELFSectionSymTab<Bitwidth> *symtab =
-    static_cast<ELFSectionSymTab<Bitwidth> *>(getSectionByName(".symtab"));
+  ELFSectionSymTabTy *symtab =
+    static_cast<ELFSectionSymTabTy *>(getSectionByName(".symtab"));
 
   char const *name[] = {".text", ".eh_frame"};
   size_t size = sizeof(name) / sizeof(char const *);
 
   for (size_t i = 0; i < size; ++i) {
-    ELFSectionRelTable<Bitwidth> *relatab =
-      static_cast<ELFSectionRelTable<Bitwidth> *>(
+    ELFSectionRelTableTy *relatab =
+      static_cast<ELFSectionRelTableTy *>(
           getSectionByName((std::string(".rela") + name[i]).c_str()));
-    ELFSectionProgBits<Bitwidth> *text =
-      static_cast<ELFSectionProgBits<Bitwidth> *>(getSectionByName(name[i]));
+    ELFSectionProgBitsTy *text =
+      static_cast<ELFSectionProgBitsTy *>(getSectionByName(name[i]));
 
     for (size_t i = 0; i < relatab->size(); ++i) {
       // FIXME: Can not implement here, use Fixup!
-      ELFReloc<Bitwidth> *rela = (*relatab)[i];
-      ELFSymbol<Bitwidth> *sym = (*symtab)[rela->getSymTabIndex()];
+      ELFRelocTy *rela = (*relatab)[i];
+      ELFSymbolTy *sym = (*symtab)[rela->getSymTabIndex()];
 
       //typedef uint64_t Inst_t;
       typedef int32_t Inst_t;
@@ -254,26 +253,24 @@ relocateX86_32(void *(*find_sym)(char const *name, void *context),
                void *context) {
   assert(Bitwidth == 32 && "Only support X86.");
 
-  ELFSectionSymTab<Bitwidth> *symtab =
-    static_cast<ELFSectionSymTab<Bitwidth> *>(
-      getSectionByName(".symtab"));
+  ELFSectionSymTabTy *symtab =
+    static_cast<ELFSectionSymTabTy *>(getSectionByName(".symtab"));
 
   char const *name[] = {".text"};
   size_t const size = sizeof(name) / sizeof(char const *);
 
   for (size_t i = 0; i < size; ++i) {
-    ELFSectionRelTable<Bitwidth> *reltab =
-      static_cast<ELFSectionRelTable<Bitwidth> *>(
+    ELFSectionRelTableTy *reltab =
+      static_cast<ELFSectionRelTableTy *>(
         getSectionByName((std::string(".rel") + name[i]).c_str()));
 
-    ELFSectionProgBits<Bitwidth> *text =
-      static_cast<ELFSectionProgBits<Bitwidth> *>(
-        getSectionByName(name[i]));
+    ELFSectionProgBitsTy *text =
+      static_cast<ELFSectionProgBitsTy *>(getSectionByName(name[i]));
 
     for (size_t i = 0; i < reltab->size(); ++i) {
       // FIXME: Can not implement here, use Fixup!
-      ELFReloc<Bitwidth> *rel = (*reltab)[i];
-      ELFSymbol<Bitwidth> *sym = (*symtab)[rel->getSymTabIndex()];
+      ELFRelocTy *rel = (*reltab)[i];
+      ELFSymbolTy *sym = (*symtab)[rel->getSymTabIndex()];
 
       //typedef uint64_t Inst_t;
       typedef int32_t Inst_t;
@@ -318,10 +315,10 @@ relocate(void *(*find_sym)(char const *name, void *context), void *context) {
   }
 
   for (size_t i = 0; i < stab.size(); ++i) {
-    ELFSectionHeader<Bitwidth> *sh = (*shtab)[i];
+    ELFSectionHeaderTy *sh = (*shtab)[i];
     if (sh && (sh->getType() == SHT_PROGBITS ||
                sh->getType() == SHT_NOBITS)) {
-      static_cast<ELFSectionBits<Bitwidth> *>(stab[i])->memory_protect();
+      static_cast<ELFSectionBitsTy *>(stab[i])->memory_protect();
     }
   }
 }
@@ -332,7 +329,7 @@ inline void ELFObject<Bitwidth>::print() const {
   shtab->print();
 
   for (size_t i = 0; i < stab.size(); ++i) {
-    ELFSection<Bitwidth> *sec = stab[i];
+    ELFSectionTy *sec = stab[i];
     if (sec) {
       sec->print();
     }

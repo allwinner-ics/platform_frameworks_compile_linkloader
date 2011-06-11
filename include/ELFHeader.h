@@ -163,7 +163,7 @@ public:
 private:
   template <typename Archiver>
   bool serialize(Archiver &AR) {
-    AR.prologue(TypeTraits<ELFHeader<Bitwidth> >::size);
+    AR.prologue(TypeTraits<ELFHeaderTy>::size);
 
     AR & e_ident;
     AR & e_type;
@@ -180,7 +180,7 @@ private:
     AR & e_shnum;
     AR & e_shstrndx;
 
-    AR.epilogue(TypeTraits<ELFHeader<Bitwidth> >::size);
+    AR.epilogue(TypeTraits<ELFHeaderTy>::size);
     return AR;
   }
 
@@ -219,17 +219,15 @@ private:
   }
 
   bool isCompatibleHeaderSize() const {
-    if (e_ehsize < TypeTraits<ELFHeader<Bitwidth> >::size) {
+    if (e_ehsize < TypeTraits<ELFHeaderTy>::size) {
       return false;
     }
 
-    if (e_phnum > 0 &&
-        e_phentsize < TypeTraits<ELFProgramHeader<Bitwidth> >::size) {
+    if (e_phnum > 0 && e_phentsize < TypeTraits<ELFProgramHeaderTy>::size) {
       return false;
     }
 
-    if (e_shnum > 0 &&
-        e_shentsize < TypeTraits<ELFSectionHeader<Bitwidth> >::size) {
+    if (e_shnum > 0 && e_shentsize < TypeTraits<ELFSectionHeaderTy>::size) {
       return false;
     }
 

@@ -14,9 +14,9 @@ char const *ELFSectionHeader_CRTP<Bitwidth>::getName() const {
 
 template <unsigned Bitwidth>
 template <typename Archiver>
-typename ELFSectionHeader_CRTP<Bitwidth>::ConcreteELFSectionHeader *
+typename ELFSectionHeader_CRTP<Bitwidth>::ELFSectionHeaderTy *
 ELFSectionHeader_CRTP<Bitwidth>::read(Archiver &AR,
-                                      ELFObject<Bitwidth> const *owner,
+                                      ELFObjectTy const *owner,
                                       size_t index) {
 
   if (!AR) {
@@ -25,8 +25,7 @@ ELFSectionHeader_CRTP<Bitwidth>::read(Archiver &AR,
     return 0;
   }
 
-  llvm::OwningPtr<ConcreteELFSectionHeader> sh(
-    new ConcreteELFSectionHeader());
+  llvm::OwningPtr<ELFSectionHeaderTy> sh(new ELFSectionHeaderTy());
 
   if (!sh->serialize(AR)) {
     // Unable to read the structure.  Return NULL.

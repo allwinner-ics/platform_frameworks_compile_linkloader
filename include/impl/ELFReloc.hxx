@@ -16,7 +16,7 @@ ELFReloc_CRTP<Bitwidth>::readRela(Archiver &AR, size_t index) {
     return 0;
   }
 
-  llvm::OwningPtr<ConcreteELFReloc> sh(new ConcreteELFReloc());
+  llvm::OwningPtr<ELFRelocTy> sh(new ELFRelocTy());
 
   if (!sh->serializeRela(AR)) {
     // Unable to read the structure.  Return NULL.
@@ -44,7 +44,7 @@ ELFReloc_CRTP<Bitwidth>::readRel(Archiver &AR, size_t index) {
     return 0;
   }
 
-  llvm::OwningPtr<ConcreteELFReloc> sh(new ConcreteELFReloc());
+  llvm::OwningPtr<ELFRelocTy> sh(new ELFRelocTy());
 
   sh->r_addend = 0;
   if (!sh->serializeRel(AR)) {
