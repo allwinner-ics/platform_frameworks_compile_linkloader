@@ -11,7 +11,7 @@ template <unsigned Bitwidth> class ELFReloc;
 template <unsigned Bitwidth>
 class ELFSectionRelTable : public ELFSection<Bitwidth> {
 private:
-  std::vector<ELFReloc<Bitwidth> *> rel_table;
+  std::vector<ELFReloc<Bitwidth> *> table;
 
 private:
   ELFSectionRelTable() { }
@@ -27,15 +27,15 @@ public:
        ELFSectionHeader<Bitwidth> const *sh);
 
   size_t size() const {
-    return rel_table.size();
+    return table.size();
   }
 
   ELFReloc<Bitwidth> const *operator[](size_t index) const {
-    return rel_table[index];
+    return table[index];
   }
 
   ELFReloc<Bitwidth> *operator[](size_t index) {
-    return rel_table[index];
+    return table[index];
   }
 };
 

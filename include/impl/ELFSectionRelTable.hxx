@@ -6,8 +6,8 @@
 template <unsigned Bitwidth>
 ELFSectionRelTable<Bitwidth>::~ELFSectionRelTable() {
   using namespace std;
-  for (size_t i = 0; i < rel_table.size(); ++i) {
-    delete rel_table[i];
+  for (size_t i = 0; i < table.size(); ++i) {
+    delete table[i];
   }
 }
 
@@ -47,13 +47,13 @@ ELFSectionRelTable<Bitwidth>::read(Archiver &AR,
   if (sh->getType() == SHT_REL) {
     assert(sh->getEntrySize() == TypeTraits<ELFRelocRel<Bitwidth> >::size);
     for (size_t i = 0; i < size; ++i) {
-      rt->rel_table.push_back(ELFReloc<Bitwidth>::readRel(AR, i));
+      rt->table.push_back(ELFReloc<Bitwidth>::readRel(AR, i));
     }
 
   } else {
     assert(sh->getEntrySize() == TypeTraits<ELFRelocRela<Bitwidth> >::size);
     for (size_t i = 0; i < size; ++i) {
-      rt->rel_table.push_back(ELFReloc<Bitwidth>::readRela(AR, i));
+      rt->table.push_back(ELFReloc<Bitwidth>::readRela(AR, i));
     }
   }
 
