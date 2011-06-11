@@ -219,19 +219,10 @@ private:
   }
 
   bool isCompatibleHeaderSize() const {
-    if (e_ehsize < TypeTraits<ELFHeaderTy>::size) {
-      return false;
-    }
-
-    if (e_phnum > 0 && e_phentsize < TypeTraits<ELFProgramHeaderTy>::size) {
-      return false;
-    }
-
-    if (e_shnum > 0 && e_shentsize < TypeTraits<ELFSectionHeaderTy>::size) {
-      return false;
-    }
-
-    return true;
+    return (
+      (e_ehsize == TypeTraits<ELFHeaderTy>::size) &&
+      (e_phnum == 0 || e_phentsize == TypeTraits<ELFProgramHeaderTy>::size) &&
+      (e_shnum == 0 || e_shentsize == TypeTraits<ELFSectionHeaderTy>::size));
   }
 };
 

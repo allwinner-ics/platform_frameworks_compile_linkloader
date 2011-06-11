@@ -30,11 +30,8 @@ ELFSectionHeaderTable<Bitwidth>::read(Archiver &AR, ELFObjectTy *owner) {
   // Get ELF header
   ELFHeaderTy const *header = owner->getHeader();
 
-  assert(header->getSectionHeaderEntrySize() >=
+  assert(header->getSectionHeaderEntrySize() ==
          TypeTraits<ELFSectionHeaderTy>::size);
-
-  size_t pending = TypeTraits<ELFSectionHeaderTy>::size -
-                   header->getSectionHeaderEntrySize();
 
   // Seek to the address of section header
   AR.seek(header->getSectionHeaderTableOffset(), true);
@@ -48,7 +45,6 @@ ELFSectionHeaderTable<Bitwidth>::read(Archiver &AR, ELFObjectTy *owner) {
       return 0;
     }
 
-    AR.seek(pending);
     tab->table.push_back(sh.take());
   }
 
