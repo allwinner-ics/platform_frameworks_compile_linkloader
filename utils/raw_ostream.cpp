@@ -19,7 +19,7 @@ MyFormat const fillformat(char const fill_char, // Fill character.
   va_list valist;
   va_start(valist, format_s);
   t_format.ptr = new char[length+1];
-  t_format.ptr[length+1] = '\0';
+  t_format.ptr[length] = '\0';
   vsnprintf(t_format.ptr, length, format_s, valist);
   int real_len = strlen(t_format.ptr);
   int fill_len = length;
