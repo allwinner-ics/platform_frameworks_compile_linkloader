@@ -132,10 +132,11 @@ void *ELFSymbol_CRTP<Bitwidth>::getAddress() const {
         case SHN_COMMON:
           {
 #if _POSIX_C_SOURCE >= 200112L || _XOPEN_SOURCE >= 600
-            int r = posix_memalign(&my_addr,
-                                   std::max((size_t)getValue(), sizeof(void*)),
-                                   (size_t)getSize());
-            assert(r==0 && "posix_memalign failed.");
+            if (posix_memalign(&my_addr,
+                               std::max((size_t)getValue(), sizeof(void*)),
+                               (size_t)getSize()) != 0) {
+              assert(0 && "posix_memalign failed.");
+            }
 #else
             my_addr = memalign(std::max((size_t)getValue(), sizeof(void *)),
                                (size_t)getSize());
