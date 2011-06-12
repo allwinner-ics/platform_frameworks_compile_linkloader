@@ -106,6 +106,10 @@ public:
     return true;
   }
 
+  bool isExternFunc() const {
+    return getType() == STT_NOTYPE;
+  }
+
   template <typename Archiver>
   static ELFSymbolTy *
   read(Archiver &AR, ELFObject<Bitwidth> const *owner, size_t index = 0);

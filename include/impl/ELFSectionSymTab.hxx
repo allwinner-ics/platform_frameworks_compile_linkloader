@@ -12,6 +12,17 @@ ELFSectionSymTab<Bitwidth>::~ELFSectionSymTab() {
 }
 
 template <unsigned Bitwidth>
+size_t ELFSectionSymTab<Bitwidth>::getExternFuncCount() const {
+  size_t result = 0;
+  for (size_t i = 0; i < table.size(); ++i) {
+    if (table[i] && table[i]->isExternFunc()) {
+      result++;
+    }
+  }
+  return result;
+}
+
+template <unsigned Bitwidth>
 template <typename Archiver>
 ELFSectionSymTab<Bitwidth> *
 ELFSectionSymTab<Bitwidth>::read(Archiver &AR,

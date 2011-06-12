@@ -52,6 +52,8 @@ public:
            const_cast<ELFSectionSymTabTy const *>(this)->getByName(name));
   }
 
+  size_t getExternFuncCount() const;
+
 };
 
 #include "impl/ELFSectionSymTab.hxx"
