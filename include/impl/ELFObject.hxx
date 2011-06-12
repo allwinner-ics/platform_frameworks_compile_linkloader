@@ -92,7 +92,7 @@ ELFObject<Bitwidth>::getSectionByName(std::string const &str) {
 
 template <unsigned Bitwidth>
 inline void ELFObject<Bitwidth>::
-relocateARM(void *(*find_sym)(char const *name, void *context),
+relocateARM(void *(*find_sym)(void *context, char const *name),
             void *context) {
   // FIXME: Should be implement in independent files.
   assert(Bitwidth == 32 && "ARM only have 32 bits.");
@@ -129,7 +129,7 @@ relocateARM(void *(*find_sym)(char const *name, void *context),
         A = (Inst_t)(int64_t)SIGN_EXTEND(*inst & 0xFFFFFF, 24);
 #undef SIGN_EXTEND
         if (S == 0) {
-          S = (Inst_t)(int64_t)find_sym(sym->getName(), context);
+          S = (Inst_t)(int64_t)find_sym(context, sym->getName());
           sym->setAddress((void *)S);
         }
         //switch (sym->getType()) {
@@ -144,7 +144,7 @@ relocateARM(void *(*find_sym)(char const *name, void *context),
         //  case STT_NOTYPE:
         //    {
         //      if (sym->getAddress() == 0) {
-        //        sym->setAddress(find_sym(sym->getName(), context));
+        //        sym->setAddress(find_sym(context, sym->getName()));
         //      }
         //      S = (uint32_t)sym->getAddress();
         //    }
@@ -195,7 +195,7 @@ relocateARM(void *(*find_sym)(char const *name, void *context),
 
 template <unsigned Bitwidth>
 inline void ELFObject<Bitwidth>::
-relocateX86_64(void *(*find_sym)(char const *name, void *context),
+relocateX86_64(void *(*find_sym)(void *context, char const *name),
                void *context) {
   assert(Bitwidth == 64 && "Only support X86_64.");
 
@@ -225,7 +225,7 @@ relocateX86_64(void *(*find_sym)(char const *name, void *context),
       Inst_t S = (Inst_t)(int64_t)sym->getAddress();
 
       if (S == 0) {
-        S = (Inst_t)(int64_t)find_sym(sym->getName(), context);
+        S = (Inst_t)(int64_t)find_sym(context, sym->getName());
         sym->setAddress((void *)S);
       }
 
@@ -249,7 +249,7 @@ relocateX86_64(void *(*find_sym)(char const *name, void *context),
 
 template <unsigned Bitwidth>
 inline void ELFObject<Bitwidth>::
-relocateX86_32(void *(*find_sym)(char const *name, void *context),
+relocateX86_32(void *(*find_sym)(void *context, char const *name),
                void *context) {
   assert(Bitwidth == 32 && "Only support X86.");
 
@@ -280,7 +280,7 @@ relocateX86_32(void *(*find_sym)(char const *name, void *context),
       Inst_t S = (Inst_t)(uintptr_t)sym->getAddress();
 
       if (S == 0) {
-        S = (Inst_t)(uintptr_t)find_sym(sym->getName(), context);
+        S = (Inst_t)(uintptr_t)find_sym(context, sym->getName());
         sym->setAddress((void *)S);
       }
 
@@ -303,7 +303,7 @@ relocateX86_32(void *(*find_sym)(char const *name, void *context),
 
 template <unsigned Bitwidth>
 inline void ELFObject<Bitwidth>::
-relocate(void *(*find_sym)(char const *name, void *context), void *context) {
+relocate(void *(*find_sym)(void *context, char const *name), void *context) {
   switch (getHeader()->getMachine()) {
     case EM_ARM:    relocateARM(find_sym, context); break;
     case EM_386:    relocateX86_32(find_sym, context); break;

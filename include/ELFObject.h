@@ -49,7 +49,7 @@ public:
   StubLayout *getStubLayout();
 #endif
 
-  void relocate(void *(*find_sym)(char const *name, void *context),
+  void relocate(void *(*find_sym)(void *context, char const *name),
                 void *context);
 
   void print() const;
@@ -62,13 +62,13 @@ public:
   }
 
 private:
-  void relocateARM(void *(*find_sym)(char const *name, void *context),
+  void relocateARM(void *(*find_sym)(void *context, char const *name),
                    void *context);
 
-  void relocateX86_32(void *(*find_sym)(char const *name, void *context),
+  void relocateX86_32(void *(*find_sym)(void *context, char const *name),
                       void *context);
 
-  void relocateX86_64(void *(*find_sym)(char const *name, void *context),
+  void relocateX86_64(void *(*find_sym)(void *context, char const *name),
                       void *context);
 
 };

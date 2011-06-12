@@ -88,7 +88,7 @@ time_t stub_time(time_t *output) {
   return time(output);
 }
 
-void *find_sym(char const *name, void *context) {
+void *find_sym(void *context, char const *name) {
   struct func_entry_t {
     char const *name;
     size_t name_len;
