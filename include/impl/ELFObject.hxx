@@ -128,53 +128,54 @@ relocateARM(void *(*find_sym)(void *context, char const *name),
 #define SIGN_EXTEND(x, l) (((x)^(1<<((l)-1)))-(1<<(l-1)))
         A = (Inst_t)(int64_t)SIGN_EXTEND(*inst & 0xFFFFFF, 24);
 #undef SIGN_EXTEND
-        if (S == 0) {
-          S = (Inst_t)(int64_t)find_sym(context, sym->getName());
-          sym->setAddress((void *)S);
-        }
-        //switch (sym->getType()) {
-        //  default:
-        //    assert(0 && "Wrong type for R_ARM_CALL relocation.");
-        //    break;
-        //  case STT_FUNC:
-        //    {
-        //      S = (uint32_t)sym->getAddress();
-        //    }
-        //    break;
-        //  case STT_NOTYPE:
-        //    {
-        //      if (sym->getAddress() == 0) {
-        //        sym->setAddress(find_sym(context, sym->getName()));
-        //      }
-        //      S = (uint32_t)sym->getAddress();
-        //    }
-        //    break;
-        //}
-        S >>= 2;
-        P >>= 2;
-        uint32_t result = (S+A-P);
 
-        if (result > 0x007fffff && result < 0xff800000) {
-#ifndef __arm__
-          assert(0 && "Target address is far from call instruction");
+        switch (sym->getType()) {
+        default:
+          assert(0 && "Wrong type for R_ARM_CALL relocation.");
           abort();
-#else
-          void *stub = getStubLayout()->allocateStub((void *)sym->getAddress());
-          if (!stub) {
-            out() << "unable to allocate stub." << "\n";
-            exit(EXIT_FAILURE);
-          }
-          out() << "far stub for: " << sym->getAddress() << " ";
-          out() << "is at " << stub << "\n";
-          sym->setAddress(stub);
-          S = ((uint32_t)stub) >> 2;
-          result = (S+A-P);
+          break;
 
-          if (result > 0x007fffff && result < 0xff800000) {
-            assert(0 && "Stub is still too far");
+        case STT_FUNC:
+          if (S == 0) {
+            assert(0 && "We should get function address at previous "
+                   "sym->getAddress() function call.");
             abort();
           }
+          break;
+
+        case STT_NOTYPE:
+          if (S == 0) {
+            void *ext_func = find_sym(context, sym->getName());
+            S = (Inst_t)(uintptr_t)ext_func;
+            sym->setAddress(ext_func);
+
+            uint32_t result = (S >> 2) - (P >> 2) + A;
+            if (result > 0x007fffff && result < 0xff800000) {
+#ifndef __arm__
+              // We have not implement function stub in this runtime env
+              assert(0 && "Target address is far from call instruction");
+              abort();
+#else
+              void *stub = getStubLayout()->allocateStub(ext_func);
+              if (!stub) {
+                llvm::errs() << "unable to allocate stub." << "\n";
+                exit(EXIT_FAILURE);
+              }
+
+              //out() << "stub: for " << ext_func << " at " << stub << "\n";
+              sym->setAddress(stub);
+              S = (uint32_t)stub;
 #endif
+            }
+          }
+          break;
+        }
+
+        uint32_t result = (S >> 2) - (P >> 2) + A;
+
+        if (result > 0x007fffff && result < 0xff800000) {
+          assert(0 && "Stub is still too far");
+          abort();
         }
 
         *inst = ((result) & 0x00FFFFFF) | (*inst & 0xFF000000);
