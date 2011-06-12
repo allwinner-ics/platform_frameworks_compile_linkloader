@@ -10,6 +10,7 @@
 #include "cutils/log.h"
 
 #include <llvm/ADT/OwningPtr.h>
+#include <elf.h>
 
 static inline RSExecRef wrap(ELFObject<32> *object) {
   return reinterpret_cast<RSExecRef>(object);
@@ -50,5 +51,16 @@ extern "C" void *rsloaderGetSymbolAddress(RSExecRef object_,
   ELFSectionSymTab<32> *symtab =
     static_cast<ELFSectionSymTab<32> *>(object->getSectionByName(".symtab"));
 
-  return symtab->getByName(name)->getAddress();
+  if (!symtab) {
+    return NULL;
+  }
+
+  ELFSymbol<32> *symbol = symtab->getByName(name);
+
+  if (!symbol) {
+    LOGE("Symbol not found: %s\n", name);
+    return NULL;
+  }
+
+  return symbol->getAddress();
 }
