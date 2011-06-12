@@ -327,7 +327,7 @@ relocate(void *(*find_sym)(void *context, char const *name), void *context) {
     ELFSectionHeaderTy *sh = (*shtab)[i];
     if (sh && (sh->getType() == SHT_PROGBITS ||
                sh->getType() == SHT_NOBITS)) {
-      static_cast<ELFSectionBitsTy *>(stab[i])->memory_protect();
+      static_cast<ELFSectionBitsTy *>(stab[i])->protect();
     }
   }
 }

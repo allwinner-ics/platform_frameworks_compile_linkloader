@@ -9,23 +9,22 @@
 #include "utils/raw_ostream.h"
 
 template <unsigned Bitwidth>
-void ELFSectionProgBits<Bitwidth>::print() const {
-  using namespace llvm;
+template <typename Archiver>
+ELFSectionProgBits<Bitwidth> *
+ELFSectionProgBits<Bitwidth>::read(Archiver &AR,
+                                   ELFObjectTy const *owner,
+                                   ELFSectionHeaderTy const *sh) {
 
-  out() << '\n' << fillformat('=', 79) << '\n';
-  out().changeColor(raw_ostream::WHITE, true);
-  out() << "ELF PROGBITS: " << this->section_header->getName() << '\n';
-  out().resetColor();
-  out() << fillformat('-', 79) << '\n';
+  llvm::OwningPtr<ELFSectionProgBits> result(new ELFSectionProgBits());
 
-  out() << "  Size         : " << this->size() << '\n';
-  out() << "  Start Address: "
-    << static_cast<addr_t>((size_t)this->buf) << '\n';
-  out() << fillformat('-', 79) << '\n';
+  // FIXME: We should add extra space for stub.
+  if (!result->chunk.allocate(sh->getSize())) {
+    return NULL;
+  }
 
-  dump_hex(this->buf, this->buf_size, 0, this->buf_size);
+  result->sh = sh;
 
-  out() << fillformat('=', 79) << '\n';
+  return result.take();
 }
 
 #endif // ELF_SECTION_PROGBITS_HXX

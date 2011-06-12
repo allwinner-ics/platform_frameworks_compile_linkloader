@@ -8,24 +8,21 @@
 #include <llvm/Support/Format.h>
 #include <llvm/Support/raw_ostream.h>
 
+#include <sys/mman.h>
+
 template <unsigned Bitwidth>
-inline void ELFSectionNoBits<Bitwidth>::print() const {
-  using namespace llvm;
+template <typename Archiver>
+inline ELFSectionNoBits<Bitwidth> *
+ELFSectionNoBits<Bitwidth>::read(Archiver &AR, ELFSectionHeaderTy const *sh) {
+  llvm::OwningPtr<ELFSectionNoBits> result(new ELFSectionNoBits());
 
-  out() << '\n' << fillformat('=', 79) << '\n';
-  out().changeColor(raw_ostream::WHITE, true);
-  out() << "ELF NOBITS: " << this->section_header->getName() << '\n';
-  out().resetColor();
-  out() << fillformat('-', 79) << '\n';
+  if (!result->chunk.allocate(sh->getSize())) {
+    return NULL;
+  }
 
-  out() << "  Size         : " << this->size() << '\n';
-  out() << "  Start Address: "
-    << static_cast<addr_t>((size_t)this->buf) << '\n';
-  out() << fillformat('-', 79) << '\n';
+  result->sh = sh;
 
-  dump_hex(this->buf, this->buf_size, 0, 16);
-
-  out() << fillformat('=', 79) << '\n';
+  return result.take();
 }
 
 #endif // ELF_SECTION_NOBITS_HXX

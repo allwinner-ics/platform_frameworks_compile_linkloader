@@ -4,20 +4,18 @@
 #include "ELFTypes.h"
 #include "ELFSectionBits.h"
 #include "ELFSectionHeader.h"
+#include "MemChunk.h"
 
 template <unsigned Bitwidth>
 class ELFSectionProgBits : public ELFSectionBits<Bitwidth> {
-  friend class ELFSectionBits<Bitwidth>;
-
 public:
   ELF_TYPE_INTRO_TO_TEMPLATE_SCOPE(Bitwidth);
 
 public:
   template <typename Archiver>
-  static ELFSectionProgBits *
-  read(Archiver &AR, ELFSectionHeaderTy const *sh) {
-    return ELFSectionBitsTy::read(AR, sh, new ELFSectionProgBits);
-  }
+  static ELFSectionProgBits *read(Archiver &AR,
+                                  ELFObjectTy const *owner,
+                                  ELFSectionHeaderTy const *sh);
 
 private:
   template <typename Archiver>
@@ -28,8 +26,6 @@ private:
     AR.epilogue(this->section_header->getSize());
     return static_cast<bool>(AR);
   }
-
-  void print() const;
 };
 
 #include "impl/ELFSectionProgBits.hxx"

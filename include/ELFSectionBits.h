@@ -3,43 +3,43 @@
 
 #include "ELFTypes.h"
 #include "ELFSection.h"
+#include "MemChunk.h"
 
 #include <llvm/ADT/OwningPtr.h>
 
 template <unsigned Bitwidth>
 class ELFSectionBits : public ELFSection<Bitwidth> {
 protected:
-  ELFSectionHeader<Bitwidth> const *section_header;
-  unsigned char *buf;
-  size_t buf_size;
+  ELFSectionHeader<Bitwidth> const *sh;
+  MemChunk chunk;
 
 protected:
-  ELFSectionBits() : buf(NULL), buf_size(0) { }
-
-  ~ELFSectionBits();
+  ELFSectionBits() : sh(NULL) { }
 
 public:
-  template <typename Archiver, typename ConcreteELFSectionBits>
-  static ConcreteELFSectionBits *
-  read(Archiver &AR,
-       ELFSectionHeader<Bitwidth> const *sh,
-       ConcreteELFSectionBits *concrete);
+  virtual void print() const;
 
-  virtual void print() const {}
+  bool protect();
+
+  unsigned char const *getBuffer() const {
+    return chunk.getBuffer();
+  }
+
+  unsigned char *getBuffer() {
+    return chunk.getBuffer();
+  }
 
   unsigned char &operator[](size_t index) {
-    return buf[index];
+    return chunk[index];
   }
 
   unsigned char const &operator[](size_t index) const {
-    return buf[index];
+    return chunk[index];
   }
 
   size_t size() const {
-    return buf_size;
+    return chunk.size();
   }
-
-  unsigned char const *memory_protect() const;
 
 };
 
