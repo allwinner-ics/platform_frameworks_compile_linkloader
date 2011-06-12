@@ -153,22 +153,30 @@ relocateARM(void *(*find_sym)(void *context, char const *name),
         S >>= 2;
         P >>= 2;
         uint32_t result = (S+A-P);
-#ifdef __arm__
-        if ((result & 0xFF000000) != 0) {
-          out() << "far stub for: " << sym->getAddress() << " ";
+
+        if (result > 0x007fffff && result < 0xff800000) {
+#ifndef __arm__
+          assert(0 && "Target address is far from call instruction");
+          abort();
+#else
           void *stub = getStubLayout()->allocateStub((void *)sym->getAddress());
           if (!stub) {
             out() << "unable to allocate stub." << "\n";
             exit(EXIT_FAILURE);
           }
+          out() << "far stub for: " << sym->getAddress() << " ";
           out() << "is at " << stub << "\n";
+          sym->setAddress(stub);
           S = ((uint32_t)stub) >> 2;
           result = (S+A-P);
-        }
-#else
-        // TODO: Stub.
-        assert(((result & 0xFF000000) == 0) && "Too far, need stub.");
+
+          if (result > 0x007fffff && result < 0xff800000) {
+            assert(0 && "Stub is still too far");
+            abort();
+          }
 #endif
+        }
+
         *inst = ((result) & 0x00FFFFFF) | (*inst & 0xFF000000);
       }
       break;
