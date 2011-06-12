@@ -8,60 +8,36 @@
 #include <sys/mman.h>
 
 #ifdef __arm__
-#define STUB_SIZE 16 // 16 bytes (4 words)
-#define STUB_TABLE_COUNT 256
-#define STUB_TABLE_SIZE (STUB_SIZE * STUB_TABLE_COUNT)
+#define STUB_SIZE 8 // 8 bytes (2 words)
 #endif
 
-StubLayout::StubLayout() : count(0), table((unsigned char *)MAP_FAILED) {
+StubLayout::StubLayout() : table(NULL), count(0) {
 }
 
-StubLayout::~StubLayout() {
-#ifdef __arm__
-  if (table != MAP_FAILED) {
-    munmap(table, STUB_TABLE_SIZE);
-  }
-#endif
+void StubLayout::initStubTable(unsigned char *table_, size_t count_) {
+  table = table_;
+  count = count_;
 }
 
 void *StubLayout::allocateStub(void *addr) {
 #ifdef __arm__
-  if (table == MAP_FAILED && !allocateTable()) {
+  if (count == 0) {
+    // No free stub slot is available
     return NULL;
   }
 
-  if (count >= STUB_TABLE_COUNT) {
-    return NULL;
-  }
+  // Initialize the stub
+  unsigned char *stub = table;
+  setStubAddress(stub, addr);
 
-  void *stub = table + STUB_SIZE * count;
-  count++;
-
-  updateStubAddress(stub, addr);
+  // Increase the free stub slot pointer
+  table += STUB_SIZE;
+  count--;
 
   return stub;
+
 #else
   return NULL;
-#endif
-}
-
-void StubLayout::updateStubAddress(void *stub, void *addr) {
-#ifdef __arm__
-  mprotect(table, STUB_TABLE_SIZE, PROT_WRITE);
-  setStubAddress(stub, addr);
-  FLUSH_CPU_CACHE(table, table + STUB_TABLE_SIZE);
-  mprotect(table, STUB_TABLE_SIZE, PROT_EXEC);
-#endif
-}
-
-bool StubLayout::allocateTable() {
-#ifdef __arm__
-  table = (unsigned char *)mmap(0, STUB_TABLE_SIZE, PROT_READ | PROT_WRITE,
-                                MAP_PRIVATE | MAP_ANONYMOUS, -1, 0);
-
-  return table != MAP_FAILED;
-#else
-  return false;
 #endif
 }
 
@@ -75,5 +51,13 @@ void StubLayout::setStubAddress(void *stub_, void *addr) {
 
   void **target = (void **)(stub + 4);
   *target = addr;
+#endif
+}
+
+size_t StubLayout::calcStubTableSize(size_t count) const {
+#ifdef __arm__
+  return count * STUB_SIZE;
+#else
+  return 0;
 #endif
 }

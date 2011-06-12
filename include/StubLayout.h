@@ -5,18 +5,18 @@
 
 class StubLayout {
 private:
-  size_t count;
   unsigned char *table;
+  size_t count;
 
 public:
   StubLayout();
-  ~StubLayout();
 
+  void initStubTable(unsigned char *table, size_t count);
   void *allocateStub(void *addr = 0);
-  void updateStubAddress(void *stub, void *addr);
+
+  size_t calcStubTableSize(size_t count) const;
 
 private:
-  bool allocateTable();
   void setStubAddress(void *stub, void *addr);
 
 };

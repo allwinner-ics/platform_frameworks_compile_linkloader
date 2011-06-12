@@ -7,18 +7,10 @@
 #include "ELFSectionHeaderTable.h"
 #include "StubLayout.h"
 
+#include <llvm/ADT/SmallVector.h>
+
 #include <assert.h>
 #include <elf.h>
-
-#ifdef __arm__
-template <unsigned Bitwidth>
-inline StubLayout *ELFObject<Bitwidth>::getStubLayout() {
-  if (!stubs) {
-    stubs.reset(new StubLayout());
-  }
-  return stubs.get();
-}
-#endif
 
 template <unsigned Bitwidth>
 template <typename Archiver>
@@ -39,10 +31,24 @@ ELFObject<Bitwidth>::read(Archiver &AR) {
   }
 
   // Read each section
+  llvm::SmallVector<size_t, 4> progbits_ndx;
   for (size_t i = 0; i < object->header->getSectionHeaderNum(); ++i) {
+    if ((*object->shtab)[i]->getType() == SHT_PROGBITS) {
+      object->stab.push_back(NULL);
+      progbits_ndx.push_back(i);
+    } else {
+      llvm::OwningPtr<ELFSectionTy> sec(
+        ELFSectionTy::read(AR, object.get(), (*object->shtab)[i]));
+      object->stab.push_back(sec.take());
+    }
+  }
+
+  for (size_t i = 0; i < progbits_ndx.size(); ++i) {
+    size_t index = progbits_ndx[i];
+
     llvm::OwningPtr<ELFSectionTy> sec(
-      ELFSectionTy::read(AR, object.get(), (*object->shtab)[i]));
-    object->stab.push_back(sec.take());
+      ELFSectionTy::read(AR, object.get(), (*object->shtab)[index]));
+    object->stab[index] = sec.take();
   }
 
   return object.take();
@@ -325,9 +331,10 @@ relocate(void *(*find_sym)(void *context, char const *name), void *context) {
 
   for (size_t i = 0; i < stab.size(); ++i) {
     ELFSectionHeaderTy *sh = (*shtab)[i];
-    if (sh && (sh->getType() == SHT_PROGBITS ||
-               sh->getType() == SHT_NOBITS)) {
-      static_cast<ELFSectionBitsTy *>(stab[i])->protect();
+    if (sh->getType() == SHT_PROGBITS || sh->getType() == SHT_NOBITS) {
+      if (stab[i]) {
+        static_cast<ELFSectionBitsTy *>(stab[i])->protect();
+      }
     }
   }
 }

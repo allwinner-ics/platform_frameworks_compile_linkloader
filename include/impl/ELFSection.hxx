@@ -23,7 +23,7 @@ ELFSection<Bitwidth>::read(Archiver &AR,
   switch (sh->getType()) {
     default:
       // Uknown type of ELF section.  Return NULL.
-      llvm::errs() << "WARNING: Unknown section type.\n";
+      //llvm::errs() << "WARNING: Unknown section type.\n";
       return 0;
 
     case SHT_STRTAB:
@@ -33,12 +33,7 @@ ELFSection<Bitwidth>::read(Archiver &AR,
       return ELFSectionSymTabTy::read(AR, owner, sh);
 
     case SHT_PROGBITS:
-    {
-#ifdef __arm__
-      owner->getStubLayout();
-#endif
       return ELFSectionProgBitsTy::read(AR, owner, sh);
-    }
 
     case SHT_NOBITS:
       return ELFSectionNoBitsTy::read(AR, sh);

@@ -2,13 +2,12 @@
 #define ELF_OBJECT_H
 
 #include "ELFTypes.h"
+#include "StubLayout.h"
 
 #include <llvm/ADT/OwningPtr.h>
 
 #include <string>
 #include <vector>
-
-class StubLayout;
 
 template <unsigned Bitwidth>
 class ELFObject {
@@ -21,7 +20,7 @@ private:
   std::vector<ELFSectionTy *> stab;
 
 #ifdef __arm__
-  llvm::OwningPtr<StubLayout> stubs;
+  StubLayout stubs;
 #endif
 
 private:
@@ -46,7 +45,9 @@ public:
   ELFSectionTy *getSectionByName(std::string const &str);
 
 #ifdef __arm__
-  StubLayout *getStubLayout();
+  StubLayout *getStubLayout() {
+    return &stubs;
+  }
 #endif
 
   void relocate(void *(*find_sym)(void *context, char const *name),

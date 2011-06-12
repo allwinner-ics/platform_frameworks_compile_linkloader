@@ -14,17 +14,21 @@ public:
 public:
   template <typename Archiver>
   static ELFSectionProgBits *read(Archiver &AR,
-                                  ELFObjectTy const *owner,
+                                  ELFObjectTy *owner,
                                   ELFSectionHeaderTy const *sh);
 
 private:
   template <typename Archiver>
   bool serialize(Archiver &AR) {
-    AR.seek(this->section_header->getOffset(), true);
-    AR.prologue(this->section_header->getSize());
-    AR.readBytes(this->buf, this->section_header->getSize());
-    AR.epilogue(this->section_header->getSize());
-    return static_cast<bool>(AR);
+    ELFSectionHeaderTy const *sh = this->sh;
+    MemChunk &chunk = this->chunk;
+
+    AR.seek(sh->getOffset(), true);
+    AR.prologue(sh->getSize());
+    AR.readBytes(chunk.getBuffer(), sh->getSize());
+    AR.epilogue(sh->getSize());
+
+    return AR;
   }
 };
 
