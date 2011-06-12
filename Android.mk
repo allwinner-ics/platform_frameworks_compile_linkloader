@@ -2,11 +2,123 @@ LOCAL_PATH := $(call my-dir)
 
 LLVM_ROOT_PATH := external/llvm
 
+#=============================================================================
+# android librsloader for libbcc (Device)
+#-----------------------------------------------------------------------------
+
+include $(CLEAR_VARS)
+
+LOCAL_MODULE := librsloader
+
+LOCAL_MODULE_TAGS := optional
+
+LOCAL_SRC_FILES := \
+  lib/ELFHeader.cpp \
+  lib/ELFSymbol.cpp \
+  lib/ELFSectionHeader.cpp \
+  lib/ELFTypes.cpp \
+  lib/StubLayout.cpp \
+  utils/raw_ostream.cpp \
+  utils/helper.cpp \
+  android/librsloader.cpp
+
+LOCAL_C_INCLUDES := \
+  $(LOCAL_PATH)/ \
+  $(LOCAL_PATH)/include \
+  bionic \
+  external/elfutils/libelf \
+  external/stlport/stlport \
+  $(LOCAL_C_INCLUDES)
+
+include $(LLVM_ROOT_PATH)/llvm-device-build.mk
+include $(BUILD_STATIC_LIBRARY)
+
+
+#=============================================================================
+# android librsloader for libbcc (Host)
+#-----------------------------------------------------------------------------
+
+include $(CLEAR_VARS)
+
+LOCAL_MODULE := librsloader
+
+LOCAL_MODULE_TAGS := optional
+
+LOCAL_SRC_FILES := \
+  lib/ELFHeader.cpp \
+  lib/ELFSymbol.cpp \
+  lib/ELFSectionHeader.cpp \
+  lib/ELFTypes.cpp \
+  lib/StubLayout.cpp \
+  utils/raw_ostream.cpp \
+  utils/helper.cpp \
+  android/librsloader.cpp
+
+LOCAL_C_INCLUDES := \
+  $(LOCAL_PATH)/ \
+  $(LOCAL_PATH)/include \
+  $(LOCAL_C_INCLUDES)
+
+include $(LLVM_ROOT_PATH)/llvm-host-build.mk
+include $(BUILD_HOST_STATIC_LIBRARY)
+
+
+#=============================================================================
+# librsloader-test (Device)
+#-----------------------------------------------------------------------------
+
+include $(CLEAR_VARS)
+
+LOCAL_MODULE := test-librsloader
+
+LOCAL_MODULE_TAGS := tests
+
+LOCAL_SHARED_LIBRARIES := \
+  libstlport
+
+LOCAL_STATIC_LIBRARIES := \
+  librsloader \
+  libcutils \
+  libLLVMSupport
+
+LOCAL_SRC_FILES := \
+  android/test-librsloader.c
+
+include $(LLVM_ROOT_PATH)/llvm-device-build.mk
+include $(BUILD_EXECUTABLE)
+
+
+#=============================================================================
+# librsloader-test (Host)
+#-----------------------------------------------------------------------------
+
+include $(CLEAR_VARS)
+
+LOCAL_MODULE := test-librsloader
+
+LOCAL_MODULE_TAGS := tests
+
+LOCAL_LDFLAGS := \
+  -lpthread \
+  -ldl
+
+LOCAL_STATIC_LIBRARIES := \
+  librsloader \
+  libcutils \
+  libLLVMSupport
+
+LOCAL_SRC_FILES := \
+  android/test-librsloader.c
+
+include $(LLVM_ROOT_PATH)/llvm-host-build.mk
+include $(BUILD_HOST_EXECUTABLE)
+
 
 #=============================================================================
 # rsloader
 #-----------------------------------------------------------------------------
 
+ifdef BUILD_RSLOADER_TOOL
 include $(CLEAR_VARS)
 
 LOCAL_MODULE := rsloader
@@ -39,6 +151,7 @@ LOCAL_C_INCLUDES := \
 
 include $(LLVM_ROOT_PATH)/llvm-device-build.mk
 include $(BUILD_EXECUTABLE)
+endif
 
 
 #=============================================================================
