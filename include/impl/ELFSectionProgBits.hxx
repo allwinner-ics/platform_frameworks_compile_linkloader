@@ -46,6 +46,11 @@ ELFSectionProgBits<Bitwidth>::read(Archiver &AR,
     }
 
     stubs->initStubTable(result->chunk.getBuffer()+sh->getSize(), func_count);
+#else
+    // Allocate text section
+    if (!result->chunk.allocate(sh->getSize())) {
+      return NULL;
+    }
 #endif
   }
 
