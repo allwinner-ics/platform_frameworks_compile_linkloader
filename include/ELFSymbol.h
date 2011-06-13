@@ -44,11 +44,13 @@ protected:
   ELFSymbol_CRTP() { my_addr = 0; }
 
   ~ELFSymbol_CRTP() {
+#if 0
     if (my_addr != 0 &&
         getType() == STT_OBJECT &&
         getSectionIndex() == SHN_COMMON) {
       std::free(my_addr);
     }
+#endif
   }
 
 public:

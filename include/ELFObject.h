@@ -2,6 +2,7 @@
 #define ELF_OBJECT_H
 
 #include "ELFTypes.h"
+#include "MemChunk.h"
 #include "StubLayout.h"
 
 #include <llvm/ADT/OwningPtr.h>
@@ -23,8 +24,12 @@ private:
   StubLayout stubs;
 #endif
 
+  MemChunk SHNCommonData;
+  unsigned char *SHNCommonDataPtr;
+  size_t SHNCommonDataFreeSize;
+
 private:
-  ELFObject() { }
+  ELFObject() : SHNCommonDataPtr(NULL) { }
 
 public:
   template <typename Archiver>
@@ -49,6 +54,39 @@ public:
     return &stubs;
   }
 #endif
+
+  void *allocateSHNCommonData(size_t size, size_t align = 1) {
+    assert(size > 0 && alignment != 0);
+
+    if (!SHNCommonDataPtr) {
+      // FIXME: We should not hard code these number!
+      if (!SHNCommonData.allocate(4096)) {
+        return NULL;
+      }
+
+      SHNCommonDataPtr = SHNCommonData.getBuffer();
+      SHNCommonDataFreeSize = 4096;
+    }
+
+    // Ensure alignment
+    size_t rem = ((uintptr_t)SHNCommonDataPtr) % align;
+    if (rem != 0) {
+      SHNCommonDataPtr += align - rem;
+      SHNCommonDataFreeSize -= align - rem;
+    }
+
+    // Ensure the free size is sufficient
+    if (SHNCommonDataFreeSize < size) {
+      return NULL;
+    }
+
+    // Allcoate
+    void *result = SHNCommonDataPtr;
+    SHNCommonDataPtr += size;
+    SHNCommonDataFreeSize -= size;
+
+    return result;
+  }
 
   void relocate(void *(*find_sym)(void *context, char const *name),
                 void *context);

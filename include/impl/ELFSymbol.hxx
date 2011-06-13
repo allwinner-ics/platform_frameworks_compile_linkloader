@@ -134,6 +134,7 @@ void *ELFSymbol_CRTP<Bitwidth>::getAddress(bool autoAlloc) const {
             if (!autoAlloc) {
               return NULL;
             }
+#if 0
 #if _POSIX_C_SOURCE >= 200112L || _XOPEN_SOURCE >= 600
             if (posix_memalign(&my_addr,
                                std::max((size_t)getValue(), sizeof(void*)),
@@ -148,6 +149,14 @@ void *ELFSymbol_CRTP<Bitwidth>::getAddress(bool autoAlloc) const {
 #endif
             if (my_addr) {
               memset(my_addr, '\0', getSize());
+            }
+#endif
+            size_t align = std::max((size_t)getValue(), sizeof(void*));
+            my_addr = const_cast<ELFObjectTy *>(owner)->
+                          allocateSHNCommonData((size_t)getSize(), align);
+            if (!my_addr) {
+              assert(0 && "Unable to allocate memory for SHN_COMMON.");
+              abort();
             }
           }
           break;
