@@ -100,7 +100,7 @@ inline void ELFSymbol_CRTP<Bitwidth>::print(bool shouldPrintHeader) const {
 }
 
 template <unsigned Bitwidth>
-void *ELFSymbol_CRTP<Bitwidth>::getAddress() const {
+void *ELFSymbol_CRTP<Bitwidth>::getAddress(bool autoAlloc) const {
   if (my_addr != 0) {
     return my_addr;
   }
@@ -131,6 +131,9 @@ void *ELFSymbol_CRTP<Bitwidth>::getAddress() const {
 
         case SHN_COMMON:
           {
+            if (!autoAlloc) {
+              return NULL;
+            }
 #if _POSIX_C_SOURCE >= 200112L || _XOPEN_SOURCE >= 600
             if (posix_memalign(&my_addr,
                                std::max((size_t)getValue(), sizeof(void*)),

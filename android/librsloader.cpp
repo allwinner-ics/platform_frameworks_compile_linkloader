@@ -62,5 +62,5 @@ extern "C" void *rsloaderGetSymbolAddress(RSExecRef object_,
     return NULL;
   }
 
-  return symbol->getAddress();
+  return symbol->getAddress(false);
 }

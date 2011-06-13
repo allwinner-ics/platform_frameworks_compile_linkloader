@@ -95,7 +95,7 @@ public:
     return st_size;
   }
 
-  void *getAddress() const;
+  void *getAddress(bool autoAlloc = true) const;
 
   void setAddress(void *addr) {
     my_addr = addr;
