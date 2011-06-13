@@ -2,6 +2,7 @@
 #define MEM_CHUNK_H
 
 #include <stddef.h>
+#include <stdlib.h>
 
 class MemChunk {
 private:
@@ -40,7 +41,5 @@ public:
   }
 
 };
-
-#include "impl/MemChunk.hxx"
 
 #endif // MEM_CHUNK_H

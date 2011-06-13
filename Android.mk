@@ -19,6 +19,7 @@ LOCAL_SRC_FILES := \
   lib/ELFSymbol.cpp \
   lib/ELFSectionHeader.cpp \
   lib/ELFTypes.cpp \
+  lib/MemChunk.cpp \
   lib/StubLayout.cpp \
   utils/raw_ostream.cpp \
   utils/helper.cpp \
@@ -51,6 +52,7 @@ LOCAL_SRC_FILES := \
   lib/ELFSymbol.cpp \
   lib/ELFSectionHeader.cpp \
   lib/ELFTypes.cpp \
+  lib/MemChunk.cpp \
   lib/StubLayout.cpp \
   utils/raw_ostream.cpp \
   utils/helper.cpp \
