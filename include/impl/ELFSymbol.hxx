@@ -146,6 +146,9 @@ void *ELFSymbol_CRTP<Bitwidth>::getAddress(bool autoAlloc) const {
 
             assert(my_addr != NULL && "memalign failed.");
 #endif
+            if (my_addr) {
+              memset(my_addr, '\0', getSize());
+            }
           }
           break;
 
