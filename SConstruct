@@ -61,4 +61,5 @@ env.Program('rsloader',
                     'lib/StubLayout.cpp',
                     'utils/helper.cpp',
                     'utils/raw_ostream.cpp',
+                    'utils/rsl_assert.cpp',
                     'main.cpp'])

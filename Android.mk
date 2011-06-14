@@ -22,6 +22,7 @@ LOCAL_SRC_FILES := \
   lib/MemChunk.cpp \
   lib/StubLayout.cpp \
   utils/raw_ostream.cpp \
+  utils/rsl_assert.cpp \
   utils/helper.cpp \
   android/librsloader.cpp
 
@@ -55,6 +56,7 @@ LOCAL_SRC_FILES := \
   lib/MemChunk.cpp \
   lib/StubLayout.cpp \
   utils/raw_ostream.cpp \
+  utils/rsl_assert.cpp \
   utils/helper.cpp \
   android/librsloader.cpp
 
@@ -142,6 +144,7 @@ LOCAL_SRC_FILES := \
   lib/ELFTypes.cpp \
   lib/StubLayout.cpp \
   utils/raw_ostream.cpp \
+  utils/rsl_assert.cpp \
   utils/helper.cpp \
   main.cpp
 

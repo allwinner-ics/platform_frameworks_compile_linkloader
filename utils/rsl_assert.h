@@ -1,24 +1,31 @@
 #ifndef RSL_ASSERT_H
 #define RSL_ASSERT_H
 
-#include <llvm/Support/raw_ostream.h>
+#if defined(__cplusplus)
+extern "C" {
+#endif
 
-#define ASSERT_FAIL(mes)                                      \
-  ((llvm::errs() << "RSL ASSERT FAIL!\n"                      \
-  << __FILE__ << ':' << __LINE__ << ": "                      \
-  << "rsl_assert(" << (mes) << ")\n"), abort())
+extern void ASSERT_FAILED(char const *file,
+                          unsigned line,
+                          char const *expr);
+
+#if defined(__cplusplus)
+} // extern "C"
+#endif
 
 #ifdef RSL_NDEBUG
 
-#define rsl_assert(con) (void)(0)
+#define rsl_assert(EXPR) \
+  do { } while (0)
 
 #else
 
-#define rsl_assert(con) \
-  ((con)                \
-  ? (void)(0)           \
-  : ASSERT_FAIL(#con))
-
+#define rsl_assert(EXPR)                                      \
+  do {                                                        \
+    if (!(EXPR)) {                                            \
+      ASSERT_FAILED(__FILE__, __LINE__, #EXPR);               \
+    }                                                         \
+  } while (0)
 
 #endif
 
