@@ -57,6 +57,8 @@ env.Program('rsloader',
                     'lib/ELFSectionHeader.cpp',
                     'lib/ELFSymbol.cpp',
                     'lib/ELFTypes.cpp',
+                    'lib/MemChunk.cpp',
+                    'lib/StubLayout.cpp',
                     'utils/helper.cpp',
                     'utils/raw_ostream.cpp',
                     'main.cpp'])
