@@ -125,6 +125,13 @@ relocateARM(void *(*find_sym)(void *context, char const *name),
       rsl_assert(0 && "Not implemented relocation type.");
       break;
 
+    case 2: // R_ARM_ABS32
+      {
+        A = *inst;
+        *inst = (S+A);
+      }
+      break;
+
       // FIXME: Predefine relocation codes.
     case 28: // R_ARM_CALL
       {
