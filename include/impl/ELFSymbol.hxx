@@ -10,6 +10,8 @@
 #include "ELFSectionProgBits.h"
 #include "ELFSectionNoBits.h"
 
+#include "utils/rsl_assert.h"
+
 template <unsigned Bitwidth>
 inline char const *ELFSymbol_CRTP<Bitwidth>::getName() const {
   ELFSectionHeaderTableTy const &shtab = *owner->getSectionHeaderTable();
@@ -116,12 +118,12 @@ void *ELFSymbol_CRTP<Bitwidth>::getAddress(bool autoAlloc) const {
 #ifndef NDEBUG
             ELFSectionHeaderTableTy const *header =
               owner->getSectionHeaderTable();
-            assert(((*header)[idx]->getType() == SHT_PROGBITS ||
+            rsl_assert(((*header)[idx]->getType() == SHT_PROGBITS ||
                     (*header)[idx]->getType() == SHT_NOBITS) &&
                    "STT_OBJECT with not BITS section.");
 #endif
             ELFSectionTy const *sec = owner->getSectionByIndex(idx);
-            assert(sec != 0 && "STT_OBJECT with null section.");
+            rsl_assert(sec != 0 && "STT_OBJECT with null section.");
 
             ELFSectionBitsTy const &st =
               static_cast<ELFSectionBitsTy const &>(*sec);
@@ -139,32 +141,33 @@ void *ELFSymbol_CRTP<Bitwidth>::getAddress(bool autoAlloc) const {
             if (posix_memalign(&my_addr,
                                std::max((size_t)getValue(), sizeof(void*)),
                                (size_t)getSize()) != 0) {
-              assert(0 && "posix_memalign failed.");
+              rsl_assert(0 && "posix_memalign failed.");
             }
 #else
             my_addr = memalign(std::max((size_t)getValue(), sizeof(void *)),
                                (size_t)getSize());
 
-            assert(my_addr != NULL && "memalign failed.");
+            rsl_assert(my_addr != NULL && "memalign failed.");
 #endif
             if (my_addr) {
               memset(my_addr, '\0', getSize());
             }
-#endif
+#else
             size_t align = std::max((size_t)getValue(), sizeof(void*));
             my_addr = const_cast<ELFObjectTy *>(owner)->
                           allocateSHNCommonData((size_t)getSize(), align);
             if (!my_addr) {
-              assert(0 && "Unable to allocate memory for SHN_COMMON.");
+              rsl_assert(0 && "Unable to allocate memory for SHN_COMMON.");
               abort();
             }
+#endif
           }
           break;
 
         case SHN_ABS:
         case SHN_UNDEF:
         case SHN_XINDEX:
-          assert(0 && "STT_OBJECT with special st_shndx.");
+          rsl_assert(0 && "STT_OBJECT with special st_shndx.");
           break;
       }
       break;
@@ -177,11 +180,11 @@ void *ELFSymbol_CRTP<Bitwidth>::getAddress(bool autoAlloc) const {
 #ifndef NDEBUG
             ELFSectionHeaderTableTy const *header =
               owner->getSectionHeaderTable();
-            assert((*header)[idx]->getType() == SHT_PROGBITS &&
+            rsl_assert((*header)[idx]->getType() == SHT_PROGBITS &&
                    "STT_FUNC with not PROGBITS section.");
 #endif
             ELFSectionTy const *sec = owner->getSectionByIndex(idx);
-            assert(sec != 0 && "STT_FUNC with null section.");
+            rsl_assert(sec != 0 && "STT_FUNC with null section.");
 
             ELFSectionProgBitsTy const &st =
               static_cast<ELFSectionProgBitsTy const &>(*sec);
@@ -193,7 +196,7 @@ void *ELFSymbol_CRTP<Bitwidth>::getAddress(bool autoAlloc) const {
         case SHN_COMMON:
         case SHN_UNDEF:
         case SHN_XINDEX:
-          assert(0 && "STT_FUNC with special st_shndx.");
+          rsl_assert(0 && "STT_FUNC with special st_shndx.");
           break;
       }
       break;
@@ -206,12 +209,12 @@ void *ELFSymbol_CRTP<Bitwidth>::getAddress(bool autoAlloc) const {
 #ifndef NDEBUG
             ELFSectionHeaderTableTy const *header =
               owner->getSectionHeaderTable();
-            assert(((*header)[idx]->getType() == SHT_PROGBITS ||
+            rsl_assert(((*header)[idx]->getType() == SHT_PROGBITS ||
                     (*header)[idx]->getType() == SHT_NOBITS) &&
                    "STT_SECTION with not BITS section.");
 #endif
             ELFSectionTy const *sec = owner->getSectionByIndex(idx);
-            assert(sec != 0 && "STT_SECTION with null section.");
+            rsl_assert(sec != 0 && "STT_SECTION with null section.");
 
             ELFSectionBitsTy const &st =
               static_cast<ELFSectionBitsTy const &>(*sec);
@@ -223,7 +226,7 @@ void *ELFSymbol_CRTP<Bitwidth>::getAddress(bool autoAlloc) const {
         case SHN_COMMON:
         case SHN_UNDEF:
         case SHN_XINDEX:
-          assert(0 && "STT_SECTION with special st_shndx.");
+          rsl_assert(0 && "STT_SECTION with special st_shndx.");
           break;
       }
       break;
@@ -238,7 +241,7 @@ void *ELFSymbol_CRTP<Bitwidth>::getAddress(bool autoAlloc) const {
     case STT_HIOS:
     case STT_LOPROC:
     case STT_HIPROC:
-      assert(0 && "Not implement.");
+      rsl_assert(0 && "Not implement.");
       return 0;
   }
   return my_addr;

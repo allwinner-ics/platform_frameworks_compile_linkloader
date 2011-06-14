@@ -6,7 +6,7 @@
 #include <algorithm>
 #include <vector>
 
-#include <assert.h>
+#include "utils/rsl_assert.h"
 #include <string.h>
 #include <stdint.h>
 #include <stddef.h>
@@ -56,13 +56,13 @@ public:
   }
 
   void prologue(size_t size) {
-    assert(cursor_base == NULL);
+    rsl_assert(cursor_base == NULL);
     cursor_base = cursor;
   }
 
   void epilogue(size_t size) {
-    assert(cursor_base != NULL);
-    assert(cursor_base + size >= cursor);
+    rsl_assert(cursor_base != NULL);
+    rsl_assert(cursor_base + size >= cursor);
     cursor = cursor_base + size;
     cursor_base = NULL;
   }

@@ -33,7 +33,7 @@ ELFSectionRelTable<Bitwidth> *
 ELFSectionRelTable<Bitwidth>::read(Archiver &AR,
                                    ELFSectionHeaderTy const *sh) {
 
-  assert(sh->getType() == SHT_REL || sh->getType() == SHT_RELA);
+  rsl_assert(sh->getType() == SHT_REL || sh->getType() == SHT_RELA);
 
   llvm::OwningPtr<ELFSectionRelTable> rt(new ELFSectionRelTable());
 
@@ -45,13 +45,13 @@ ELFSectionRelTable<Bitwidth>::read(Archiver &AR,
 
   // Read every relocation entries
   if (sh->getType() == SHT_REL) {
-    assert(sh->getEntrySize() == TypeTraits<ELFRelocRelTy>::size);
+    rsl_assert(sh->getEntrySize() == TypeTraits<ELFRelocRelTy>::size);
     for (size_t i = 0; i < size; ++i) {
       rt->table.push_back(ELFRelocTy::readRel(AR, i));
     }
 
   } else {
-    assert(sh->getEntrySize() == TypeTraits<ELFRelocRelaTy>::size);
+    rsl_assert(sh->getEntrySize() == TypeTraits<ELFRelocRelaTy>::size);
     for (size_t i = 0; i < size; ++i) {
       rt->table.push_back(ELFRelocTy::readRela(AR, i));
     }

@@ -5,7 +5,7 @@
 #include "ELFObject.h"
 #include "ELFSectionHeader.h"
 
-#include <assert.h>
+#include "utils/rsl_assert.h"
 
 template <unsigned Bitwidth>
 ELFSectionHeaderTable<Bitwidth>::~ELFSectionHeaderTable() {
@@ -30,7 +30,7 @@ ELFSectionHeaderTable<Bitwidth>::read(Archiver &AR, ELFObjectTy *owner) {
   // Get ELF header
   ELFHeaderTy const *header = owner->getHeader();
 
-  assert(header->getSectionHeaderEntrySize() ==
+  rsl_assert(header->getSectionHeaderEntrySize() ==
          TypeTraits<ELFSectionHeaderTy>::size);
 
   // Seek to the address of section header

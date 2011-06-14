@@ -1,6 +1,6 @@
 #include "librsloader.h"
+#include "utils/rsl_assert.h"
 
-#include <assert.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -45,7 +45,7 @@ void *find_sym(void *context, char const *name) {
     }
   }
 
-  assert(0 && "Can't find symbol.");
+  rsl_assert(0 && "Can't find symbol.");
   return 0;
 }
 

@@ -2,6 +2,7 @@
 #define ELF_RELOC_H
 
 #include "ELFTypes.h"
+#include "utils/rsl_assert.h"
 
 #include <llvm/ADT/OwningPtr.h>
 #include <string>
@@ -60,7 +61,7 @@ private:
 
   template <typename Archiver>
   bool serializeRel(Archiver &AR) {
-    assert(r_addend == 0 && "r_addend should be zero before serialization.");
+    rsl_assert(r_addend == 0 && "r_addend should be zero before serialization.");
 
     AR.prologue(TypeTraits<ELFRelocRelTy>::size);
 

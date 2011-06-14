@@ -8,7 +8,6 @@
 #include <string>
 #include <algorithm>
 
-#include <assert.h>
 #include <elf.h>
 #include <malloc.h>
 #include <stdint.h>

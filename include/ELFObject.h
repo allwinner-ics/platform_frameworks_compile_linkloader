@@ -5,6 +5,8 @@
 #include "MemChunk.h"
 #include "StubLayout.h"
 
+#include "utils/rsl_assert.h"
+
 #include <llvm/ADT/OwningPtr.h>
 
 #include <string>
@@ -56,7 +58,7 @@ public:
 #endif
 
   void *allocateSHNCommonData(size_t size, size_t align = 1) {
-    assert(size > 0 && align != 0);
+    rsl_assert(size > 0 && align != 0);
 
     if (!SHNCommonDataPtr) {
       // FIXME: We should not hard code these number!

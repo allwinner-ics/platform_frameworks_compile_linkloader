@@ -9,7 +9,7 @@
 
 #include <llvm/ADT/SmallVector.h>
 
-#include <assert.h>
+#include "utils/rsl_assert.h"
 #include <elf.h>
 
 template <unsigned Bitwidth>
@@ -101,7 +101,7 @@ inline void ELFObject<Bitwidth>::
 relocateARM(void *(*find_sym)(void *context, char const *name),
             void *context) {
   // FIXME: Should be implement in independent files.
-  assert(Bitwidth == 32 && "ARM only have 32 bits.");
+  rsl_assert(Bitwidth == 32 && "ARM only have 32 bits.");
 
   // FIXME: Can not only relocate .rel.text!
   ELFSectionRelTableTy *reltab =
@@ -125,7 +125,7 @@ relocateARM(void *(*find_sym)(void *context, char const *name),
 
     switch (rel->getType()) {
     default:
-      assert(0 && "Not implemented relocation type.");
+      rsl_assert(0 && "Not implemented relocation type.");
       break;
 
       // FIXME: Predefine relocation codes.
@@ -137,13 +137,13 @@ relocateARM(void *(*find_sym)(void *context, char const *name),
 
         switch (sym->getType()) {
         default:
-          assert(0 && "Wrong type for R_ARM_CALL relocation.");
+          rsl_assert(0 && "Wrong type for R_ARM_CALL relocation.");
           abort();
           break;
 
         case STT_FUNC:
           if (S == 0) {
-            assert(0 && "We should get function address at previous "
+            rsl_assert(0 && "We should get function address at previous "
                    "sym->getAddress() function call.");
             abort();
           }
@@ -159,7 +159,7 @@ relocateARM(void *(*find_sym)(void *context, char const *name),
             if (result > 0x007fffff && result < 0xff800000) {
 #ifndef __arm__
               // We have not implement function stub in this runtime env
-              assert(0 && "Target address is far from call instruction");
+              rsl_assert(0 && "Target address is far from call instruction");
               abort();
 #else
               void *stub = getStubLayout()->allocateStub(ext_func);
@@ -180,7 +180,7 @@ relocateARM(void *(*find_sym)(void *context, char const *name),
         uint32_t result = (S >> 2) - (P >> 2) + A;
 
         if (result > 0x007fffff && result < 0xff800000) {
-          assert(0 && "Stub is still too far");
+          rsl_assert(0 && "Stub is still too far");
           abort();
         }
 
@@ -212,7 +212,7 @@ template <unsigned Bitwidth>
 inline void ELFObject<Bitwidth>::
 relocateX86_64(void *(*find_sym)(void *context, char const *name),
                void *context) {
-  assert(Bitwidth == 64 && "Only support X86_64.");
+  rsl_assert(Bitwidth == 64 && "Only support X86_64.");
 
   ELFSectionSymTabTy *symtab =
     static_cast<ELFSectionSymTabTy *>(getSectionByName(".symtab"));
@@ -246,7 +246,7 @@ relocateX86_64(void *(*find_sym)(void *context, char const *name),
 
       switch (rela->getType()) {
         default:
-          assert(0 && "Not implemented relocation type.");
+          rsl_assert(0 && "Not implemented relocation type.");
           break;
 
         case 2: // R_X86_64_PC32
@@ -266,7 +266,7 @@ template <unsigned Bitwidth>
 inline void ELFObject<Bitwidth>::
 relocateX86_32(void *(*find_sym)(void *context, char const *name),
                void *context) {
-  assert(Bitwidth == 32 && "Only support X86.");
+  rsl_assert(Bitwidth == 32 && "Only support X86.");
 
   ELFSectionSymTabTy *symtab =
     static_cast<ELFSectionSymTabTy *>(getSectionByName(".symtab"));
@@ -301,7 +301,7 @@ relocateX86_32(void *(*find_sym)(void *context, char const *name),
 
       switch (rel->getType()) {
       default:
-        assert(0 && "Not implemented relocation type.");
+        rsl_assert(0 && "Not implemented relocation type.");
         break;
 
       case R_386_PC32:
@@ -325,7 +325,7 @@ relocate(void *(*find_sym)(void *context, char const *name), void *context) {
     case EM_X86_64: relocateX86_64(find_sym, context); break;
 
     default:
-      assert(0 && "Only support ARM and X86_64 relocation.");
+      rsl_assert(0 && "Only support ARM and X86_64 relocation.");
       break;
   }
 

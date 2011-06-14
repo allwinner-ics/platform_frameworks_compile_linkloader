@@ -3,6 +3,7 @@
 
 #include "ELFSectionHeader.h"
 #include "ELFSymbol.h"
+#include "utils/rsl_assert.h"
 
 template <unsigned Bitwidth>
 ELFSectionSymTab<Bitwidth>::~ELFSectionSymTab() {
@@ -32,7 +33,7 @@ ELFSectionSymTab<Bitwidth>::read(Archiver &AR,
   llvm::OwningPtr<ELFSectionSymTabTy> st(new ELFSectionSymTabTy());
 
   // Assert that entry size will be the same as standard.
-  assert(sh->getEntrySize() == TypeTraits<ELFSymbolTy>::size);
+  rsl_assert(sh->getEntrySize() == TypeTraits<ELFSymbolTy>::size);
 
   // Seek to the start of symbol table
   AR.seek(sh->getOffset(), true);
