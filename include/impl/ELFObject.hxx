@@ -238,6 +238,11 @@ relocateX86_64(void *(*find_sym)(void *context, char const *name),
         rsl_assert(0 && "Not implemented relocation type.");
         break;
 
+      // FIXME: XXX: R_X86_64_64 is 64 bit, there is a big problem here.
+      case 1: // R_X86_64_64
+        *inst = (S+A);
+        break;
+
       case 2: // R_X86_64_PC32
         *inst = (S+A-P);
         break;

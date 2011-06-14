@@ -232,6 +232,34 @@ void *ELFSymbol_CRTP<Bitwidth>::getAddress(bool autoAlloc) const {
       break;
 
     case STT_NOTYPE:
+      switch (idx) {
+        default:
+          {
+#ifndef NDEBUG
+            ELFSectionHeaderTableTy const *header =
+              owner->getSectionHeaderTable();
+            rsl_assert(((*header)[idx]->getType() == SHT_PROGBITS ||
+                    (*header)[idx]->getType() == SHT_NOBITS) &&
+                   "STT_SECTION with not BITS section.");
+#endif
+            ELFSectionTy const *sec = owner->getSectionByIndex(idx);
+            rsl_assert(sec != 0 && "STT_SECTION with null section.");
+
+            ELFSectionBitsTy const &st =
+              static_cast<ELFSectionBitsTy const &>(*sec);
+            my_addr = const_cast<unsigned char *>(&st[0] + (off_t)getValue());
+          }
+          break;
+
+        case SHN_ABS:
+        case SHN_COMMON:
+        case SHN_XINDEX:
+          rsl_assert(0 && "STT_SECTION with special st_shndx.");
+          break;
+        case SHN_UNDEF:
+          return 0;
+      }
+      break;
       return 0;
 
     case STT_COMMON:
