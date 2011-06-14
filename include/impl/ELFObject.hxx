@@ -99,15 +99,12 @@ ELFObject<Bitwidth>::getSectionByName(std::string const &str) {
 template <unsigned Bitwidth>
 inline void ELFObject<Bitwidth>::
 relocateARM(void *(*find_sym)(void *context, char const *name),
-            void *context) {
+            void *context,
+            ELFSectionRelTableTy *reltab,
+            ELFSectionProgBitsTy *text) {
   // FIXME: Should be implement in independent files.
   rsl_assert(Bitwidth == 32 && "ARM only have 32 bits.");
 
-  // FIXME: Can not only relocate .rel.text!
-  ELFSectionRelTableTy *reltab =
-    static_cast<ELFSectionRelTableTy *>(getSectionByName(".rel.text"));
-  ELFSectionProgBitsTy *text =
-    static_cast<ELFSectionProgBitsTy *>(getSectionByName(".text"));
   ELFSectionSymTabTy *symtab =
     static_cast<ELFSectionSymTabTy *>(getSectionByName(".symtab"));
 
@@ -211,53 +208,44 @@ relocateARM(void *(*find_sym)(void *context, char const *name),
 template <unsigned Bitwidth>
 inline void ELFObject<Bitwidth>::
 relocateX86_64(void *(*find_sym)(void *context, char const *name),
-               void *context) {
+               void *context,
+               ELFSectionRelTableTy *reltab,
+               ELFSectionProgBitsTy *text) {
   rsl_assert(Bitwidth == 64 && "Only support X86_64.");
 
   ELFSectionSymTabTy *symtab =
     static_cast<ELFSectionSymTabTy *>(getSectionByName(".symtab"));
 
-  char const *name[] = {".text", ".eh_frame"};
-  size_t size = sizeof(name) / sizeof(char const *);
+  for (size_t i = 0; i < reltab->size(); ++i) {
+    // FIXME: Can not implement here, use Fixup!
+    ELFRelocTy *rel = (*reltab)[i];
+    ELFSymbolTy *sym = (*symtab)[rel->getSymTabIndex()];
 
-  for (size_t i = 0; i < size; ++i) {
-    ELFSectionRelTableTy *relatab =
-      static_cast<ELFSectionRelTableTy *>(
-          getSectionByName((std::string(".rela") + name[i]).c_str()));
-    ELFSectionProgBitsTy *text =
-      static_cast<ELFSectionProgBitsTy *>(getSectionByName(name[i]));
+    //typedef uint64_t Inst_t;
+    typedef int32_t Inst_t;
+    Inst_t *inst = (Inst_t *)&(*text)[rel->getOffset()];
+    Inst_t P = (Inst_t)(int64_t)inst;
+    Inst_t A = (Inst_t)(int64_t)rel->getAddend();
+    Inst_t S = (Inst_t)(int64_t)sym->getAddress();
 
-    for (size_t i = 0; i < relatab->size(); ++i) {
-      // FIXME: Can not implement here, use Fixup!
-      ELFRelocTy *rela = (*relatab)[i];
-      ELFSymbolTy *sym = (*symtab)[rela->getSymTabIndex()];
+    if (S == 0) {
+      S = (Inst_t)(int64_t)find_sym(context, sym->getName());
+      sym->setAddress((void *)S);
+    }
 
-      //typedef uint64_t Inst_t;
-      typedef int32_t Inst_t;
-      Inst_t *inst = (Inst_t *)&(*text)[rela->getOffset()];
-      Inst_t P = (Inst_t)(int64_t)inst;
-      Inst_t A = (Inst_t)(int64_t)rela->getAddend();
-      Inst_t S = (Inst_t)(int64_t)sym->getAddress();
+    switch (rel->getType()) {
+      default:
+        rsl_assert(0 && "Not implemented relocation type.");
+        break;
 
-      if (S == 0) {
-        S = (Inst_t)(int64_t)find_sym(context, sym->getName());
-        sym->setAddress((void *)S);
-      }
+      case 2: // R_X86_64_PC32
+        *inst = (S+A-P);
+        break;
 
-      switch (rela->getType()) {
-        default:
-          rsl_assert(0 && "Not implemented relocation type.");
-          break;
-
-        case 2: // R_X86_64_PC32
-          *inst = (S+A-P);
-          break;
-
-        case 10: // R_X86_64_32
-        case 11: // R_X86_64_32S
-          *inst = (S+A);
-          break;
-      }
+      case 10: // R_X86_64_32
+      case 11: // R_X86_64_32S
+        *inst = (S+A);
+        break;
     }
   }
 }
@@ -265,53 +253,43 @@ relocateX86_64(void *(*find_sym)(void *context, char const *name),
 template <unsigned Bitwidth>
 inline void ELFObject<Bitwidth>::
 relocateX86_32(void *(*find_sym)(void *context, char const *name),
-               void *context) {
+               void *context,
+               ELFSectionRelTableTy *reltab,
+               ELFSectionProgBitsTy *text) {
   rsl_assert(Bitwidth == 32 && "Only support X86.");
 
   ELFSectionSymTabTy *symtab =
     static_cast<ELFSectionSymTabTy *>(getSectionByName(".symtab"));
 
-  char const *name[] = {".text"};
-  size_t const size = sizeof(name) / sizeof(char const *);
+  for (size_t i = 0; i < reltab->size(); ++i) {
+    // FIXME: Can not implement here, use Fixup!
+    ELFRelocTy *rel = (*reltab)[i];
+    ELFSymbolTy *sym = (*symtab)[rel->getSymTabIndex()];
 
-  for (size_t i = 0; i < size; ++i) {
-    ELFSectionRelTableTy *reltab =
-      static_cast<ELFSectionRelTableTy *>(
-        getSectionByName((std::string(".rel") + name[i]).c_str()));
+    //typedef uint64_t Inst_t;
+    typedef int32_t Inst_t;
+    Inst_t *inst = (Inst_t *)&(*text)[rel->getOffset()];
+    Inst_t P = (Inst_t)(uintptr_t)inst;
+    Inst_t A = (Inst_t)(uintptr_t)*inst;
+    Inst_t S = (Inst_t)(uintptr_t)sym->getAddress();
 
-    ELFSectionProgBitsTy *text =
-      static_cast<ELFSectionProgBitsTy *>(getSectionByName(name[i]));
+    if (S == 0) {
+      S = (Inst_t)(uintptr_t)find_sym(context, sym->getName());
+      sym->setAddress((void *)S);
+    }
 
-    for (size_t i = 0; i < reltab->size(); ++i) {
-      // FIXME: Can not implement here, use Fixup!
-      ELFRelocTy *rel = (*reltab)[i];
-      ELFSymbolTy *sym = (*symtab)[rel->getSymTabIndex()];
+    switch (rel->getType()) {
+    default:
+      rsl_assert(0 && "Not implemented relocation type.");
+      break;
 
-      //typedef uint64_t Inst_t;
-      typedef int32_t Inst_t;
-      Inst_t *inst = (Inst_t *)&(*text)[rel->getOffset()];
-      Inst_t P = (Inst_t)(uintptr_t)inst;
-      Inst_t A = (Inst_t)(uintptr_t)*inst;
-      Inst_t S = (Inst_t)(uintptr_t)sym->getAddress();
+    case R_386_PC32:
+      *inst = (S+A-P);
+      break;
 
-      if (S == 0) {
-        S = (Inst_t)(uintptr_t)find_sym(context, sym->getName());
-        sym->setAddress((void *)S);
-      }
-
-      switch (rel->getType()) {
-      default:
-        rsl_assert(0 && "Not implemented relocation type.");
-        break;
-
-      case R_386_PC32:
-        *inst = (S+A-P);
-        break;
-
-      case R_386_32:
-        *inst = (S+A);
-        break;
-      }
+    case R_386_32:
+      *inst = (S+A);
+      break;
     }
   }
 }
@@ -319,14 +297,45 @@ relocateX86_32(void *(*find_sym)(void *context, char const *name),
 template <unsigned Bitwidth>
 inline void ELFObject<Bitwidth>::
 relocate(void *(*find_sym)(void *context, char const *name), void *context) {
-  switch (getHeader()->getMachine()) {
-    case EM_ARM:    relocateARM(find_sym, context); break;
-    case EM_386:    relocateX86_32(find_sym, context); break;
-    case EM_X86_64: relocateX86_64(find_sym, context); break;
 
-    default:
-      rsl_assert(0 && "Only support ARM and X86_64 relocation.");
-      break;
+  for (size_t i = 0; i < stab.size(); ++i) {
+    ELFSectionHeaderTy *sh = (*shtab)[i];
+    if (sh->getType() != SHT_REL && sh->getType() != SHT_RELA) {
+      continue;
+    }
+    ELFSectionRelTableTy *reltab =
+      static_cast<ELFSectionRelTableTy *>(stab[i]);
+    rsl_assert(reltab && "Relocation section can't be NULL.");
+
+    const char *reltab_name = sh->getName();
+    const char *need_rel_name;
+    if (sh->getType() == SHT_REL) {
+      need_rel_name = reltab_name + 4;
+      // ".rel.xxxx"
+      //      ^ start from here.
+    } else {
+      need_rel_name = reltab_name + 5;
+    }
+
+    ELFSectionProgBitsTy *need_rel =
+      static_cast<ELFSectionProgBitsTy *>(getSectionByName(need_rel_name));
+    rsl_assert(need_rel && "Need be relocated section can't be NULL.");
+
+    switch (getHeader()->getMachine()) {
+      case EM_ARM:
+        relocateARM(find_sym, context, reltab, need_rel);
+        break;
+      case EM_386:
+        relocateX86_32(find_sym, context, reltab, need_rel);
+        break;
+      case EM_X86_64:
+        relocateX86_64(find_sym, context, reltab, need_rel);
+        break;
+
+      default:
+        rsl_assert(0 && "Only support ARM, X86, and X86_64 relocation.");
+        break;
+    }
   }
 
   for (size_t i = 0; i < stab.size(); ++i) {

@@ -104,13 +104,19 @@ public:
 
 private:
   void relocateARM(void *(*find_sym)(void *context, char const *name),
-                   void *context);
+                   void *context,
+                   ELFSectionRelTableTy *reltab,
+                   ELFSectionProgBitsTy *text);
 
   void relocateX86_32(void *(*find_sym)(void *context, char const *name),
-                      void *context);
+                      void *context,
+                      ELFSectionRelTableTy *reltab,
+                      ELFSectionProgBitsTy *text);
 
   void relocateX86_64(void *(*find_sym)(void *context, char const *name),
-                      void *context);
+                      void *context,
+                      ELFSectionRelTableTy *reltab,
+                      ELFSectionProgBitsTy *text);
 
 };
 
