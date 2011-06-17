@@ -19,6 +19,8 @@ void rsloaderDisposeExec(RSExecRef object);
 
 void *rsloaderGetSymbolAddress(RSExecRef object, char const *name);
 
+size_t rsloaderGetSymbolSize(RSExecRef object, char const *name);
+
 #ifdef __cplusplus
 } /* extern "C" */
 #endif

@@ -64,3 +64,23 @@ extern "C" void *rsloaderGetSymbolAddress(RSExecRef object_,
 
   return symbol->getAddress(false);
 }
+
+extern "C" size_t rsloaderGetSymbolSize(RSExecRef object_, char const *name) {
+  ELFObject<32> *object = unwrap(object_);
+
+  ELFSectionSymTab<32> *symtab =
+    static_cast<ELFSectionSymTab<32> *>(object->getSectionByName(".symtab"));
+
+  if (!symtab) {
+    return NULL;
+  }
+
+  ELFSymbol<32> *symbol = symtab->getByName(name);
+
+  if (!symbol) {
+    LOGE("Symbol not found: %s\n", name);
+    return NULL;
+  }
+
+  return (size_t)symbol->getSize();
+}
