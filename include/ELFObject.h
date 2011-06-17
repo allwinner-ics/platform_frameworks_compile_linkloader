@@ -60,14 +60,16 @@ public:
   void *allocateSHNCommonData(size_t size, size_t align = 1) {
     rsl_assert(size > 0 && align != 0);
 
+    enum { SHN_COMMON_DATA_SIZE = 0x40000 };
+
     if (!SHNCommonDataPtr) {
       // FIXME: We should not hard code these number!
-      if (!SHNCommonData.allocate(4096)) {
+      if (!SHNCommonData.allocate(SHN_COMMON_DATA_SIZE)) {
         return NULL;
       }
 
       SHNCommonDataPtr = SHNCommonData.getBuffer();
-      SHNCommonDataFreeSize = 4096;
+      SHNCommonDataFreeSize = SHN_COMMON_DATA_SIZE;
     }
 
     // Ensure alignment

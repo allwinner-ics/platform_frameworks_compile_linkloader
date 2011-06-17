@@ -125,9 +125,17 @@ void *ELFSymbol_CRTP<Bitwidth>::getAddress(bool autoAlloc) const {
             ELFSectionTy const *sec = owner->getSectionByIndex(idx);
             rsl_assert(sec != 0 && "STT_OBJECT with null section.");
 
+            size_t align = 16;
+            my_addr = const_cast<ELFObjectTy *>(owner)->
+                          allocateSHNCommonData((size_t)getSize(), align);
+            if (!my_addr) {
+              rsl_assert(0 && "Unable to allocate memory for SHN_COMMON.");
+              abort();
+            }
+
             ELFSectionBitsTy const &st =
               static_cast<ELFSectionBitsTy const &>(*sec);
-            my_addr = const_cast<unsigned char *>(&st[0] + (off_t)getValue());
+            memcpy(my_addr, &st[0] + (off_t)getValue(), getSize());
           }
           break;
 
@@ -153,7 +161,7 @@ void *ELFSymbol_CRTP<Bitwidth>::getAddress(bool autoAlloc) const {
               memset(my_addr, '\0', getSize());
             }
 #else
-            size_t align = std::max((size_t)getValue(), sizeof(void*));
+            size_t align = 16;
             my_addr = const_cast<ELFObjectTy *>(owner)->
                           allocateSHNCommonData((size_t)getSize(), align);
             if (!my_addr) {
