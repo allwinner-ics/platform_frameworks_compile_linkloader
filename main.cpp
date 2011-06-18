@@ -17,10 +17,10 @@
 #include "ELFObject.h"
 
 #include "utils/serialize.h"
+#include "ELF.h"
 
 #include <llvm/ADT/OwningPtr.h>
 
-#include <elf.h>
 #include <fcntl.h>
 #include <stdlib.h>
 #include <sys/mman.h>

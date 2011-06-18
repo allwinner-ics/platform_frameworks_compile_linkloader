@@ -112,11 +112,15 @@ private:
 
 public:
   word_t getSymTabIndex() const {
+#define ELF32_R_SYM(i)  ((i)>>8)
     return ELF32_R_SYM(this->r_info);
+#undef ELF32_R_SYM
   }
 
   word_t getType() const {
+#define ELF32_R_TYPE(i)   ((unsigned char)(i))
     return ELF32_R_TYPE(this->r_info);
+#undef ELF32_R_TYPE
   }
 
 };
@@ -131,11 +135,15 @@ private:
 
 public:
   xword_t getSymTabIndex() const {
+#define ELF64_R_SYM(i)    ((i)>>32)
     return ELF64_R_SYM(this->r_info);
+#undef ELF64_R_SYM
   }
 
   xword_t getType() const {
+#define ELF64_R_TYPE(i)   ((i)&0xffffffffL)
     return ELF64_R_TYPE(this->r_info);
+#undef ELF64_R_TYPE
   }
 };
 

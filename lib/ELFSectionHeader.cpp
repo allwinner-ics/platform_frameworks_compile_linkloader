@@ -15,8 +15,7 @@
  */
 
 #include "ELFSectionHeader.h"
-
-#include <elf.h>
+#include "ELF.h"
 
 // ARM Section Header Type Definitions
 

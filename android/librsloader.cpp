@@ -26,7 +26,6 @@
 #include "cutils/log.h"
 
 #include <llvm/ADT/OwningPtr.h>
-#include <elf.h>
 
 static inline RSExecRef wrap(ELFObject<32> *object) {
   return reinterpret_cast<RSExecRef>(object);

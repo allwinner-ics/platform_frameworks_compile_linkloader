@@ -18,13 +18,13 @@
 #define ELF_SYMBOL_H
 
 #include "ELFTypes.h"
+#include "ELF.h"
 
 #include <llvm/ADT/OwningPtr.h>
 
 #include <string>
 #include <algorithm>
 
-#include <elf.h>
 #include <malloc.h>
 #include <stdint.h>
 #include <stdlib.h>

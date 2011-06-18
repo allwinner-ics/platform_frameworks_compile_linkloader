@@ -15,6 +15,7 @@
  */
 
 #include "ELFHeader.h"
+#include "ELF.h"
 
 char const *ELFHeaderHelperMixin::getClassStr(int clazz) {
   switch (clazz) {

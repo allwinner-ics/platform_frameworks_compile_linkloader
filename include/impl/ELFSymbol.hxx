@@ -27,6 +27,7 @@
 #include "ELFSectionNoBits.h"
 
 #include "utils/rsl_assert.h"
+#include "ELF.h"
 
 #ifdef __arm__
 #define LOG_TAG "bcc"

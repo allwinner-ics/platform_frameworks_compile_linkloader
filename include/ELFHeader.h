@@ -18,10 +18,10 @@
 #define ELF_HEADER_H
 
 #include "ELFTypes.h"
+#include "ELF.h"
 
 #include <llvm/ADT/OwningPtr.h>
 
-#include <elf.h>
 #include <string.h>
 
 class ELFHeaderHelperMixin {
@@ -33,7 +33,6 @@ protected:
   static char const *getMachineStr(uint16_t machine);
   static char const *getVersionStr(uint32_t version);
 };
-
 
 template <unsigned Bitwidth>
 class ELFHeader : private ELFHeaderHelperMixin {

@@ -15,8 +15,7 @@
  */
 
 #include "ELFSymbol.h"
-
-#include <elf.h>
+#include "ELF.h"
 
 char const *
 ELFSymbolHelperMixin::getTypeStr(uint8_t type) {

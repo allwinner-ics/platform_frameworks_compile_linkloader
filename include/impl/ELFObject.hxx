@@ -22,11 +22,11 @@
 #include "ELFSection.h"
 #include "ELFSectionHeaderTable.h"
 #include "StubLayout.h"
+#include "ELF.h"
 
 #include <llvm/ADT/SmallVector.h>
 
 #include "utils/rsl_assert.h"
-#include <elf.h>
 
 template <unsigned Bitwidth>
 template <typename Archiver>
@@ -141,7 +141,7 @@ relocateARM(void *(*find_sym)(void *context, char const *name),
       rsl_assert(0 && "Not implemented relocation type.");
       break;
 
-    case 2: // R_ARM_ABS32
+    case R_ARM_ABS32:
       {
         A = *inst;
         *inst = (S+A);
@@ -149,7 +149,7 @@ relocateARM(void *(*find_sym)(void *context, char const *name),
       break;
 
       // FIXME: Predefine relocation codes.
-    case 28: // R_ARM_CALL
+    case R_ARM_CALL:
       {
 #define SIGN_EXTEND(x, l) (((x)^(1<<((l)-1)))-(1<<(l-1)))
         A = (Inst_t)(int64_t)SIGN_EXTEND(*inst & 0xFFFFFF, 24);
@@ -207,9 +207,9 @@ relocateARM(void *(*find_sym)(void *context, char const *name),
         *inst = ((result) & 0x00FFFFFF) | (*inst & 0xFF000000);
       }
       break;
-    case 44: // R_ARM_MOVT_ABS
+    case R_ARM_MOVT_ABS:
       S >>= 16;
-    case 43: // R_ARM_MOVW_ABS_NC
+    case R_ARM_MOVW_ABS_NC:
       {
         // No need sign extend.
         A = ((*inst & 0xF0000) >> 4) | (*inst & 0xFFF);
