@@ -28,6 +28,11 @@
 
 #include "utils/rsl_assert.h"
 
+#ifdef __arm__
+#define LOG_TAG "bcc"
+#include "cutils/log.h"
+#endif
+
 template <unsigned Bitwidth>
 inline char const *ELFSymbol_CRTP<Bitwidth>::getName() const {
   ELFSectionHeaderTableTy const &shtab = *owner->getSectionHeaderTable();
@@ -152,6 +157,17 @@ void *ELFSymbol_CRTP<Bitwidth>::getAddress(bool autoAlloc) const {
             ELFSectionBitsTy const &st =
               static_cast<ELFSectionBitsTy const &>(*sec);
             memcpy(my_addr, &st[0] + (off_t)getValue(), getSize());
+
+#ifdef __arm__
+            LOGD("Symbol %s\n", getName());
+            if (strcmp(getName(), "camera") == 0) {
+              uint32_t *p = (uint32_t *)(&st[0] + (size_t)getValue());
+              LOGD("     | %08x %08x %08x %08x\n", p[0], p[1], p[2], p[3]);
+              LOGD("     | %08x %08x %08x %08x\n", p[4], p[5], p[6], p[7]);
+              LOGD("     | %08x %08x %08x %08x\n", p[8], p[9], p[10], p[11]);
+              LOGD("     | %08x %08x %08x %08x\n", p[12], p[13], p[14], p[15]);
+            }
+#endif
           }
           break;
 
