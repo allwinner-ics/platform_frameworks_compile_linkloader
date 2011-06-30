@@ -158,6 +158,7 @@ void *ELFSymbol_CRTP<Bitwidth>::getAddress(bool autoAlloc) const {
               static_cast<ELFSectionBitsTy const &>(*sec);
             memcpy(my_addr, &st[0] + (off_t)getValue(), getSize());
 
+#if 0
 #ifdef __arm__
             LOGD("Symbol %s\n", getName());
             if (strcmp(getName(), "camera") == 0) {
@@ -167,6 +168,7 @@ void *ELFSymbol_CRTP<Bitwidth>::getAddress(bool autoAlloc) const {
               LOGD("     | %08x %08x %08x %08x\n", p[8], p[9], p[10], p[11]);
               LOGD("     | %08x %08x %08x %08x\n", p[12], p[13], p[14], p[15]);
             }
+#endif
 #endif
           }
           break;
