@@ -68,6 +68,10 @@ public:
            const_cast<ELFSectionSymTabTy const *>(this)->getByName(name));
   }
 
+  size_t getFuncCount() const;
+
+  void getFuncNameList(size_t size, char const **list) const;
+
   size_t getExternFuncCount() const;
 
 };

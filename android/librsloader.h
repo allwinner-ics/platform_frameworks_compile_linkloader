@@ -37,6 +37,10 @@ void *rsloaderGetSymbolAddress(RSExecRef object, char const *name);
 
 size_t rsloaderGetSymbolSize(RSExecRef object, char const *name);
 
+size_t rsloaderGetFuncCount(RSExecRef object);
+
+void rsloaderGetFuncNameList(RSExecRef object, size_t size, char const **list);
+
 #ifdef __cplusplus
 } /* extern "C" */
 #endif

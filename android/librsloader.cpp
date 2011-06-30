@@ -100,3 +100,25 @@ extern "C" size_t rsloaderGetSymbolSize(RSExecRef object_, char const *name) {
 
   return (size_t)symbol->getSize();
 }
+
+extern "C" size_t rsloaderGetFuncCount(RSExecRef object) {
+  ELFSectionSymTab<32> *symtab = static_cast<ELFSectionSymTab<32> *>(
+    unwrap(object)->getSectionByName(".symtab"));
+
+  if (!symtab) {
+    return 0;
+  }
+
+  return symtab->getFuncCount();
+}
+
+extern "C" void rsloaderGetFuncNameList(RSExecRef object,
+                                        size_t size,
+                                        char const **list) {
+  ELFSectionSymTab<32> *symtab = static_cast<ELFSectionSymTab<32> *>(
+    unwrap(object)->getSectionByName(".symtab"));
+
+  if (symtab) {
+    symtab->getFuncNameList(size, list);
+  }
+}

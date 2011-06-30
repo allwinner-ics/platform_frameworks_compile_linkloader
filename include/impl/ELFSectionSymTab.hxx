@@ -29,6 +29,17 @@ ELFSectionSymTab<Bitwidth>::~ELFSectionSymTab() {
 }
 
 template <unsigned Bitwidth>
+size_t ELFSectionSymTab<Bitwidth>::getFuncCount() const {
+  size_t result = 0;
+  for (size_t i = 0; i < table.size(); ++i) {
+    if (table[i] && table[i]->isConcreteFunc()) {
+      result++;
+    }
+  }
+  return result;
+}
+
+template <unsigned Bitwidth>
 size_t ELFSectionSymTab<Bitwidth>::getExternFuncCount() const {
   size_t result = 0;
   for (size_t i = 0; i < table.size(); ++i) {
@@ -37,6 +48,16 @@ size_t ELFSectionSymTab<Bitwidth>::getExternFuncCount() const {
     }
   }
   return result;
+}
+
+template <unsigned Bitwidth>
+void ELFSectionSymTab<Bitwidth>::getFuncNameList(size_t size,
+                                                 char const **list) const {
+  for (size_t i = 0, j = 0; i < table.size() && j < size; ++i) {
+    if (table[i] && table[i]->isConcreteFunc()) {
+      list[j++] = table[i]->getName();
+    }
+  }
 }
 
 template <unsigned Bitwidth>

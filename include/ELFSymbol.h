@@ -123,6 +123,10 @@ public:
     return true;
   }
 
+  bool isConcreteFunc() const {
+    return getType() == STT_FUNC;
+  }
+
   bool isExternFunc() const {
     return getType() == STT_NOTYPE;
   }
