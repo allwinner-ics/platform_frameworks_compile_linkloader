@@ -129,6 +129,7 @@ relocateARM(void *(*find_sym)(void *context, char const *name),
 
   ELFSectionSymTabTy *symtab =
     static_cast<ELFSectionSymTabTy *>(getSectionByName(".symtab"));
+  rsl_assert(symtab && "Symtab is required.");
 
   for (size_t i = 0; i < reltab->size(); ++i) {
     // FIXME: Can not implement here, use Fixup!
@@ -244,6 +245,7 @@ relocateX86_64(void *(*find_sym)(void *context, char const *name),
 
   ELFSectionSymTabTy *symtab =
     static_cast<ELFSectionSymTabTy *>(getSectionByName(".symtab"));
+  rsl_assert(symtab && "Symtab is required.");
 
   for (size_t i = 0; i < reltab->size(); ++i) {
     // FIXME: Can not implement here, use Fixup!
@@ -294,6 +296,7 @@ relocateX86_32(void *(*find_sym)(void *context, char const *name),
 
   ELFSectionSymTabTy *symtab =
     static_cast<ELFSectionSymTabTy *>(getSectionByName(".symtab"));
+  rsl_assert(symtab && "Symtab is required.");
 
   for (size_t i = 0; i < reltab->size(); ++i) {
     // FIXME: Can not implement here, use Fixup!
