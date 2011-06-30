@@ -20,6 +20,7 @@
 #include "ELFTypes.h"
 
 #include <llvm/ADT/OwningPtr.h>
+#include <llvm/ADT/StringMap.h>
 
 #include <vector>
 #include <string>
@@ -31,6 +32,7 @@ public:
 
 private:
   std::vector<ELFSectionHeaderTy *> table;
+  llvm::StringMap<ELFSectionHeaderTy *> name_map;
 
 private:
   ELFSectionHeaderTable() {
@@ -50,8 +52,10 @@ public:
     return table[i];
   }
 
-  ELFSectionHeaderTy const *getByName(const std::string &str) const;
-  ELFSectionHeaderTy *getByName(const std::string &str);
+  void buildNameMap();
+
+  ELFSectionHeaderTy const *getByName(const std::string &name) const;
+  ELFSectionHeaderTy *getByName(const std::string &name);
 
   void print() const;
 };

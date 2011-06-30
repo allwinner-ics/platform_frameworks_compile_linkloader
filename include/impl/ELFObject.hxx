@@ -67,6 +67,12 @@ ELFObject<Bitwidth>::read(Archiver &AR) {
     object->stab[index] = sec.take();
   }
 
+  object->shtab->buildNameMap();
+  ELFSectionSymTabTy *symtab =
+    static_cast<ELFSectionSymTabTy *>(object->getSectionByName(".symtab"));
+  rsl_assert(symtab && "Symtab is required.");
+  symtab->buildNameMap();
+
   return object.take();
 }
 

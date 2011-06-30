@@ -84,23 +84,32 @@ inline void ELFSectionHeaderTable<Bitwidth>::print() const {
 }
 
 template <unsigned Bitwidth>
-inline ELFSectionHeader<Bitwidth> const *
-ELFSectionHeaderTable<Bitwidth>::getByName(const std::string &str) const {
-  // TODO: Use map
+inline void ELFSectionHeaderTable<Bitwidth>::buildNameMap() {
   for (size_t i = 0; i < table.size(); ++i) {
-    if (str == std::string(table[i]->getName())) {
-      return table[i];
+    ELFSectionHeaderTy *sh = table[i];
+    if ( sh ) {
+      name_map[sh->getName()] = sh;
     }
   }
-  // Return SHN_UNDEF section header;
-  return table[0];
+}
+
+template <unsigned Bitwidth>
+inline ELFSectionHeader<Bitwidth> const *
+ELFSectionHeaderTable<Bitwidth>::getByName(const std::string &name) const {
+  typename llvm::StringMap<ELFSectionHeaderTy *>::const_iterator sh =
+    name_map.find(name);
+  if (sh == name_map.end()) {
+    // Return SHN_UNDEF section header;
+    return table[0];
+  }
+  return sh->getValue();
 }
 
 template <unsigned Bitwidth>
 inline ELFSectionHeader<Bitwidth> *
-ELFSectionHeaderTable<Bitwidth>::getByName(const std::string &str) {
+ELFSectionHeaderTable<Bitwidth>::getByName(const std::string &name) {
   ELFSectionHeaderTableTy const *const_this = this;
-  ELFSectionHeaderTy const *shptr = const_this->getByName(str);
+  ELFSectionHeaderTy const *shptr = const_this->getByName(name);
   // Const cast for the same API's const and non-const versions.
   return const_cast<ELFSectionHeaderTy *>(shptr);
 }

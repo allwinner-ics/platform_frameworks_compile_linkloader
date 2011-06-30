@@ -19,6 +19,8 @@
 
 #include "ELFTypes.h"
 
+#include <llvm/ADT/StringMap.h>
+
 #include <vector>
 #include <string>
 
@@ -29,6 +31,7 @@ public:
 
 private:
   std::vector<ELFSymbolTy *> table;
+  llvm::StringMap<ELFSymbolTy *> name_map;
 
 private:
   ELFSectionSymTab() { }
@@ -54,14 +57,9 @@ public:
     return table[index];
   }
 
-  ELFSymbolTy const *getByName(std::string const &name) const {
-    for (size_t i = 0; i < table.size(); ++i) {
-      if (table[i]->getName() == name){
-        return table[i];
-      }
-    }
-    return NULL;
-  }
+  void buildNameMap();
+
+  ELFSymbolTy const *getByName(std::string const &name) const;
 
   ELFSymbolTy *getByName(std::string const &name) {
     return const_cast<ELFSymbolTy *>(
