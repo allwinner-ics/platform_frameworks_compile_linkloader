@@ -40,7 +40,7 @@ size_t ELFSectionSymTab<Bitwidth>::getFuncCount() const {
 }
 
 template <unsigned Bitwidth>
-void ELFSectionSymTab<Bitwidth>::buildNameMap() {
+inline void ELFSectionSymTab<Bitwidth>::buildNameMap() {
   for (size_t i = 0; i < table.size(); ++i) {
     ELFSymbolTy *symbol = table[i];
     if ( symbol ) {
@@ -50,7 +50,7 @@ void ELFSectionSymTab<Bitwidth>::buildNameMap() {
 }
 
 template <unsigned Bitwidth>
-ELFSymbol<Bitwidth> const *
+inline ELFSymbol<Bitwidth> const *
 ELFSectionSymTab<Bitwidth>::getByName(std::string const &name) const {
   typename llvm::StringMap<ELFSymbolTy *>::const_iterator symbol =
     name_map.find(name);
@@ -61,7 +61,7 @@ ELFSectionSymTab<Bitwidth>::getByName(std::string const &name) const {
 }
 
 template <unsigned Bitwidth>
-size_t ELFSectionSymTab<Bitwidth>::getExternFuncCount() const {
+inline size_t ELFSectionSymTab<Bitwidth>::getExternFuncCount() const {
   size_t result = 0;
   for (size_t i = 0; i < table.size(); ++i) {
     if (table[i] && table[i]->isExternFunc()) {
