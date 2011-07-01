@@ -137,27 +137,37 @@ void *ELFSymbol_CRTP<Bitwidth>::getAddress(bool autoAlloc) const {
       switch (idx) {
         default:
           {
-#ifndef NDEBUG
             ELFSectionHeaderTableTy const *header =
               owner->getSectionHeaderTable();
-            rsl_assert(((*header)[idx]->getType() == SHT_PROGBITS ||
-                    (*header)[idx]->getType() == SHT_NOBITS) &&
-                   "STT_OBJECT with not BITS section.");
-#endif
-            ELFSectionTy const *sec = owner->getSectionByIndex(idx);
-            rsl_assert(sec != 0 && "STT_OBJECT with null section.");
 
-            size_t align = 16;
-            my_addr = const_cast<ELFObjectTy *>(owner)->
-                          allocateSHNCommonData((size_t)getSize(), align);
-            if (!my_addr) {
-              rsl_assert(0 && "Unable to allocate memory for SHN_COMMON.");
-              abort();
+            unsigned section_type = (*header)[idx]->getType();
+
+            rsl_assert((section_type == SHT_PROGBITS ||
+                        section_type == SHT_NOBITS) &&
+                       "STT_OBJECT with not BITS section.");
+
+            if (section_type == SHT_NOBITS) {
+              // FIXME(logan): This is a workaround for .lcomm directives
+              // bug of LLVM ARM MC code generator.  Remove this when the
+              // LLVM bug is fixed.
+
+              size_t align = 16;
+
+              my_addr = const_cast<ELFObjectTy *>(owner)->
+                allocateSHNCommonData((size_t)getSize(), align);
+
+              if (!my_addr) {
+                rsl_assert(0 && "Unable to allocate memory for SHN_COMMON.");
+                abort();
+              }
+            } else {
+              ELFSectionTy const *sec = owner->getSectionByIndex(idx);
+              rsl_assert(sec != 0 && "STT_OBJECT with null section.");
+
+              ELFSectionBitsTy const &st =
+                static_cast<ELFSectionBitsTy const &>(*sec);
+              my_addr =const_cast<unsigned char *>(&st[0] + (off_t)getValue());
             }
-
-            ELFSectionBitsTy const &st =
-              static_cast<ELFSectionBitsTy const &>(*sec);
-            memcpy(my_addr, &st[0] + (off_t)getValue(), getSize());
 
 #if 0
 #ifdef __arm__
