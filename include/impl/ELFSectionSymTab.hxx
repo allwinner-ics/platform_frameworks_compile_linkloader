@@ -72,8 +72,9 @@ ELFSectionSymTab<Bitwidth>::getByName(std::string const &name) const {
 }
 
 template <unsigned Bitwidth>
-void ELFSectionSymTab<Bitwidth>::getFuncNameList(size_t size,
-                                                 char const **list) const {
+inline void
+ELFSectionSymTab<Bitwidth>::getFuncNameList(size_t size,
+                                            char const **list) const {
   for (size_t i = 0, j = 0; i < table.size() && j < size; ++i) {
     if (table[i] && table[i]->isConcreteFunc()) {
       list[j++] = table[i]->getName();
