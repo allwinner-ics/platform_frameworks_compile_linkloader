@@ -59,7 +59,7 @@ bool MemChunk::allocate(size_t size) {
 
 void MemChunk::print() const {
   if (buf != MAP_FAILED) {
-    dump_hex(buf, buf_size, 0, 0);
+    dump_hex(buf, buf_size, 0, buf_size);
   }
 }
 
