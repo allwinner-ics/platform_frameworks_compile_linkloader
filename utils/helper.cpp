@@ -18,6 +18,7 @@
 #include "raw_ostream.h"
 
 #include <stdlib.h>
+#include <ctype.h>
 
 using namespace llvm;
 
@@ -53,6 +54,16 @@ void dump_hex(unsigned char const *data,
     }
 
     out().resetColor();
+    out() << "  ";
+
+    for (size_t j = i, k = i + 16; j < k; ++j) {
+      if (data[j] > 0x20 && data[j] < 0x7f) {
+        out() << (char)data[j];
+      } else {
+        out() << '.';
+      }
+    }
+
     out() << '\n';
   }
 }
