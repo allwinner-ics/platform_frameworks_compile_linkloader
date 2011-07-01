@@ -79,6 +79,10 @@ LOCAL_C_INCLUDES := \
   $(LOCAL_PATH)/include \
   $(LOCAL_C_INCLUDES)
 
+ifeq (darwin,$(BUILD_OS))
+LOCAL_CFLAGS += -DMACOSX
+endif
+
 include $(LLVM_ROOT_PATH)/llvm-host-build.mk
 include $(BUILD_HOST_STATIC_LIBRARY)
 

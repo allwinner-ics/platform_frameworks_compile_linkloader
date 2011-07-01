@@ -44,7 +44,7 @@ MemChunk::~MemChunk() {
 
 bool MemChunk::allocate(size_t size) {
   buf = (unsigned char *)mmap((void *)StartAddr, size, PROT_READ | PROT_WRITE,
-                              MAP_PRIVATE | MAP_ANONYMOUS | MAP_32BIT,
+                              MAP_PRIVATE | MAP_ANON | MAP_32BIT,
                               -1, 0);
 
   if (buf == MAP_FAILED) {
