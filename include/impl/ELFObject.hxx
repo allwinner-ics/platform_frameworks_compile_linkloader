@@ -59,6 +59,12 @@ ELFObject<Bitwidth>::read(Archiver &AR) {
     }
   }
 
+  object->shtab->buildNameMap();
+  ELFSectionSymTabTy *symtab =
+    static_cast<ELFSectionSymTabTy *>(object->getSectionByName(".symtab"));
+  rsl_assert(symtab && "Symtab is required.");
+  symtab->buildNameMap();
+
   for (size_t i = 0; i < progbits_ndx.size(); ++i) {
     size_t index = progbits_ndx[i];
 
@@ -66,12 +72,6 @@ ELFObject<Bitwidth>::read(Archiver &AR) {
       ELFSectionTy::read(AR, object.get(), (*object->shtab)[index]));
     object->stab[index] = sec.take();
   }
-
-  object->shtab->buildNameMap();
-  ELFSectionSymTabTy *symtab =
-    static_cast<ELFSectionSymTabTy *>(object->getSectionByName(".symtab"));
-  rsl_assert(symtab && "Symtab is required.");
-  symtab->buildNameMap();
 
   return object.take();
 }
