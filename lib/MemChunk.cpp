@@ -31,7 +31,9 @@
 // define it as zero, so that it won't manipulate the flags.
 #endif
 
+#if USE_FIXED_ADDR_MEM_CHUNK
 static uintptr_t StartAddr = 0x7e000000UL;
+#endif
 
 MemChunk::MemChunk() : buf((unsigned char *)MAP_FAILED), buf_size(0) {
 }
@@ -43,15 +45,25 @@ MemChunk::~MemChunk() {
 }
 
 bool MemChunk::allocate(size_t size) {
-  buf = (unsigned char *)mmap((void *)StartAddr, size, PROT_READ | PROT_WRITE,
+#if USE_FIXED_ADDR_MEM_CHUNK
+  buf = (unsigned char *)mmap((void *)StartAddr, size,
+                              PROT_READ | PROT_WRITE,
                               MAP_PRIVATE | MAP_ANON | MAP_32BIT,
                               -1, 0);
+#else
+  buf = (unsigned char *)mmap(0, size,
+                              PROT_READ | PROT_WRITE,
+                              MAP_PRIVATE | MAP_ANON | MAP_32BIT,
+                              -1, 0);
+#endif
 
   if (buf == MAP_FAILED) {
     return false;
   }
 
+#if USE_FIXED_ADDR_MEM_CHUNK
   StartAddr += (size + 4095) / 4096 * 4096;
+#endif
 
   buf_size = size;
   return true;
