@@ -179,11 +179,13 @@ relocateARM(void *(*find_sym)(void *context, char const *name),
         case STT_NOTYPE:
           if (S == 0) {
             void *ext_func = find_sym(context, sym->getName());
+#ifdef SUPPORT_NEAR_JUMP_EVEN_IF_BLc2BLX_NEEDED
             S = (Inst_t)(uintptr_t)ext_func;
             sym->setAddress(ext_func);
 
             uint32_t result = (S >> 2) - (P >> 2) + A;
             if (result > 0x007fffff && result < 0xff800000) {
+#endif
 #ifndef __arm__
               // We have not implement function stub in this runtime env
               rsl_assert(0 && "Target address is far from call instruction");
@@ -199,7 +201,9 @@ relocateARM(void *(*find_sym)(void *context, char const *name),
               sym->setAddress(stub);
               S = (uint32_t)stub;
 #endif
+#ifdef SUPPORT_NEAR_JUMP_EVEN_IF_BLc2BLX_NEEDED
             }
+#endif
           }
           break;
         }
