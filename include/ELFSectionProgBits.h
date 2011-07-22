@@ -21,17 +21,29 @@
 #include "ELFSectionBits.h"
 #include "ELFSectionHeader.h"
 #include "MemChunk.h"
+#include "StubLayout.h"
 
 template <unsigned Bitwidth>
 class ELFSectionProgBits : public ELFSectionBits<Bitwidth> {
 public:
   ELF_TYPE_INTRO_TO_TEMPLATE_SCOPE(Bitwidth);
 
+private:
+#ifdef __arm__
+  StubLayout stubs;
+#endif
+
 public:
   template <typename Archiver>
   static ELFSectionProgBits *read(Archiver &AR,
                                   ELFObjectTy *owner,
                                   ELFSectionHeaderTy const *sh);
+
+#ifdef __arm__
+  StubLayout *getStubLayout() {
+    return &stubs;
+  }
+#endif
 
 private:
   template <typename Archiver>

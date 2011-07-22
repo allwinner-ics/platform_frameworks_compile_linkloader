@@ -36,39 +36,33 @@ ELFSectionProgBits<Bitwidth>::read(Archiver &AR,
 
   llvm::OwningPtr<ELFSectionProgBits> result(new ELFSectionProgBits());
 
-  bool is_text_section = strcmp(sh->getName(), ".text") == 0;
-
-  if (!is_text_section) {
-    if (!result->chunk.allocate(sh->getSize())) {
-      return NULL;
-    }
-
-  } else {
+  // TODO: Not every section needs a stub.
 #ifdef __arm__
-    StubLayout *stubs = owner->getStubLayout();
+  // Count the extern function symbol
+  ELFSectionSymTabTy const *symtab =
+    static_cast<ELFSectionSymTabTy *>(owner->getSectionByName(".symtab"));
 
-    // Count the extern function symbol
-    ELFSectionSymTabTy const *symtab =
-      static_cast<ELFSectionSymTabTy *>(owner->getSectionByName(".symtab"));
+  // TODO: May not call this function every progbits section.
+  size_t func_count = symtab->getExternFuncCount();
 
-    size_t func_count = symtab->getExternFuncCount();
+  StubLayout *stubs = result->getStubLayout();
 
-    // Calculate additional stub size
-    size_t stub_size = stubs->calcStubTableSize(func_count);
+  // TODO: May be too many stubs.
+  // Calculate additional stub size
+  size_t stub_size = stubs->calcStubTableSize(func_count);
 
-    // Allocate text section
-    if (!result->chunk.allocate(sh->getSize() + stub_size)) {
-      return NULL;
-    }
-
-    stubs->initStubTable(result->chunk.getBuffer()+sh->getSize(), func_count);
-#else
-    // Allocate text section
-    if (!result->chunk.allocate(sh->getSize())) {
-      return NULL;
-    }
-#endif
+  // Allocate progbits section + stub
+  if (!result->chunk.allocate(sh->getSize() + stub_size)) {
+    return NULL;
   }
+
+  stubs->initStubTable(result->chunk.getBuffer()+sh->getSize(), func_count);
+#else
+  // Allocate text section
+  if (!result->chunk.allocate(sh->getSize())) {
+    return NULL;
+  }
+#endif
 
   result->sh = sh;
 

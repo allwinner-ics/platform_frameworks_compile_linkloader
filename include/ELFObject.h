@@ -19,7 +19,6 @@
 
 #include "ELFTypes.h"
 #include "MemChunk.h"
-#include "StubLayout.h"
 
 #include "utils/rsl_assert.h"
 
@@ -37,10 +36,6 @@ private:
   llvm::OwningPtr<ELFHeaderTy> header;
   llvm::OwningPtr<ELFSectionHeaderTableTy> shtab;
   std::vector<ELFSectionTy *> stab;
-
-#ifdef __arm__
-  StubLayout stubs;
-#endif
 
   MemChunk SHNCommonData;
   unsigned char *SHNCommonDataPtr;
@@ -66,12 +61,6 @@ public:
   ELFSectionTy *getSectionByIndex(size_t i);
   ELFSectionTy const *getSectionByName(std::string const &str) const;
   ELFSectionTy *getSectionByName(std::string const &str);
-
-#ifdef __arm__
-  StubLayout *getStubLayout() {
-    return &stubs;
-  }
-#endif
 
   void *allocateSHNCommonData(size_t size, size_t align = 1) {
     rsl_assert(size > 0 && align != 0);

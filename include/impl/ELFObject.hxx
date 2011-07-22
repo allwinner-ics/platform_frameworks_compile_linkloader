@@ -191,7 +191,7 @@ relocateARM(void *(*find_sym)(void *context, char const *name),
               rsl_assert(0 && "Target address is far from call instruction");
               abort();
 #else
-              void *stub = getStubLayout()->allocateStub(ext_func);
+              void *stub = text->getStubLayout()->allocateStub(ext_func);
               if (!stub) {
                 llvm::errs() << "unable to allocate stub." << "\n";
                 exit(EXIT_FAILURE);
