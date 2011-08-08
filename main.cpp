@@ -156,6 +156,8 @@ void dump_and_run_object(Archiver &AR, int argc, char **argv) {
         object->getSectionByName(".symtab"));
 
   object->relocate(find_sym, 0);
+  out() << "relocate finished!\n";
+  out().flush();
 
   void *main_addr = symtab->getByName("main")->getAddress();
   out() << "main address: " << main_addr << "\n";
