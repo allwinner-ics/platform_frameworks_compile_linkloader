@@ -369,7 +369,7 @@ relocate(void *(*find_sym)(void *context, char const *name), void *context) {
 
     case SHN_COMMON:
       {
-        size_t align = 16;
+        size_t align = (size_t)sym->getValue();
         SHNCommonDataSize += (size_t)sym->getSize() + align;
       }
       break;

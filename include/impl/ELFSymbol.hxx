@@ -206,7 +206,7 @@ void *ELFSymbol_CRTP<Bitwidth>::getAddress(bool autoAlloc) const {
               memset(my_addr, '\0', getSize());
             }
 #else
-            size_t align = 16;
+            size_t align = (size_t)getValue();
             my_addr = const_cast<ELFObjectTy *>(owner)->
                           allocateSHNCommonData((size_t)getSize(), align);
             if (!my_addr) {
