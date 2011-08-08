@@ -41,6 +41,18 @@ private:
   unsigned char *SHNCommonDataPtr;
   size_t SHNCommonDataFreeSize;
 
+  // TODO: Need refactor!
+  bool initSHNCommonDataSize(size_t SHNCommonDataSize) {
+    rsl_assert(!SHNCommonDataPtr && "Can't init twice.");
+    if (!SHNCommonData.allocate(SHNCommonDataSize)) {
+      return false;
+    }
+
+    SHNCommonDataPtr = SHNCommonData.getBuffer();
+    SHNCommonDataFreeSize = SHNCommonDataSize;
+    return true;
+  }
+
 private:
   ELFObject() : SHNCommonDataPtr(NULL) { }
 
@@ -65,17 +77,7 @@ public:
   void *allocateSHNCommonData(size_t size, size_t align = 1) {
     rsl_assert(size > 0 && align != 0);
 
-    enum { SHN_COMMON_DATA_SIZE = 0x40000 };
-
-    if (!SHNCommonDataPtr) {
-      // FIXME: We should not hard code these number!
-      if (!SHNCommonData.allocate(SHN_COMMON_DATA_SIZE)) {
-        return NULL;
-      }
-
-      SHNCommonDataPtr = SHNCommonData.getBuffer();
-      SHNCommonDataFreeSize = SHN_COMMON_DATA_SIZE;
-    }
+    rsl_assert(SHNCommonDataPtr && "Must init common data size before use!");
 
     // Ensure alignment
     size_t rem = ((uintptr_t)SHNCommonDataPtr) % align;

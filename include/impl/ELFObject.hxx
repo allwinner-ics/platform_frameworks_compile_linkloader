@@ -335,9 +335,54 @@ relocateX86_32(void *(*find_sym)(void *context, char const *name),
   }
 }
 
+// TODO: Refactor all relocations.
 template <unsigned Bitwidth>
 inline void ELFObject<Bitwidth>::
 relocate(void *(*find_sym)(void *context, char const *name), void *context) {
+  // Init SHNCommonDataSize.
+  // Need refactoring
+  size_t SHNCommonDataSize = 0;
+
+  ELFSectionSymTabTy *symtab =
+    static_cast<ELFSectionSymTabTy *>(getSectionByName(".symtab"));
+  rsl_assert(symtab && "Symtab is required.");
+
+  for (size_t i = 0; i < symtab->size(); ++i) {
+    ELFSymbolTy *sym = (*symtab)[i];
+
+    if (sym->getType() != STT_OBJECT) {
+      continue;
+    }
+
+    size_t idx = (size_t)sym->getSectionIndex();
+    switch (idx) {
+    default:
+      if ((*shtab)[idx]->getType() == SHT_NOBITS) {
+        // FIXME(logan): This is a workaround for .lcomm directives
+        // bug of LLVM ARM MC code generator.  Remove this when the
+        // LLVM bug is fixed.
+
+        size_t align = 16;
+        SHNCommonDataSize += (size_t)sym->getSize() + align;
+      }
+      break;
+
+    case SHN_COMMON:
+      {
+        size_t align = 16;
+        SHNCommonDataSize += (size_t)sym->getSize() + align;
+      }
+      break;
+
+    case SHN_ABS:
+    case SHN_UNDEF:
+    case SHN_XINDEX:
+      break;
+    }
+  }
+  if (!initSHNCommonDataSize(SHNCommonDataSize)) {
+    rsl_assert("Allocate memory for common variable fail!");
+  }
 
   for (size_t i = 0; i < stab.size(); ++i) {
     ELFSectionHeaderTy *sh = (*shtab)[i];
