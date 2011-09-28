@@ -219,9 +219,18 @@ relocateARM(void *(*find_sym)(void *context, char const *name),
       }
       break;
     case R_ARM_MOVT_ABS:
-      S >>= 16;
     case R_ARM_MOVW_ABS_NC:
       {
+        if (S==0 && sym->getType() == STT_NOTYPE)
+        {
+          void *ext_sym = find_sym(context, sym->getName());
+          S = (Inst_t)(uintptr_t)ext_sym;
+          sym->setAddress(ext_sym);
+        }
+        if (rel->getType() == R_ARM_MOVT_ABS) {
+          S >>= 16;
+        }
+
         // No need sign extend.
         A = ((*inst & 0xF0000) >> 4) | (*inst & 0xFFF);
         uint32_t result = (S+A);
