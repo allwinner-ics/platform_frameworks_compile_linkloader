@@ -344,6 +344,65 @@ relocateX86_32(void *(*find_sym)(void *context, char const *name),
   }
 }
 
+template <unsigned Bitwidth>
+inline void ELFObject<Bitwidth>::
+relocateMIPS(void *(*find_sym)(void *context, char const *name),
+             void *context,
+             ELFSectionRelTableTy *reltab,
+             ELFSectionProgBitsTy *text) {
+  rsl_assert(Bitwidth == 32 && "Only support 32-bit MIPS.");
+
+  ELFSectionSymTabTy *symtab =
+    static_cast<ELFSectionSymTabTy *>(getSectionByName(".symtab"));
+  rsl_assert(symtab && "Symtab is required.");
+
+  for (size_t i = 0; i < reltab->size(); ++i) {
+    // FIXME: Can not implement here, use Fixup!
+    ELFRelocTy *rel = (*reltab)[i];
+    ELFSymbolTy *sym = (*symtab)[rel->getSymTabIndex()];
+
+    typedef int32_t Inst_t;
+    Inst_t *inst = (Inst_t *)&(*text)[rel->getOffset()];
+    Inst_t P = (Inst_t)(uintptr_t)inst;
+    Inst_t A = (Inst_t)(uintptr_t)*inst;
+    Inst_t S = (Inst_t)(uintptr_t)sym->getAddress();
+
+    if (S == 0) {
+      S = (Inst_t)(uintptr_t)find_sym(context, sym->getName());
+      sym->setAddress((void *)S);
+    }
+
+    switch (rel->getType()) {
+    default:
+      rsl_assert(0 && "Not implemented relocation type.");
+      break;
+
+    case R_MIPS_HI16:
+      A = A & 0xFFFF;
+      *inst |= (((S + A + 0x8000) >> 16) & 0xFFFF);
+      break;
+
+    case R_MIPS_LO16:
+      A = A & 0xFFFF;
+      *inst |= ((S + A) & 0xFFFF);
+      break;
+
+    case R_MIPS_26:
+      A = A & 0x3FFFFFF;
+      // FIXME: We just support addend = 0.
+      rsl_assert(A == 0 && "R_MIPS_26 addend is not 0.");
+      *inst |= ((S >> 2) & 0x3FFFFFF);
+      rsl_assert((((P + 4) >> 28) != (S >> 28)) && "Cannot relocate R_MIPS_26 due to differences in the upper four bits.");
+      break;
+
+    case R_MIPS_32:
+      *inst = S + A;
+      break;
+    }
+  }
+}
+
+
 // TODO: Refactor all relocations.
 template <unsigned Bitwidth>
 inline void ELFObject<Bitwidth>::
@@ -426,9 +485,12 @@ relocate(void *(*find_sym)(void *context, char const *name), void *context) {
       case EM_X86_64:
         relocateX86_64(find_sym, context, reltab, need_rel);
         break;
+      case EM_MIPS:
+        relocateMIPS(find_sym, context, reltab, need_rel);
+        break;
 
       default:
-        rsl_assert(0 && "Only support ARM, X86, and X86_64 relocation.");
+        rsl_assert(0 && "Only support ARM, MIPS, X86, and X86_64 relocation.");
         break;
     }
   }

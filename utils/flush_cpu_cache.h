@@ -32,6 +32,12 @@
 #define FLUSH_CPU_CACHE(BEGIN, END) \
   cacheflush(((long)(BEGIN)), ((long)(END)), 0)
 
+#elif defined(mips) || defined(__mips__) || defined(MIPS) || defined(_MIPS_)
+
+#include <sys/cachectl.h>
+#define FLUSH_CPU_CACHE(BEGIN, END) \
+  _flush_cache(reinterpret_cast<char*>(BEGIN), END-BEGIN+1, BCACHE);
+
 #else
 
 #define FLUSH_CPU_CACHE(BEGIN, END) do { } while (0)
